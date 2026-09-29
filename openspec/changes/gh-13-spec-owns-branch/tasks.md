@@ -1,8 +1,8 @@
 ## 1. `/spec` owns the branch
 
-- [ ] 1.1 Create the change branch (`feat`/`fix` from the `type:*` label), commit the artifacts, and push (`commands/spec.md`)
-- [ ] 1.2 Head published comments with the artifact commit SHA and refresh them in place, recording ids in `.openspec.yaml` (`commands/spec.md`)
-- [ ] 1.3 Make re-run idempotent: reuse the existing change and branch (`commands/spec.md`)
+- [x] 1.1 Create the change branch (`feat`/`fix` from the `type:*` label), commit the artifacts, and push (`commands/spec.md`)
+- [x] 1.2 Head published comments with the artifact commit SHA and refresh them in place, recording ids in `.openspec.yaml` (`commands/spec.md`)
+- [x] 1.3 Make re-run idempotent: reuse the existing change and branch (`commands/spec.md`)
 
 ## 2. `/apply` executes on it
 
