@@ -11,8 +11,8 @@
 
 ## 3. Schema and mirrors
 
-- [ ] 3.1 Update the schema's `apply` instruction to describe the single implementation comment (`schema/octospec/schema.yaml`)
-- [ ] 3.2 Regenerate the `spec` and `apply` mirrors from the canonical commands (`repo-template/.github/prompts/spec.prompt.md`, `.github/prompts/spec.prompt.md`, `repo-template/.github/prompts/apply.prompt.md`, `.github/prompts/apply.prompt.md`)
+- [x] 3.1 Update the schema's `apply` instruction to describe the single implementation comment (`schema/octospec/schema.yaml`)
+- [x] 3.2 Regenerate the `spec` and `apply` mirrors from the canonical commands (`repo-template/.github/prompts/spec.prompt.md`, `.github/prompts/spec.prompt.md`, `repo-template/.github/prompts/apply.prompt.md`, `.github/prompts/apply.prompt.md`)
 
 ## 4. Docs
 
