@@ -12,5 +12,6 @@ Open the PR for the current branch.
    - the change name and artifact paths,
    - the `openspec validate` result.
    `gh pr create --title "<type>(#<issue>): <summary>" --body-file <file>`
-4. Add label `status:in-review`; remove `status:in-progress`.
+4. Add label `status:in-review`; leave `status:in-progress` (the `/archive`
+   step clears it).
 5. Print the PR URL.
