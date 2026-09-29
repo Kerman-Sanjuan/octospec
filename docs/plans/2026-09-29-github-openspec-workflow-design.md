@@ -60,6 +60,8 @@ Decision: add a project-local schema `octospec` and point `openspec/config.yaml`
 | PR | body with `Closes #<issue>` + summary + validation | review and merge gate |
 | Living specs | `openspec/specs/` after archive | the contract of record |
 
+Change folder names must start with a letter (OpenSpec rule), so the issue number is prefixed: `gh-<issue>-<slug>` (e.g. `gh-42-add-dark-mode`). Branch names have no such rule and stay `feat\|fix/<issue>-<slug>`.
+
 ## Decision: command surface
 
 | Command | Phase | Behaviour |
@@ -132,11 +134,11 @@ Hard gates block CI or merge; advisory gates warn.
 | Gate | Description | Strength |
 |---|---|---|
 | G1 | Issue has the required sections before `/spec` produces artifacts | hard |
-| G2 | `openspec validate` passes | hard |
+| G2 | `openspec validate --all --strict` passes **and** every unarchived change is complete (`openspec status` reports `isComplete: true`) | hard |
 | G3 | Branch name matches `feat\|fix/<issue>-<slug>` | hard |
 | G4 | PR body references the issue (`Closes #n`) | hard |
 | G5 | Tests / build / lint pass | hard |
-| G6 | A behaviour change carries a spec delta (`specs/**` non-empty) | hard |
+| G6 | A PR that touches an `openspec/changes/<name>/` folder carries a spec delta (`specs/**/*.md`) | hard |
 | G7 | All tasks checked before merge | advisory |
 | G8 | One OpenSpec change per issue (no duplicates) | advisory |
 

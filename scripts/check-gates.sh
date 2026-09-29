@@ -17,26 +17,52 @@ else
   fail=1
 fi
 
-# G2: openspec validate
+# G2a: openspec validate (structural validity of specs and changes)
 if command -v openspec >/dev/null 2>&1 && openspec validate --all --strict >/dev/null 2>&1; then
-  report PASS "G2 openspec validate"
+  report PASS "G2a openspec validate"
 else
-  report FAIL "G2 openspec validate"
+  report FAIL "G2a openspec validate"
   fail=1
 fi
 
-# G6: a change that touches behaviour must carry a spec delta
-changed=$(git diff --name-only "$BASE_REF...HEAD" 2>/dev/null || true)
-if printf '%s\n' "$changed" | grep -Eq '^openspec/changes/[^/]+/specs/.+\.md$'; then
-  report PASS "G6 spec delta"
-else
-  # Only required when the change folder exists
-  if printf '%s\n' "$changed" | grep -Eq '^openspec/changes/[^/]+/tasks\.md$'; then
-    report FAIL "G6 spec delta: change present but no specs/*.md"
+# G2b: every unarchived change is complete (all apply-required artifacts done).
+# `openspec validate` does NOT check completeness; `openspec status` does.
+if command -v openspec >/dev/null 2>&1; then
+  incomplete=""
+  for d in openspec/changes/*/; do
+    [ -d "$d" ] || continue
+    name=$(basename "$d")
+    if [ "$name" = "archive" ]; then
+      continue
+    fi
+    out=$(openspec status --change "$name" --json 2>/dev/null || true)
+    if [ -z "$out" ]; then
+      continue
+    fi
+    if ! printf '%s' "$out" | grep -Eq '"isComplete"[[:space:]]*:[[:space:]]*true'; then
+      incomplete="$incomplete $name"
+    fi
+  done
+  if [ -n "$incomplete" ]; then
+    report FAIL "G2b incomplete change(s):$incomplete"
     fail=1
   else
-    report SKIP "G6 spec delta: no OpenSpec change in this PR"
+    report PASS "G2b changes complete"
   fi
+fi
+
+# G6: a PR that touches an OpenSpec change must carry a spec delta.
+changed=$(git diff --name-only "$BASE_REF...HEAD" 2>/dev/null || true)
+change_touched=$(printf '%s\n' "$changed" | grep -E '^openspec/changes/[^/]+/' | grep -v '^openspec/changes/archive/' || true)
+if [ -n "$change_touched" ]; then
+  if printf '%s\n' "$changed" | grep -Eq '^openspec/changes/[^/]+/specs/.+\.md$'; then
+    report PASS "G6 spec delta"
+  else
+    report FAIL "G6 spec delta: change touched but no specs/*.md (use --skip-specs only for docs/tooling)"
+    fail=1
+  fi
+else
+  report SKIP "G6 spec delta: no OpenSpec change in this PR"
 fi
 
 # G4: PR body links the issue

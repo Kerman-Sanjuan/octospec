@@ -184,9 +184,9 @@ artifacts:
       1. Read `.openspec.yaml`. If it already has `github.issue`, that issue
          is authoritative - do not create another.
       2. If it does not, the issue must already exist. The change name is
-         `<issue>-<slug>`; adopt the numeric prefix when it is an existing
-         issue. If no issue exists, stop and ask the user to run `/idea`
-         first.
+         `gh-<issue>-<slug>`; OpenSpec requires a leading letter, so the
+         number cannot come first. Adopt the number from the name. If no
+         issue exists, stop and ask the user to run `/idea` first.
       3. Read the issue:
          `gh issue view <n> --json number,title,body,updatedAt,url`
       4. Record the link in `.openspec.yaml`:
@@ -422,9 +422,9 @@ Expected: validation passes; `which` reports the project-local path.
 
 ```bash
 cd "$SCRATCH"
-openspec new change 42-test --schema octospec
-openspec status --change 42-test --json | head -40
-openspec instructions issue --change 42-test --json | head -40
+openspec new change gh-42-test --schema octospec
+openspec status --change gh-42-test --json | head -40
+openspec instructions issue --change gh-42-test --json | head -40
 ```
 
 Expected: `issue`, `proposal`, `specs`, `design`, `tasks` appear; `instructions issue` returns the `issue.md` instruction and template.
@@ -595,8 +595,9 @@ from the `octospec` schema, not from this file.
 
 1. Resolve the issue: `gh issue view <n> --json number,title,body,updatedAt,url`.
    If it does not exist, stop and tell the user to run `/idea`.
-2. Derive `<slug>` from the title; the change name is `<issue>-<slug>`.
-3. `openspec new change "<issue>-<slug>" --schema octospec`
+2. Derive `<slug>` from the title; the change name is `gh-<issue>-<slug>`
+   (OpenSpec requires a leading letter, so the number cannot come first).
+3. `openspec new change "gh-<issue>-<slug>" --schema octospec`
 4. Let the skill create every artifact required by
    `openspec status --change "<change>" --json` (`issue`, `proposal`,
    `specs`, `design`, `tasks`).
@@ -1077,8 +1078,8 @@ Expected: the seeded files are present.
 
 ```bash
 cd "$SCRATCH"
-openspec new change 999-sample --schema octospec
-openspec status --change 999-sample --json | python3 -c "import json,sys; d=json.load(sys.stdin); print([a['id'] for a in d['artifacts']])"
+openspec new change gh-999-sample --schema octospec
+openspec status --change gh-999-sample --json | python3 -c "import json,sys; d=json.load(sys.stdin); print([a['id'] for a in d['artifacts']])"
 ```
 
 Expected: `['issue', 'proposal', 'specs', 'design', 'tasks']`.
@@ -1159,3 +1160,17 @@ Expected: the repo exists at `https://github.com/Kerman-Sanjuan/octospec`.
 - **Spec coverage:** source-of-truth split (Tasks 2, 6), artifact map (Task 2), command surface (Task 4), schema override not shadowing (Tasks 2, 8 Step 3), issue forms (Task 6), gates G1–G8 (Task 7; G1 enforced by `/spec` in Task 4 Step 4, G7/G8 advisory and unenforced by design), three-tool layout (Tasks 5, 6), risks (documented in the spec).
 - **Placeholders:** the only `<...>` markers are inside templates, where they are intentional user-facing hints. No `TODO`/`TBD` in scripts or commands.
 - **Type consistency:** schema artifact ids (`issue`, `proposal`, `specs`, `design`, `tasks`) are used identically in Tasks 2, 4, and 8. `install.sh` flags (`--repo`, `PI_PROMPTS_DIR`, `OPENCODE_COMMAND_DIR`) are consistent between Tasks 3 and 5. `check-gates.sh` env vars (`BASE_REF`, `HEAD_REF`, `PR_BODY`) match the workflow in Task 7.
+
+---
+
+## Verified
+
+- 2026-09-29 — end-to-end into a scratch repo:
+  - `install.sh --repo` seeded `.github/ISSUE_TEMPLATE`, `.github/prompts`, `.github/workflows`, `openspec/config.yaml`, and `scripts/check-gates.sh`.
+  - `openspec schema which octospec` resolved from `user` (the global install).
+  - `openspec status` listed `issue, proposal, design, specs, tasks`; `applyRequires: [tasks]`.
+  - Gate cases: incomplete change → G2b FAIL; change without a spec delta → G6 FAIL; plain repo → PASS.
+- Corrections found during implementation and folded back:
+  1. OpenSpec change names must start with a letter → convention is `gh-<issue>-<slug>` (design doc updated).
+  2. `openspec validate` does not check artifact completeness → the gate script adds **G2b** using `openspec status --change <name> --json` (`isComplete`), and **G6** now triggers on any touched change folder.
+- `install.sh --repo` also copies `scripts/check-gates.sh` into the target repo (the CI workflow calls it).
