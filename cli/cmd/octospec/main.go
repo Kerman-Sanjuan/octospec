@@ -12,106 +12,96 @@ import (
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 	"github.com/kerman-sanjuan/octospec/cli/internal/update"
+	"github.com/spf13/cobra"
 )
 
 const version = "0.1.0"
 
 func main() {
-	args := os.Args[1:]
-	if len(args) == 0 {
-		usage()
-		os.Exit(2)
-	}
-	switch args[0] {
-	case "install":
-		opts, err := parseInstall(args[1:])
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
-			os.Exit(2)
-		}
-		if len(opts.Tools) == 0 && isTerminal(os.Stdin) {
-			opts.Tools, err = wizard()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "error:", err)
-				os.Exit(2)
-			}
-		}
-		if err := install.Run(opts); err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
-			os.Exit(1)
-		}
-	case "update":
-		repo := ""
-		for i := 1; i < len(args); i++ {
-			if args[i] == "--repo" && i+1 < len(args) {
-				i++
-				repo = args[i]
-			}
-		}
-		if err := update.Run(repo); err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
-			os.Exit(1)
-		}
-	case "seed":
-		repo, skipLabels := "", false
-		for i := 1; i < len(args); i++ {
-			switch args[i] {
-			case "--repo":
-				if i+1 >= len(args) {
-					fmt.Fprintln(os.Stderr, "error: --repo needs a value")
-					os.Exit(2)
-				}
-				i++
-				repo = args[i]
-			case "--no-labels":
-				skipLabels = true
-			default:
-				fmt.Fprintf(os.Stderr, "error: unknown flag %q\n", args[i])
-				os.Exit(2)
-			}
-		}
-		if repo == "" {
-			repo, _ = os.Getwd()
-		}
-		r, err := seed.Run(seed.Options{Repo: repo, SkipLabels: skipLabels})
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "error:", err)
-			os.Exit(1)
-		}
-		fmt.Printf("schema -> %s (%d files)\nrepo -> %s (%d files)\nlabels -> %d\n",
-			seed.SchemaDir(), r.Schema, repo, r.Repo, r.Labels)
-	case "version", "--version", "-v":
-		fmt.Println("octospec", version)
-	case "help", "--help", "-h":
-		usage()
-	default:
-		fmt.Fprintf(os.Stderr, "unknown command %q\n\n", args[0])
-		usage()
-		os.Exit(2)
+	if err := newRootCmd().Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
 	}
 }
 
-func parseInstall(args []string) (install.Options, error) {
-	var opts install.Options
-	for i := 0; i < len(args); i++ {
-		switch args[i] {
-		case "--tool", "-t":
-			i++
-			if i >= len(args) {
-				return opts, fmt.Errorf("--tool needs a value")
-			}
-			opts.Tools = append(opts.Tools, args[i])
-		case "--repo":
-			i++
-			if i >= len(args) {
-				return opts, fmt.Errorf("--repo needs a value")
-			}
-			opts.Repo = args[i]
-		default:
-			return opts, fmt.Errorf("unknown flag %q", args[i])
-		}
+func newRootCmd() *cobra.Command {
+	root := &cobra.Command{
+		Use:           "octospec",
+		Short:         "Install the octospec spec-driven workflow into your tools",
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
-	return opts, nil
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newVersionCmd())
+	return root
+}
+
+func newInstallCmd() *cobra.Command {
+	var tools []string
+	var repo string
+	cmd := &cobra.Command{
+		Use:   "install",
+		Short: "Install the commands into each tool's native location",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(tools) == 0 && isTerminal(os.Stdin) {
+				t, err := wizard()
+				if err != nil {
+					return err
+				}
+				tools = t
+			}
+			return install.Run(install.Options{Tools: tools, Repo: repo})
+		},
+	}
+	cmd.Flags().StringArrayVarP(&tools, "tool", "t", nil, "tool to install for (pi, opencode, copilot, claude); repeatable")
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root for repo-local tools (default: cwd)")
+	return cmd
+}
+
+func newSeedCmd() *cobra.Command {
+	var repo string
+	var noLabels bool
+	cmd := &cobra.Command{
+		Use:   "seed",
+		Short: "Install the OpenSpec schema, the repo seed files, and the labels",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if repo == "" {
+				repo, _ = os.Getwd()
+			}
+			r, err := seed.Run(seed.Options{Repo: repo, SkipLabels: noLabels})
+			if err != nil {
+				return err
+			}
+			fmt.Printf("schema -> %s (%d files)\nrepo -> %s (%d files)\nlabels -> %d\n",
+				seed.SchemaDir(), r.Schema, repo, r.Repo, r.Labels)
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	cmd.Flags().BoolVar(&noLabels, "no-labels", false, "skip label provisioning")
+	return cmd
+}
+
+func newUpdateCmd() *cobra.Command {
+	var repo string
+	cmd := &cobra.Command{
+		Use:   "update",
+		Short: "Re-apply an install, preserving local edits",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return update.Run(repo)
+		},
+	}
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	return cmd
+}
+
+func newVersionCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: "Print the version",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("octospec", version)
+		},
+	}
 }
 
 // wizard asks which tools to install for. An empty answer means all of them.
@@ -143,21 +133,4 @@ func wizard() ([]string, error) {
 func isTerminal(f *os.File) bool {
 	fi, err := f.Stat()
 	return err == nil && (fi.Mode()&os.ModeCharDevice) != 0
-}
-
-func usage() {
-	fmt.Print(`octospec - install the octospec workflow into your tools
-
-Usage:
-  octospec install [--tool pi|opencode|copilot|claude] [--repo <path>]
-  octospec seed [--repo <path>] [--no-labels]
-  octospec update [--repo <path>]
-  octospec version
-  octospec help
-
-With no --tool, an interactive prompt asks which tools to install for (and
-defaults to all when there is no terminal). Global targets (pi, opencode)
-write to your home directory; repo-local targets (copilot, claude) write into
---repo (default: the current directory).
-`)
 }

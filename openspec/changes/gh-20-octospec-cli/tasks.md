@@ -1,6 +1,6 @@
 ## 1. Go CLI skeleton
 
-- [x] 1.1 Create the Go module and entrypoint (`cli/go.mod`, `cli/cmd/octospec/main.go`)
+- [x] 1.1 Create the Go module and entrypoint with Cobra (`cli/go.mod`, `cli/cmd/octospec/main.go`)
 - [x] 1.2 Define the target mapping table for pi, opencode, Copilot, Claude (`cli/internal/targets/targets.go`)
 - [x] 1.3 Embed the canonical command payload (`cli/internal/payload/embed.go`, `cli/internal/payload/commands/*`)
 - [x] 1.4 Implement `install` (wizard plus `--tool`) writing rendered commands into each target (`cli/internal/install/install.go`)

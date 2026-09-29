@@ -20,6 +20,7 @@ octospec currently distributes the same Markdown command file several times and 
 ## Decisions
 
 - **Go, single binary.** No runtime dependency, trivial cross-compilation, one artifact. *Alternative rejected:* Node/npm (the OpenSpec CLI's ecosystem) — drags a runtime in.
+- **Cobra for the command tree.** Subcommands, flags, help, and shell completion are standard Go-CLI ergonomics, and the CLI grows with new verbs (`install`, `seed`, `update`). *Alternative rejected:* hand-rolled `os.Args` parsing — no help or completion, more code to maintain.
 - **Canonical payload embedded with `go:embed`.** One binary, no data directory to keep in sync. *Alternative rejected:* a payload dir next to the binary — a second thing to ship and drift.
 - **A single target table** (`internal/targets`) maps tool -> directory + front-matter. Global for pi/opencode, repo-local for Copilot/Claude. *Alternative rejected:* per-tool folders in the repo (the status quo).
 - **`curl | sh` + goreleaser releases.** Standard for Go CLIs; the installer fetches a release binary. `go install` stays for contributors.
