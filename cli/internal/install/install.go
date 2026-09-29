@@ -1,12 +1,15 @@
-// Package install writes the canonical commands into each selected target.
+// Package install writes the canonical commands into each selected target and
+// records the result so `update` can re-apply it.
 package install
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"github.com/kerman-sanjuan/octospec/cli/internal/payload"
+	"github.com/kerman-sanjuan/octospec/cli/internal/config"
+	"github.com/kerman-sanjuan/octospec/cli/internal/plan"
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 )
 
@@ -18,39 +21,43 @@ type Options struct {
 
 // Run installs the canonical commands into every selected target.
 func Run(opts Options) error {
-	cmds, err := payload.Commands()
+	repo := opts.Repo
+	if repo == "" {
+		var err error
+		if repo, err = os.Getwd(); err != nil {
+			return err
+		}
+	}
+	tools := opts.Tools
+	if len(tools) == 0 {
+		for _, t := range targets.Targets {
+			tools = append(tools, t.Name)
+		}
+	}
+	files, err := plan.Files(tools, repo)
 	if err != nil {
 		return err
 	}
-	repo := opts.Repo
-	if repo == "" {
-		repo, err = os.Getwd()
-		if err != nil {
+	cfg, err := config.Load(repo)
+	if err != nil {
+		return err
+	}
+	if cfg.Files == nil {
+		cfg.Files = map[string]string{}
+	}
+	cfg.Tools = tools
+	for _, f := range files {
+		if err := os.MkdirAll(filepath.Dir(f.Path), 0o755); err != nil {
 			return err
 		}
-	}
-	selected := opts.Tools
-	if len(selected) == 0 {
-		for _, t := range targets.Targets {
-			selected = append(selected, t.Name)
-		}
-	}
-	for _, name := range selected {
-		t, ok := targets.Get(name)
-		if !ok {
-			return fmt.Errorf("unknown tool %q (want one of pi, opencode, copilot, claude)", name)
-		}
-		dir := t.Expand(repo)
-		if err := os.MkdirAll(dir, 0o755); err != nil {
+		if err := os.WriteFile(f.Path, []byte(f.Content), 0o644); err != nil {
 			return err
 		}
-		for _, c := range cmds {
-			path := filepath.Join(dir, t.Filename(c.Name))
-			if err := os.WriteFile(path, []byte(t.Render(c)), 0o644); err != nil {
-				return err
-			}
-		}
-		fmt.Printf("%-9s -> %s (%d commands)\n", name, dir, len(cmds))
+		cfg.Files[f.Path] = config.Hash([]byte(f.Content))
 	}
+	if err := config.Save(repo, cfg); err != nil {
+		return err
+	}
+	fmt.Printf("installed %d files for %s\n", len(files), strings.Join(tools, ", "))
 	return nil
 }

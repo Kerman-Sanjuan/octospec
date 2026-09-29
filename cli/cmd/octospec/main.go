@@ -10,6 +10,7 @@ import (
 
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
+	"github.com/kerman-sanjuan/octospec/cli/internal/update"
 )
 
 const version = "0.1.0"
@@ -35,6 +36,18 @@ func main() {
 			}
 		}
 		if err := install.Run(opts); err != nil {
+			fmt.Fprintln(os.Stderr, "error:", err)
+			os.Exit(1)
+		}
+	case "update":
+		repo := ""
+		for i := 1; i < len(args); i++ {
+			if args[i] == "--repo" && i+1 < len(args) {
+				i++
+				repo = args[i]
+			}
+		}
+		if err := update.Run(repo); err != nil {
 			fmt.Fprintln(os.Stderr, "error:", err)
 			os.Exit(1)
 		}
@@ -108,6 +121,7 @@ func usage() {
 
 Usage:
   octospec install [--tool pi|opencode|copilot|claude] [--repo <path>]
+  octospec update [--repo <path>]
   octospec version
   octospec help
 

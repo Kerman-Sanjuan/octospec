@@ -14,8 +14,8 @@
 
 ## 3. Update
 
-- [ ] 3.1 Persist saved wizard answers (`cli/internal/config/config.go`)
-- [ ] 3.2 Implement `update` with a managed-file hash manifest that preserves local edits (`cli/internal/update/update.go`)
+- [x] 3.1 Persist saved wizard answers (`cli/internal/config/config.go`)
+- [x] 3.2 Implement `update` with a managed-file hash manifest that preserves local edits (`cli/internal/update/update.go`)
 
 ## 4. Replace install.sh
 
