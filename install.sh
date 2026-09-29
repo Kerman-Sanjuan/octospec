@@ -41,7 +41,10 @@ if [ "${1:-}" = "--repo" ]; then
   mkdir -p "$TARGET/.github/ISSUE_TEMPLATE" "$TARGET/.github/prompts" \
            "$TARGET/.github/workflows" "$TARGET/openspec" "$TARGET/scripts"
   cp -R "$REPO_DIR/repo-template/." "$TARGET/"
-  cp "$REPO_DIR/scripts/check-gates.sh" "$TARGET/scripts/"
+  if [ ! -f "$TARGET/scripts/check-gates.sh" ] || \
+     ! cmp -s "$REPO_DIR/scripts/check-gates.sh" "$TARGET/scripts/check-gates.sh"; then
+    cp "$REPO_DIR/scripts/check-gates.sh" "$TARGET/scripts/"
+  fi
   chmod +x "$TARGET/scripts/check-gates.sh"
   printf 'repo     -> %s\n' "$TARGET"
 fi
