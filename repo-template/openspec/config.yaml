@@ -1,0 +1,14 @@
+schema: octospec
+
+# Project context is injected into every artifact instruction. Keep it short.
+context: |
+  <One paragraph: what this project is, its stack, and any naming rules.
+   Edited per repo after seeding.>
+
+rules:
+  proposal:
+    - Link the originating issue; do not restate it.
+  design:
+    - Record every decision that fixes a means, and the alternative rejected.
+  tasks:
+    - Each task names the file it touches.

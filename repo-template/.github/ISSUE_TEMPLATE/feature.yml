@@ -1,0 +1,45 @@
+name: Feature
+description: A new capability, specified before it is built.
+title: "[Feature] "
+labels: ["type:feature", "status:backlog"]
+body:
+  - type: textarea
+    id: story
+    attributes:
+      label: User story
+      description: As a <role>, I want <capability>, so that <benefit>.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / problem
+      description: Why this, why now.
+    validations:
+      required: true
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requirements
+      description: One SHALL/MUST statement per line.
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Success criteria
+      description: Observable outcomes that decide "done".
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+    validations:
+      required: false
+  - type: textarea
+    id: open_questions
+    attributes:
+      label: Open questions
+    validations:
+      required: false
