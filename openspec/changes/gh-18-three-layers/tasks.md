@@ -6,8 +6,8 @@
 
 ## 2. Implementation comment
 
-- [ ] 2.1 Make `/apply` post one implementation comment with the checklist and a short insight per task, recording the id in `.openspec.yaml` (`commands/apply.md`)
-- [ ] 2.2 Refresh the implementation comment in place after each group (`commands/apply.md`)
+- [x] 2.1 Make `/apply` post one implementation comment with the checklist and a short insight per task, recording the id in `.openspec.yaml` (`commands/apply.md`)
+- [x] 2.2 Refresh the implementation comment in place after each group (`commands/apply.md`)
 
 ## 3. Schema and mirrors
 
