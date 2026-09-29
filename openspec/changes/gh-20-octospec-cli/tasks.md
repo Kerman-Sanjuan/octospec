@@ -7,10 +7,10 @@
 
 ## 2. Targets
 
-- [ ] 2.1 pi renderer -> `~/.pi/agent/prompts/` (`cli/internal/targets/pi.go`)
-- [ ] 2.2 opencode renderer -> `~/.config/opencode/command/` (`cli/internal/targets/opencode.go`)
-- [ ] 2.3 Copilot renderer -> `.github/prompts/*.prompt.md` with `mode: agent` (`cli/internal/targets/copilot.go`)
-- [ ] 2.4 Claude renderer -> `.claude/commands/*.md` (`cli/internal/targets/claude.go`)
+- [x] 2.1 Default front matter (`description`, `argument-hint`) for pi, opencode, and Claude (`cli/internal/targets/render.go`)
+- [x] 2.2 Copilot front matter (`mode: agent`) (`cli/internal/targets/render.go`)
+- [x] 2.3 Global target dirs: pi -> `~/.pi/agent/prompts/`, opencode -> `~/.config/opencode/command/` (`cli/internal/targets/targets.go`)
+- [x] 2.4 Repo-local target dirs: Copilot -> `.github/prompts/`, Claude -> `.claude/commands/` (`cli/internal/targets/targets.go`)
 
 ## 3. Update
 
