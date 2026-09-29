@@ -41,8 +41,8 @@
 
 ## 8. Ship feedback loop
 
-- [ ] 8.1 Make `/ship` run/observe CI and loop failures back to `/apply` (`commands/ship.md`)
-- [ ] 8.2 Mirror the ship change (`.github/prompts/ship.prompt.md`, `repo-template/.github/prompts/ship.prompt.md`)
+- [x] 8.1 Make `/ship` run/observe CI and loop failures back to `/apply` (`cli/internal/payload/commands/ship.md`)
+- [x] 8.2 No mirror: the payload is the single source, rendered per tool by the CLI
 
 ## 9. Docs and verify
 
