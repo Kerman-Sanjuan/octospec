@@ -16,7 +16,7 @@
 
 ## 4. Docs
 
-- [ ] 4.1 Document the three-layer structure in the README (`README.md`)
+- [x] 4.1 Document the three-layer structure in the README (`README.md`)
 
 ## 5. Verify
 

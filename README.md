@@ -47,14 +47,29 @@ There is no dual write. Each artifact has exactly one authoritative home:
 1. **`/idea`** interviews you for a feature and files the issue. The issue body
    is the human source of truth.
 2. **`/spec`** creates the change branch (`feat|fix/<issue>-<slug>`), commits
-   the change artifacts on it, publishes each as a comment headed with the
-   commit SHA, and validates. `/spec` does not approve its own work.
+   the change artifacts on it, publishes them as a single `## Plan` comment
+   headed with the commit SHA, and validates. `/spec` does not approve its own
+   work.
 3. **`/apply`** works the tasks on the branch `/spec` created, group by group,
-   syncing the checklist to the issue.
+   keeping a single `## Implementation` comment (the checklist plus a short
+   insight per task) up to date.
 4. **`/ship`** opens a pull request that closes the issue (the branch was
    pushed by `/spec`).
 5. **`/archive`** archives the change, updates `openspec/specs/` (filling each
    capability's Purpose), closes the issue, and deletes the merged branch.
+
+### The issue timeline
+
+An issue carries exactly three structured layers, and nothing else:
+
+| Layer | Source | Header |
+|---|---|---|
+| Requirement | issue body | — |
+| Plan | `/spec` | `## Plan` (`### Proposal`, `### Capabilities`, `### Design`, `### Tasks`) |
+| Implementation | `/apply` | `## Implementation` (checklist + a short insight per task) |
+
+The plan and implementation comments are **updated in place** on every re-run
+(their ids live in `.openspec.yaml`), so iterating never adds a new comment.
 
 ## Architecture
 
