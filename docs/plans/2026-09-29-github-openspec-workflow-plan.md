@@ -1,8 +1,8 @@
-# GitHub-native OpenSpec workflow — implementation plan
+# GitHub-native OpenSpec workflow: implementation plan
 
 > **For agentic workers:** This plan is task-by-task. Each task ends with an independently testable deliverable. Steps use checkbox (`- [ ]`) syntax. Run the test steps and confirm the expected output before moving on.
 
-**Goal:** Build a reusable, open-source workflow that makes OpenSpec GitHub-native — GitHub Issues as the backlog and human layer, repo files as the machine layer — installable for pi, opencode and GitHub Copilot from one canonical repository.
+**Goal:** Build a reusable, open-source workflow that makes OpenSpec GitHub-native, GitHub Issues as the backlog and human layer, repo files as the machine layer, installable for pi, opencode and GitHub Copilot from one canonical repository.
 
 **Architecture:** A canonical repo ships (a) an OpenSpec schema override `octospec` that owns artifact semantics, (b) seven thin command shims whose logic is only phase orchestration, (c) per-repo seed files (issue forms, config, CI), and (d) an `install.sh` that publishes the global parts and seeds a repo. CI enforces the hard gates.
 
@@ -18,7 +18,7 @@
 - **Artifact semantics live only in `schema/octospec/`.** Command shims must not re-describe what an artifact contains.
 - Never edit generated OpenSpec files; the schema override is the extension point.
 - Global install paths: schema → `${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas/octospec/`; pi → `~/.pi/agent/prompts/`; opencode → `~/.config/opencode/command/`. Copilot commands are repo-local (`.github/prompts/`).
-- Gate IDs are G1–G8 as defined in the spec. Hard: G1–G6. Advisory: G7, G8.
+- Gate IDs are G1-G8 as defined in the spec. Hard: G1-G6. Advisory: G7, G8.
 - The OpenSpec CLI never calls `gh`; agents do, following instructions.
 
 ## File Structure
@@ -56,7 +56,7 @@ octospec/
 │       └── workflows/
 │           └── openspec.yml
 └── scripts/
-    └── check-gates.sh               G2–G6, runnable locally and in CI
+    └── check-gates.sh               G2-G6, runnable locally and in CI
 ```
 
 ---
@@ -700,7 +700,7 @@ git commit -m "feat(commands): add idea, bug, explore, spec, apply, ship, archiv
 ### Task 5: Installer publishes commands (pi + opencode)
 
 **Files:**
-- Modify: `install.sh` (Tasks 1–3 already contain the pi/opencode copy blocks — confirm they are present and correct)
+- Modify: `install.sh` (Tasks 1 to 3 already contain the pi/opencode copy blocks - confirm they are present and correct)
 
 **Interfaces:**
 - Consumes: `commands/*.md` from Task 4.
@@ -731,7 +731,7 @@ git commit -m "feat(install): publish command shims for pi and opencode"
 
 ---
 
-### Task 6: Repo seed — config, issue forms, Copilot prompts
+### Task 6: Repo seed: config, issue forms, Copilot prompts
 
 **Files:**
 - Create: `repo-template/openspec/config.yaml`
@@ -1054,7 +1054,7 @@ git commit -m "feat(ci): add gate checks and PR workflow"
 ### Task 8: End-to-end install into a scratch repo
 
 **Files:**
-- No new files; validates Tasks 1–7 together.
+- No new files; validates Tasks 1 to 7 together.
 
 **Interfaces:**
 - Consumes: `install.sh`, `repo-template/`, `scripts/check-gates.sh`.
@@ -1132,7 +1132,7 @@ Cover, in this order: what it is (2 sentences); prerequisites (`openspec`, `gh`,
 - [ ] **Step 2: Verify no placeholders remain**
 
 Run: `grep -rn 'TODO\|TBD\|<name>\|FIXME' README.md install.sh scripts || true`
-Expected: no output (the templates legitimately contain `<...>` — check `schema/` separately if you extend the grep).
+Expected: no output (the templates legitimately contain `<...>` - check `schema/` separately if you extend the grep).
 
 - [ ] **Step 3: Commit**
 
@@ -1157,7 +1157,7 @@ Expected: the repo exists at `https://github.com/Kerman-Sanjuan/octospec`.
 
 ## Self-review
 
-- **Spec coverage:** source-of-truth split (Tasks 2, 6), artifact map (Task 2), command surface (Task 4), schema override not shadowing (Tasks 2, 8 Step 3), issue forms (Task 6), gates G1–G8 (Task 7; G1 enforced by `/spec` in Task 4 Step 4, G7/G8 advisory and unenforced by design), three-tool layout (Tasks 5, 6), risks (documented in the spec).
+- **Spec coverage:** source-of-truth split (Tasks 2, 6), artifact map (Task 2), command surface (Task 4), schema override not shadowing (Tasks 2, 8 Step 3), issue forms (Task 6), gates G1-G8 (Task 7; G1 enforced by `/spec` in Task 4 Step 4, G7/G8 advisory and unenforced by design), three-tool layout (Tasks 5, 6), risks (documented in the spec).
 - **Placeholders:** the only `<...>` markers are inside templates, where they are intentional user-facing hints. No `TODO`/`TBD` in scripts or commands.
 - **Type consistency:** schema artifact ids (`issue`, `proposal`, `specs`, `design`, `tasks`) are used identically in Tasks 2, 4, and 8. `install.sh` flags (`--repo`, `PI_PROMPTS_DIR`, `OPENCODE_COMMAND_DIR`) are consistent between Tasks 3 and 5. `check-gates.sh` env vars (`BASE_REF`, `HEAD_REF`, `PR_BODY`) match the workflow in Task 7.
 
@@ -1165,7 +1165,7 @@ Expected: the repo exists at `https://github.com/Kerman-Sanjuan/octospec`.
 
 ## Verified
 
-- 2026-09-29 — end-to-end into a scratch repo:
+- 2026-09-29 - end-to-end into a scratch repo:
   - `install.sh --repo` seeded `.github/ISSUE_TEMPLATE`, `.github/prompts`, `.github/workflows`, `openspec/config.yaml`, and `scripts/check-gates.sh`.
   - `openspec schema which octospec` resolved from `user` (the global install).
   - `openspec status` listed `issue, proposal, design, specs, tasks`; `applyRequires: [tasks]`.

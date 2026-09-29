@@ -13,8 +13,8 @@ surface, and hard validation in CI.
 
 Most spec frameworks keep everything in the repository. That is great for the
 machine, but it hides the backlog from the people who review it. octospec keeps
-the narrative where people already are — GitHub Issues — and the machine
-artifacts where OpenSpec can validate and archive them — files in the repo.
+the narrative where people already are (GitHub Issues) and the machine
+artifacts where OpenSpec can validate and archive them (files in the repo).
 
 There is no dual write. Each artifact has exactly one authoritative home:
 
@@ -64,7 +64,7 @@ An issue carries exactly three structured layers, and nothing else:
 
 | Layer | Source | Header |
 |---|---|---|
-| Requirement | issue body | — |
+| Requirement | issue body | (none) |
 | Plan | `/spec` | `## Plan` (`### Proposal`, `### Capabilities`, `### Design`, `### Tasks`) |
 | Implementation | `/apply` | `## Implementation` (checklist + a short insight per task) |
 
@@ -100,7 +100,7 @@ octospec/
 ### Gates
 
 Hard gates block CI or merge; advisory gates warn. `scripts/check-gates.sh` runs
-the gates that do not depend on the target stack (G2–G4, G6); a repository adds
+the gates that do not depend on the target stack (G2 to G4, G6); a repository adds
 its own build/test gate for G5.
 
 | Gate | Checks | Strength |
@@ -173,9 +173,9 @@ OpenSpec ships its own skills (`openspec-propose`, `openspec-apply-change`,
 
 ## Deeper documentation
 
-- [Design](docs/plans/2026-09-29-github-openspec-workflow-design.md) — decisions,
+- [Design](docs/plans/2026-09-29-github-openspec-workflow-design.md): decisions,
   artifact map, gates, and trade-offs.
-- [Implementation plan](docs/plans/2026-09-29-github-openspec-workflow-plan.md) —
+- [Implementation plan](docs/plans/2026-09-29-github-openspec-workflow-plan.md):
   the task-by-task build.
 
 ## License
