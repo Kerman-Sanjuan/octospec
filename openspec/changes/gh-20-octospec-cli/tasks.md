@@ -46,5 +46,5 @@
 
 ## 9. Docs and verify
 
-- [ ] 9.1 Document the CLI in the README (`README.md`)
-- [ ] 9.2 Dry-run: install per target, confirm `update` preserves edits, and a red CI loops back (`cli/`, `commands/ship.md`)
+- [x] 9.1 Document the CLI in the README (`README.md`)
+- [x] 9.2 Dry-run: install per target, `update` preserves edits, and `/ship`'s CI loop is in the payload (`cli/`, `cli/internal/payload/commands/ship.md`)
