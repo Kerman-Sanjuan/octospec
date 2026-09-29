@@ -17,7 +17,8 @@ from the `octospec` schema, not from this file.
    `openspec status --change "<change>" --json` (`issue`, `proposal`,
    `specs`, `design`, `tasks`).
 5. Publish each artifact to the issue as a comment, each headed with the
-   commit SHA it came from:
+   base commit SHA (`git rev-parse HEAD`); `/spec` does not commit, so the
+   artifacts are uncommitted until `/apply`:
    - proposal and design: one comment each.
    - specs: one comment per capability.
    - tasks: one comment containing the checklist.
