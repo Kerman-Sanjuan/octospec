@@ -124,7 +124,7 @@ func wizard() ([]string, error) {
 	fmt.Print("> ")
 	line, err := bufio.NewReader(os.Stdin).ReadString('\n')
 	if err != nil {
-		return nil, err
+		return nil, nil // no input available: install for all tools
 	}
 	line = strings.TrimSpace(line)
 	if line == "" || line == "all" {

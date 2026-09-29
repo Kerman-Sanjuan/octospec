@@ -79,24 +79,23 @@ command shims.
 
 ```
 octospec/
-├── schema/octospec/       # artifact semantics (the only place they live)
-├── commands/              # thin command shims (phase orchestration only)
-├── repo-template/         # per-repo seed: issue forms, config, CI, Copilot prompts
-├── scripts/check-gates.sh # gate checks, runnable locally and in CI
-├── install.sh             # publish global parts; seed a repo
-└── openspec/              # this repo's own changes and specs
+├── cli/                    # the Go CLI: one canonical payload, rendered per tool
+│   └── internal/
+│       ├── payload/commands/  # the canonical commands (embedded)
+│       ├── targets/           # tool -> directory + front matter
+│       └── seed/              # OpenSpec schema + repo seed (embedded)
+├── scripts/check-gates.sh  # gate checks, runnable locally and in CI
+├── .github/workflows/      # cli (Go), openspec (gates), release
+└── openspec/               # this repo's own changes and specs
 ```
 
-- **`schema/octospec/`** is the single source of artifact semantics: what each
-  artifact must contain, its dependency order, and which artifact is the intake.
-  Editing the schema also changes the behaviour of OpenSpec's own drivers,
-  because they follow whatever the schema returns.
-- **`commands/`** holds one shim per phase. They orchestrate — create the issue,
-  publish copies, branch, open the PR, close the issue — and never re-describe
-  what an artifact contains.
-- **`repo-template/`** is what `install.sh --repo` seeds into a target repository.
-- **`scripts/check-gates.sh`** runs the gates locally and from the CI workflow
-  (`.github/workflows/openspec.yml`).
+- **`cli/`** is the Go CLI. It embeds one canonical command payload and renders
+  it into each tool's directory - there is no per-tool copy in the repo.
+- **`cli/internal/payload/commands/`** is the single source of the commands.
+- **`cli/internal/targets/`** maps each tool to its directory and front matter.
+- **`cli/internal/seed/`** holds the OpenSpec schema and the repo seed (issue
+  forms, CI, config), embedded in the binary.
+- **`scripts/check-gates.sh`** runs the gates locally and in CI.
 
 ### Gates
 
@@ -120,33 +119,41 @@ its own build/test gate for G5.
 Requirements: [OpenSpec CLI](https://github.com/Fission-AI/OpenSpec) ≥ 1.3.1 and
 [`gh`](https://cli.github.com) ≥ 2.x, authenticated (`gh auth status`).
 
-Publish the global parts (schema, pi prompts, opencode commands):
+Install the CLI (fetches the latest release, then runs `octospec install`):
 
 ```sh
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh
 ```
 
-| Part | Destination |
-|---|---|
-| schema | `${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas/octospec/` |
-| pi prompt templates | `~/.pi/agent/prompts/` |
-| opencode commands | `~/.config/opencode/command/` |
+Contributors can instead `go install github.com/kerman-sanjuan/octospec/cli/cmd/octospec@latest`.
 
-Seed the repo-local parts into an existing repository:
+Install the commands for a tool - repeat `--tool`, or omit it for all:
 
 ```sh
-./install.sh --repo /path/to/repo
+octospec install --tool pi --tool opencode --tool copilot --tool claude --repo .
 ```
 
-This copies `repo-template/` — the issue forms, `.github/prompts/` for GitHub
-Copilot, the CI workflow, and `openspec/config.yaml` — installs
-`scripts/check-gates.sh` into the target, and provisions the workflow labels
-(`type:feature`, `type:bug`, `status:backlog`, `status:spec-ready`,
-`status:in-progress`, `status:in-review`).
+| Tool | Destination | Scope |
+|---|---|---|
+| pi | `~/.pi/agent/prompts/` | global |
+| opencode | `~/.config/opencode/command/` | global |
+| GitHub Copilot | `.github/prompts/` | repo-local |
+| Claude Code | `.claude/commands/` | repo-local |
 
-- **pi** and **opencode** get their commands from the global install.
-- **GitHub Copilot** commands are repo-local (`.github/prompts/`), installed by
-  `--repo`.
+Seed a repository - OpenSpec schema, issue forms, CI, config, and the workflow
+labels:
+
+```sh
+octospec seed --repo /path/to/repo
+```
+
+Update after a new release - re-applies and keeps your local edits:
+
+```sh
+octospec update
+```
+
+Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
 - OpenSpec skills (`openspec-propose`, `openspec-apply-change`,
   `openspec-archive-change`, `openspec-explore`) ship per tool.
 
