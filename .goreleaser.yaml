@@ -1,0 +1,29 @@
+version: 2
+project_name: octospec
+
+builds:
+  - id: octospec
+    dir: cli
+    main: ./cmd/octospec
+    binary: octospec
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: bin
+    formats: [binary]
+    name_template: "octospec_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+release:
+  github:
+    owner: Kerman-Sanjuan
+    name: octospec

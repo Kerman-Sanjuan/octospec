@@ -1,52 +1,40 @@
 #!/usr/bin/env sh
-# Install the octospec OpenSpec workflow.
-#   ./install.sh                publish the global parts (schema, pi, opencode)
-#   ./install.sh --repo <path>  also seed the repo-local parts into <path>
+# Install the octospec CLI from a GitHub release, then install the commands.
+#
+#   curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh -s -- --tool copilot
+#
+# Set OCTOSPEC_BIN_DIR to change where the binary lands (default ~/.local/bin).
 set -eu
 
-REPO_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-SCHEMA=octospec
-DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas"
+REPO=Kerman-Sanjuan/octospec
+BIN=octospec
 
-# 1. Global schema override
-mkdir -p "$DATA_DIR/$SCHEMA"
-cp -R "$REPO_DIR/schema/$SCHEMA/." "$DATA_DIR/$SCHEMA/"
-printf 'schema   -> %s\n' "$DATA_DIR/$SCHEMA"
+os=$(uname -s | tr '[:upper:]' '[:lower:]')
+case "$(uname -m)" in
+  arm64 | aarch64) arch=arm64 ;;
+  x86_64 | amd64) arch=amd64 ;;
+  *)
+    echo "octospec: unsupported architecture $(uname -m)" >&2
+    exit 1
+    ;;
+esac
 
-# 2. pi prompt templates
-PI_DIR="${PI_PROMPTS_DIR:-$HOME/.pi/agent/prompts}"
-mkdir -p "$PI_DIR"
-for f in "$REPO_DIR"/commands/*.md; do
-  [ -e "$f" ] || continue
-  cp "$f" "$PI_DIR/"
-done
-printf 'pi       -> %s\n' "$PI_DIR"
+dest=${OCTOSPEC_BIN_DIR:-$HOME/.local/bin}
+mkdir -p "$dest"
+url="https://github.com/$REPO/releases/latest/download/${BIN}_${os}_${arch}"
 
-# 3. opencode commands
-OC_DIR="${OPENCODE_COMMAND_DIR:-$HOME/.config/opencode/command}"
-mkdir -p "$OC_DIR"
-for f in "$REPO_DIR"/commands/*.md; do
-  [ -e "$f" ] || continue
-  cp "$f" "$OC_DIR/"
-done
-printf 'opencode -> %s\n' "$OC_DIR"
+echo "octospec: downloading $url"
+tmp=$(mktemp)
+curl -fsSL "$url" -o "$tmp"
+chmod +x "$tmp"
+mv "$tmp" "$dest/$BIN"
+echo "octospec: installed $dest/$BIN"
 
-# 4. Optional repo seed
-if [ "${1:-}" = "--repo" ]; then
-  TARGET=${2:-}
-  if [ -z "$TARGET" ] || [ ! -d "$TARGET" ]; then
-    printf 'usage: install.sh --repo <existing-repo-path>\n' >&2
-    exit 2
-  fi
-  mkdir -p "$TARGET/.github/ISSUE_TEMPLATE" "$TARGET/.github/prompts" \
-           "$TARGET/.github/workflows" "$TARGET/openspec" "$TARGET/scripts"
-  cp -R "$REPO_DIR/repo-template/." "$TARGET/"
-  if [ ! -f "$TARGET/scripts/check-gates.sh" ] || \
-     ! cmp -s "$REPO_DIR/scripts/check-gates.sh" "$TARGET/scripts/check-gates.sh"; then
-    cp "$REPO_DIR/scripts/check-gates.sh" "$TARGET/scripts/"
-  fi
-  chmod +x "$TARGET/scripts/check-gates.sh"
-  sh "$REPO_DIR/scripts/seed-labels.sh" "$TARGET" || \
-    printf 'labels   -> skipped (label provisioning failed)\n' >&2
-  printf 'repo     -> %s\n' "$TARGET"
-fi
+case ":$PATH:" in
+  *":$dest:"*) ;;
+  *) echo "octospec: add $dest to your PATH" ;;
+esac
+
+# Install the commands into the requested tools (defaults to all).
+"$dest/$BIN" install "$@"
