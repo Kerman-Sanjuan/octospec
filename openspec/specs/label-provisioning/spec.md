@@ -1,7 +1,7 @@
 # label-provisioning Specification
 
 ## Purpose
-TBD - created by archiving change gh-12-provision-labels. Update Purpose after archive.
+Seeding a repository (`install.sh --repo`) creates the workflow's `type:*` and `status:*` labels, idempotently.
 ## Requirements
 ### Requirement: Seeding provisions the workflow labels
 `install.sh --repo` SHALL provision the six workflow labels: `type:feature`, `type:bug`, `status:backlog`, `status:spec-ready`, `status:in-progress`, `status:in-review`.
