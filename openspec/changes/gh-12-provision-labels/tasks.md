@@ -10,5 +10,5 @@
 
 ## 3. Verify
 
-- [ ] 3.1 Run `./install.sh --repo <fresh-repo>` twice and confirm the six labels exist and the second run exits 0 (`scripts/seed-labels.sh`, `install.sh`)
-- [ ] 3.2 Confirm the labels match the names used by `commands/{idea,bug,spec,apply,ship,archive}.md` (`commands/`)
+- [x] 3.1 Run `./install.sh --repo <fresh-repo>` twice and confirm the six labels exist and the second run exits 0 (`scripts/seed-labels.sh`, `install.sh`)
+- [x] 3.2 Confirm the labels match the names used by `commands/{idea,bug,spec,apply,ship,archive}.md` (`commands/`)
