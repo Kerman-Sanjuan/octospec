@@ -6,8 +6,8 @@
 
 ## 2. `/apply` executes on it
 
-- [ ] 2.1 Remove branch creation, the dirty-tree special case, and the baseline commit; assume the `/spec` branch (`commands/apply.md`)
-- [ ] 2.2 Update the schema's `apply` instruction to match (`schema/octospec/schema.yaml`)
+- [x] 2.1 Remove branch creation, the dirty-tree special case, and the baseline commit; assume the `/spec` branch (`commands/apply.md`)
+- [x] 2.2 Update the schema's `apply` instruction to match (`schema/octospec/schema.yaml`)
 
 ## 3. Approval
 

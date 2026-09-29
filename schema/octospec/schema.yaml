@@ -113,7 +113,8 @@ apply:
   instruction: |
     Implement the tasks in order.
 
-    - Branch first: `feat/<issue>-<slug>` or `fix/<issue>-<slug>`.
+    - The change branch was created and committed by `/spec`; work on it.
+      Do not create a branch or commit a baseline.
     - Work one group at a time; commit per group, referencing the issue.
     - Tick tasks in `tasks.md` as they complete and keep the issue
       checklist comment in sync with `gh issue comment`.
