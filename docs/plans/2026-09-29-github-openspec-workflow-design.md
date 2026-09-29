@@ -1,4 +1,4 @@
-# GitHub-native OpenSpec workflow — design
+# GitHub-native OpenSpec workflow: design
 
 - **Date:** 2026-09-29
 - **Status:** approved in brainstorming, ready for implementation planning
@@ -8,7 +8,7 @@
 
 ## Why
 
-The previous workflow (Plain Concepts `agent-harness`, removed) carried a lot of framework for a single developer and kept its GitHub logic in a large set of `pc-*` skills. We want the opposite: a small, inspectable workflow that is **based on OpenSpec** (its CLI, schema and skills) and adds only the GitHub behaviour we need — issues as the human-readable backlog, pull requests as the execution surface, and hard validation in CI.
+The previous workflow (Plain Concepts `agent-harness`, removed) carried a lot of framework for a single developer and kept its GitHub logic in a large set of `pc-*` skills. We want the opposite: a small, inspectable workflow that is **based on OpenSpec** (its CLI, schema and skills) and adds only the GitHub behaviour we need: issues as the human-readable backlog, pull requests as the execution surface, and hard validation in CI.
 
 The goal is to follow the OpenSpec workflow using GitHub's capabilities, and to do it in a way that satisfies GH-600's principles: plan before act, durable inspectable artifacts, human-in-the-loop at risky transitions, least privilege, and guardrails as enforced controls rather than prose.
 
@@ -16,7 +16,7 @@ The goal is to follow the OpenSpec workflow using GitHub's capabilities, and to 
 
 1. GitHub Issues are the backlog and the human-readable home of the narrative artifacts: user story, requirements, contract, success criteria.
 2. The repository holds the machine artifacts (`openspec/`), committed with the branch.
-3. A single OpenSpec workflow drives everything, extended — not wrapped — so `/opsx:*` and our commands behave the same.
+3. A single OpenSpec workflow drives everything, extended, not wrapped, so `/opsx:*` and our commands behave the same.
 4. The same workflow works in pi, opencode and GitHub Copilot.
 5. CI enforces hard gates; nothing is "fixed" by convention alone.
 
@@ -38,7 +38,7 @@ OpenSpec resolves schemas by first match:
 
 The generated `/opsx:*` commands and the OpenSpec skills are **generic drivers**: they call `openspec new`, `openspec status`, `openspec instructions <artifact>`, and then follow whatever `instruction` and `template` the schema returns. Editing the schema therefore changes the behaviour of OpenSpec's own drivers too.
 
-Decision: add a project-local schema `octospec` and point `openspec/config.yaml` at it. Do **not** shadow `spec-driven`; it stays as a fallback and a reference. Do **not** edit generated command or skill files — `openspec update` overwrites them.
+Decision: add a project-local schema `octospec` and point `openspec/config.yaml` at it. Do **not** shadow `spec-driven`; it stays as a fallback and a reference. Do **not** edit generated command or skill files; `openspec update` overwrites them.
 
 ## Decision: source of truth is split by artifact
 
@@ -109,12 +109,12 @@ issue ──▶ proposal ──▶ specs ──▶ design ──▶ tasks ──
                 └──────────────┘
 ```
 
-- **`issue`** — generates `issue.md`. Instruction: ensure a GitHub issue exists for this change (adopt an existing one, or create it from the issue form), record `github.issue` and `github.issue_updated_at` in `.openspec.yaml`, and snapshot the body to `issue.md`. Requires nothing. This is what lets `/spec` run from either a fresh idea or an existing issue URL.
-- **`proposal`** — generates `proposal.md`. Requires `issue`. Instruction: derive the proposal from the issue snapshot; the issue keeps the narrative, the proposal keeps the change summary the CLI archives.
-- **`specs`** — generates `specs/**/*.md`. Requires `proposal`. Instruction unchanged from stock `spec-driven` (ADDED/MODIFIED/REMOVED/RENAMED, four-hashtag scenarios).
-- **`design`** — generates `design.md`. Requires `proposal`.
-- **`tasks`** — generates `tasks.md`. Requires `specs`, `design`. Checkbox format preserved.
-- **`apply`** — `requires: [tasks]`, `tracks: tasks.md`, instruction adds branch naming, per-group commits, and checklist sync.
+- **`issue`**: generates `issue.md`. Instruction: ensure a GitHub issue exists for this change (adopt an existing one, or create it from the issue form), record `github.issue` and `github.issue_updated_at` in `.openspec.yaml`, and snapshot the body to `issue.md`. Requires nothing. This is what lets `/spec` run from either a fresh idea or an existing issue URL.
+- **`proposal`**: generates `proposal.md`. Requires `issue`. Instruction: derive the proposal from the issue snapshot; the issue keeps the narrative, the proposal keeps the change summary the CLI archives.
+- **`specs`**: generates `specs/**/*.md`. Requires `proposal`. Instruction unchanged from stock `spec-driven` (ADDED/MODIFIED/REMOVED/RENAMED, four-hashtag scenarios).
+- **`design`**: generates `design.md`. Requires `proposal`.
+- **`tasks`**: generates `tasks.md`. Requires `specs`, `design`. Checkbox format preserved.
+- **`apply`**: `requires: [tasks]`, `tracks: tasks.md`, instruction adds branch naming, per-group commits, and checklist sync.
 
 Templates live under `openspec/schemas/octospec/templates/`.
 
@@ -122,8 +122,8 @@ Templates live under `openspec/schemas/octospec/templates/`.
 
 Issue forms (`.github/ISSUE_TEMPLATE/`) are the contract. Both the human and the agent create issues through them.
 
-- **Feature form** — user story (`As a … I want … so that …`), context/problem, requirements (SHALL/MUST), success criteria, out of scope, open questions. Required fields are those G1 checks.
-- **Bug form** — summary, steps to reproduce, expected, actual, impact.
+- **Feature form**: user story (`As a … I want … so that …`), context/problem, requirements (SHALL/MUST), success criteria, out of scope, open questions. Required fields are those G1 checks.
+- **Bug form**: summary, steps to reproduce, expected, actual, impact.
 
 Labels: `type:feature`, `type:bug`, `status:backlog`, `status:spec-ready`, `status:in-progress`, `status:in-review`.
 
@@ -142,15 +142,15 @@ Hard gates block CI or merge; advisory gates warn.
 | G7 | All tasks checked before merge | advisory |
 | G8 | One OpenSpec change per issue (no duplicates) | advisory |
 
-G1–G2 are checked locally in `/spec`; G2–G6 are re-checked in a GitHub Actions workflow (`.github/workflows/openspec.yml`) so they cannot be skipped.
+G1 and G2 are checked locally in `/spec`; G2 to G6 are re-checked in a GitHub Actions workflow (`.github/workflows/openspec.yml`) so they cannot be skipped.
 
 ## Multi-tool layout
 
 The schema and `openspec/config.yaml` are tool-agnostic and committed once. Commands are per-tool shims:
 
-- **pi** — prompt templates
-- **opencode** — `.opencode/command/<name>.md`
-- **GitHub Copilot** — `.github/prompts/<name>.prompt.md`
+- **pi**: prompt templates
+- **opencode**: `.opencode/command/<name>.md`
+- **GitHub Copilot**: `.github/prompts/<name>.prompt.md`
 
 Skills are generated by OpenSpec per tool (`delivery: skills`).
 
