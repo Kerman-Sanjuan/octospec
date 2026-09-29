@@ -4,10 +4,10 @@
 Seeding a repository (`install.sh --repo`) creates the workflow's `type:*` and `status:*` labels, idempotently.
 ## Requirements
 ### Requirement: Seeding provisions the workflow labels
-`install.sh --repo` SHALL provision the six workflow labels: `type:feature`, `type:bug`, `status:backlog`, `status:spec-ready`, `status:in-progress`, `status:in-review`.
+`octospec seed` SHALL provision the six workflow labels: `type:feature`, `type:bug`, `status:backlog`, `status:spec-ready`, `status:in-progress`, `status:in-review`.
 
 #### Scenario: Fresh repo gets the labels
-- **WHEN** `install.sh --repo <path>` runs against a repository that does not have the workflow labels
+- **WHEN** `octospec seed` runs against a repository that does not have the workflow labels
 - **THEN** all six labels exist in that repository.
 
 #### Scenario: Label names match the commands
@@ -18,6 +18,6 @@ Seeding a repository (`install.sh --repo`) creates the workflow's `type:*` and `
 Provisioning the labels SHALL be idempotent: re-running the seed SHALL NOT fail when a label already exists.
 
 #### Scenario: Re-running the seed succeeds
-- **WHEN** `install.sh --repo <path>` runs a second time against an already-seeded repository
+- **WHEN** `octospec seed` runs a second time against an already-seeded repository
 - **THEN** it exits successfully and the six labels remain present.
 
