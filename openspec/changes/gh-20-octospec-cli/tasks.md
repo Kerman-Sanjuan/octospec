@@ -36,8 +36,8 @@
 
 ## 7. CD
 
-- [ ] 7.1 Add a release workflow that produces tagged binaries (`.github/workflows/release.yml`)
-- [ ] 7.2 Add the `curl | sh` installer that fetches a release (`install.sh`)
+- [x] 7.1 Add a release workflow that produces tagged binaries (`.github/workflows/release.yml`, `.goreleaser.yaml`)
+- [x] 7.2 Add the `curl | sh` installer that fetches a release (`install.sh`)
 
 ## 8. Ship feedback loop
 
