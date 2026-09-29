@@ -154,8 +154,10 @@ octospec update
 ```
 
 Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
-- OpenSpec skills (`openspec-propose`, `openspec-apply-change`,
-  `openspec-archive-change`, `openspec-explore`) ship per tool.
+
+OpenSpec ships its own skills (`openspec-propose`, `openspec-apply-change`,
+`openspec-archive-change`, `openspec-explore`); run `openspec update` to
+(re)generate them per tool. They are not committed.
 
 ## Commands
 
@@ -164,10 +166,10 @@ Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
 | `/explore <topic>` | optional | Think through an idea. No files, no issue, no change. |
 | `/idea [idea]` | intake | Interview for a feature and file the issue from the feature form. |
 | `/bug [summary]` | intake | File a bug issue from the bug form. |
-| `/spec <#\|url>` | plan | Turn an issue into an OpenSpec change, publish the artifacts to the issue, validate, and label `status:spec-ready`. |
-| `/apply [change]` | execute | Branch, commit the change baseline, work the tasks group by group, and sync the checklist. |
-| `/ship [change]` | ship | Push the branch and open a PR whose body closes the issue. |
-| `/archive [change]` | archive | Archive the change, update `openspec/specs/`, and close the issue. |
+| `/spec <#\|url>` | plan | Turn an issue into a change, commit it on `feat\|fix/<issue>-<slug>`, publish one `## Plan` comment, validate, and label `status:spec-ready`. |
+| `/apply [change]` | execute | Work the tasks on the branch `/spec` created, group by group, keeping one `## Implementation` comment. |
+| `/ship [change]` | ship | Run CI; on failure, loop back to `/apply`; open the PR once the gates are green. |
+| `/archive [change]` | archive | Archive the change, sync `openspec/specs/` (filling each Purpose), close the issue, and delete the merged branch. |
 
 ## Deeper documentation
 
