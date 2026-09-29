@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   go:
+    name: cli
     runs-on: ubuntu-latest
     defaults:
       run:
