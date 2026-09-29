@@ -20,4 +20,4 @@
 
 ## 5. Verify
 
-- [ ] 5.1 Dry-run `/spec` and `/apply` on a sample issue: confirm one plan comment and one implementation comment, refreshed in place on re-run (`commands/spec.md`, `commands/apply.md`)
+- [x] 5.1 Dry-run `/spec` and `/apply` on a sample issue: confirm one plan comment and one implementation comment, refreshed in place on re-run (`commands/spec.md`, `commands/apply.md`)
