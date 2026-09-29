@@ -9,6 +9,6 @@
 
 ## 2. Verify
 
-- [ ] 2.1 Verify every link resolves to an existing file (`README.md`)
-- [ ] 2.2 Verify install instructions match `install.sh` and the multi-tool layout (`README.md`, `install.sh`)
-- [ ] 2.3 Review the README against the success criteria in `issue.md` (`README.md`)
+- [x] 2.1 Verify every link resolves to an existing file (`README.md`)
+- [x] 2.2 Verify install instructions match `install.sh` and the multi-tool layout (`README.md`, `install.sh`)
+- [x] 2.3 Review the README against the success criteria in `issue.md` (`README.md`)
