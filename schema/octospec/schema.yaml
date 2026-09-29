@@ -1,0 +1,121 @@
+name: octospec
+version: 1
+description: GitHub-native OpenSpec. A GitHub issue is the intake artifact; the repo holds the machine artifacts.
+artifacts:
+  - id: issue
+    generates: issue.md
+    description: Durable snapshot of the GitHub issue that motivates the change
+    template: issue.md
+    instruction: |
+      Capture the intake artifact: the GitHub issue.
+
+      1. Read `.openspec.yaml`. If it already has `github.issue`, that issue
+         is authoritative - do not create another.
+      2. If it does not, the issue must already exist. The change name is
+         `gh-<issue>-<slug>`; OpenSpec requires a leading letter, so the
+         number cannot come first. Adopt the number from the name. If no
+         issue exists, stop and ask the user to run `/idea` first.
+      3. Read the issue:
+         `gh issue view <n> --json number,title,body,updatedAt,url`
+      4. Record the link in `.openspec.yaml`:
+         github:
+           issue: <n>
+           issue_updated_at: <updatedAt>
+      5. Write `issue.md` as a snapshot of the STABLE narrative sections
+         only: user story, context, requirements, success criteria, out of
+         scope. Do not include the task checklist or comments - those
+         change. Put the issue URL and number at the top.
+
+      `issue.md` is a read-only mirror; the issue body stays the human
+      source of truth.
+    requires: []
+
+  - id: proposal
+    generates: proposal.md
+    description: Proposal derived from the issue
+    template: proposal.md
+    instruction: |
+      Create the proposal document (WHY), derived from `issue.md`.
+
+      Sections:
+      - **Why**: 1-2 sentences from the issue's context.
+      - **What Changes**: bullet list from the issue's requirements.
+      - **Capabilities**: New capabilities become `specs/<kebab-name>/spec.md`.
+        Modified capabilities only when an existing spec's REQUIREMENTS
+        change. Leave Modified empty when unsure.
+      - **Impact**: affected code, APIs, dependencies, systems.
+
+      Keep it under two pages. Link the issue; do not copy it wholesale.
+    requires:
+      - issue
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: Requirement deltas
+    template: spec.md
+    instruction: |
+      Create one delta spec per capability listed in the proposal.
+
+      Delta operations (## headers): ADDED, MODIFIED, REMOVED, RENAMED.
+      - Requirement: `### Requirement: <name>`, using SHALL or MUST.
+      - Scenario: `#### Scenario: <name>` with WHEN/THEN. Exactly four
+        hashtags - three fails silently.
+      - Every requirement needs at least one scenario.
+
+      MODIFIED: copy the ENTIRE existing block from
+      `openspec/specs/<cap>/spec.md` and edit it. Partial content loses
+      detail at archive time.
+      REMOVED: include **Reason** and **Migration**.
+
+      Scenarios are the success criteria. If a success criterion from the
+      issue has no scenario, stop and ask rather than inventing one.
+    requires:
+      - proposal
+
+  - id: design
+    generates: design.md
+    description: Technical design document
+    template: design.md
+    instruction: |
+      Create the design document (HOW). Skip only when none apply:
+      cross-cutting change, new dependency or data model change, security
+      or migration complexity, or decisions worth recording.
+
+      Sections: Context, Goals / Non-Goals, Decisions (with alternatives),
+      Risks / Trade-offs ([Risk] -> Mitigation), Migration Plan, Open
+      Questions.
+
+      Reference the proposal for motivation and the specs for requirements.
+    requires:
+      - proposal
+
+  - id: tasks
+    generates: tasks.md
+    description: Implementation checklist
+    template: tasks.md
+    instruction: |
+      Create the task list. The apply phase parses checkboxes; tasks that
+      are not `- [ ]` are not tracked.
+
+      - Group under `## N. <Group>` headings.
+      - Each task is `- [ ] N.M <description>`.
+      - A task is small enough for one session and names the file it
+        touches.
+      - Order by dependency.
+      - Every task traces to a requirement or a design decision.
+    requires:
+      - specs
+      - design
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Implement the tasks in order.
+
+    - Branch first: `feat/<issue>-<slug>` or `fix/<issue>-<slug>`.
+    - Work one group at a time; commit per group, referencing the issue.
+    - Tick tasks in `tasks.md` as they complete and keep the issue
+      checklist comment in sync with `gh issue comment`.
+    - Run the project's build and tests before reporting a group done.
+    - Stop and ask on a blocker. Do not guess a requirement.
