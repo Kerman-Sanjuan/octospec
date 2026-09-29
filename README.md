@@ -22,7 +22,7 @@ There is no dual write. Each artifact has exactly one authoritative home:
 |---|---|---|
 | User story, requirements, success criteria, out of scope | GitHub **Issue** body | backlog + human source of truth |
 | Proposal, specs, design, tasks | repo `openspec/changes/<name>/` | machine layer, committed with the branch |
-| Published copies of the above | Issue **comments** | read-only mirrors for review |
+| Published copies of the above | Issue **comments** | read-only mirrors, pinned to the commit SHA and refreshed in place on re-run |
 | Change ↔ issue link | `.openspec.yaml` → `github.issue` | traceability |
 | Living specs | `openspec/specs/` after archive | the contract of record |
 
@@ -32,10 +32,10 @@ There is no dual write. Each artifact has exactly one authoritative home:
 /idea    ──▶ issue in the backlog                       ← human refines on GitHub
               │
               ▼
-/spec    ──▶ change files + issue comments + validate   ← human approves
+/spec    ──▶ branch + committed change + comments    ← human approves
               │
               ▼
-/apply   ──▶ branch, tasks, commits, checklist synced
+/apply   ──▶ tasks, commits, checklist synced
               │
               ▼
 /ship    ──▶ PR (Closes #n) + CI gates                  ← human reviews and merges
@@ -46,11 +46,13 @@ There is no dual write. Each artifact has exactly one authoritative home:
 
 1. **`/idea`** interviews you for a feature and files the issue. The issue body
    is the human source of truth.
-2. **`/spec`** turns the issue into an OpenSpec change, publishes each artifact
-   back to the issue as a comment, and validates. It does not commit.
-3. **`/apply`** branches (`feat/<issue>-<slug>`), commits the change baseline,
-   and works the tasks group by group, syncing the checklist to the issue.
-4. **`/ship`** pushes the branch and opens a pull request that closes the issue.
+2. **`/spec`** creates the change branch (`feat|fix/<issue>-<slug>`), commits
+   the change artifacts on it, publishes each as a comment headed with the
+   commit SHA, and validates. `/spec` does not approve its own work.
+3. **`/apply`** works the tasks on the branch `/spec` created, group by group,
+   syncing the checklist to the issue.
+4. **`/ship`** opens a pull request that closes the issue (the branch was
+   pushed by `/spec`).
 5. **`/archive`** archives the change, updates `openspec/specs/`, and closes the
    issue.
 

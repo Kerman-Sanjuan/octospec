@@ -15,9 +15,9 @@
 
 ## 4. Mirrors and docs
 
-- [ ] 4.1 Mirror the `spec` change into `.github/prompts/spec.prompt.md` and `repo-template/.github/prompts/spec.prompt.md` (`.github/prompts/spec.prompt.md`, `repo-template/.github/prompts/spec.prompt.md`)
-- [ ] 4.2 Mirror the `apply` change into `.github/prompts/apply.prompt.md` and `repo-template/.github/prompts/apply.prompt.md` (`.github/prompts/apply.prompt.md`, `repo-template/.github/prompts/apply.prompt.md`)
-- [ ] 4.3 Update the README workflow loop to show `/spec` creating the branch (`README.md`)
+- [x] 4.1 Mirror the `spec` change into `.github/prompts/spec.prompt.md` and `repo-template/.github/prompts/spec.prompt.md` (`.github/prompts/spec.prompt.md`, `repo-template/.github/prompts/spec.prompt.md`)
+- [x] 4.2 Mirror the `apply` change into `.github/prompts/apply.prompt.md` and `repo-template/.github/prompts/apply.prompt.md` (`.github/prompts/apply.prompt.md`, `repo-template/.github/prompts/apply.prompt.md`)
+- [x] 4.3 Update the README workflow loop to show `/spec` creating the branch (`README.md`)
 
 ## 5. Verify
 
