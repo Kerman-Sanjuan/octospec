@@ -1,9 +1,12 @@
 schema: octospec
 
-# Project context is injected into every artifact instruction. Keep it short.
+# Project context is injected into every artifact instruction. Replace this
+# placeholder with a short paragraph about the target repo: what it is, its
+# stack, and any naming rules. See this project's own openspec/config.yaml for
+# a filled-in example.
 context: |
-  <One paragraph: what this project is, its stack, and any naming rules.
-   Edited per repo after seeding.>
+  <TODO: one paragraph describing this project. Filled in per repo after
+   seeding.>
 
 rules:
   proposal:

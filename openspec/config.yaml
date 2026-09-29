@@ -2,8 +2,14 @@ schema: octospec
 
 # Project context is injected into every artifact instruction. Keep it short.
 context: |
-  <One paragraph: what this project is, its stack, and any naming rules.
-   Edited per repo after seeding.>
+  octospec is a GitHub-native spec-driven workflow built on OpenSpec
+  (https://github.com/Fission-AI/OpenSpec). GitHub Issues are the human backlog
+  and source of truth; the repository holds the machine artifacts under
+  openspec/changes/; CI enforces the gates (see scripts/check-gates.sh). Stack:
+  POSIX sh, GitHub Actions, Markdown and YAML. Naming: commands are /idea,
+  /spec, /apply, /ship, /archive; change folders are gh-<issue>-<slug>
+  (OpenSpec requires a leading letter); branches are feat|fix/<issue>-<slug>;
+  labels are type:* and status:*.
 
 rules:
   proposal:

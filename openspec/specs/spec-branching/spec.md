@@ -1,7 +1,7 @@
 # spec-branching Specification
 
 ## Purpose
-TBD - created by archiving change gh-13-spec-owns-branch. Update Purpose after archive.
+Where a change's plan artifacts live and how they are versioned: committed on the change branch, published to the issue, and approved by a human.
 ## Requirements
 ### Requirement: `/spec` commits the change artifacts on the change branch
 `/spec` SHALL create the change branch and commit the change artifacts on it before publishing.

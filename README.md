@@ -53,8 +53,8 @@ There is no dual write. Each artifact has exactly one authoritative home:
    syncing the checklist to the issue.
 4. **`/ship`** opens a pull request that closes the issue (the branch was
    pushed by `/spec`).
-5. **`/archive`** archives the change, updates `openspec/specs/`, and closes the
-   issue.
+5. **`/archive`** archives the change, updates `openspec/specs/` (filling each
+   capability's Purpose), closes the issue, and deletes the merged branch.
 
 ## Architecture
 

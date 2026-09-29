@@ -1,7 +1,7 @@
 # readme Specification
 
 ## Purpose
-TBD - created by archiving change gh-1-create-readme. Update Purpose after archive.
+What the octospec README must convey: what the project is, the workflow loop, the architecture, installation for each agent, and the full command surface.
 ## Requirements
 ### Requirement: README explains what octospec is
 The README SHALL explain what octospec is and the problem it solves.
