@@ -26,8 +26,8 @@
 
 ## 5. Tests
 
-- [ ] 5.1 Table tests for every renderer (`cli/internal/targets/*_test.go`)
-- [ ] 5.2 Install and update tests into temp dirs, including edit preservation (`cli/internal/install/*_test.go`, `cli/internal/update/*_test.go`)
+- [x] 5.1 Table tests for every renderer (`cli/internal/targets/*_test.go`)
+- [x] 5.2 Install and update tests into temp dirs, including edit preservation (`cli/internal/install/*_test.go`, `cli/internal/update/*_test.go`)
 
 ## 6. CI
 
