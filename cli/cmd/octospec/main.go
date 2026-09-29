@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
+	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 	"github.com/kerman-sanjuan/octospec/cli/internal/update"
 )
@@ -51,6 +52,34 @@ func main() {
 			fmt.Fprintln(os.Stderr, "error:", err)
 			os.Exit(1)
 		}
+	case "seed":
+		repo, skipLabels := "", false
+		for i := 1; i < len(args); i++ {
+			switch args[i] {
+			case "--repo":
+				if i+1 >= len(args) {
+					fmt.Fprintln(os.Stderr, "error: --repo needs a value")
+					os.Exit(2)
+				}
+				i++
+				repo = args[i]
+			case "--no-labels":
+				skipLabels = true
+			default:
+				fmt.Fprintf(os.Stderr, "error: unknown flag %q\n", args[i])
+				os.Exit(2)
+			}
+		}
+		if repo == "" {
+			repo, _ = os.Getwd()
+		}
+		r, err := seed.Run(seed.Options{Repo: repo, SkipLabels: skipLabels})
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "error:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("schema -> %s (%d files)\nrepo -> %s (%d files)\nlabels -> %d\n",
+			seed.SchemaDir(), r.Schema, repo, r.Repo, r.Labels)
 	case "version", "--version", "-v":
 		fmt.Println("octospec", version)
 	case "help", "--help", "-h":
@@ -121,6 +150,7 @@ func usage() {
 
 Usage:
   octospec install [--tool pi|opencode|copilot|claude] [--repo <path>]
+  octospec seed [--repo <path>] [--no-labels]
   octospec update [--repo <path>]
   octospec version
   octospec help

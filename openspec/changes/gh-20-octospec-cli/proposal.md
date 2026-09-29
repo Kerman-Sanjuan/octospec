@@ -17,7 +17,7 @@ octospec ships the same command file several times — once per tool — and ins
 - `ship-feedback-loop`: `/ship` observing CI and looping failures back to `/apply`.
 
 ### Modified Capabilities
-<!-- None; these are new capabilities. -->
+- `label-provisioning`: labels are now provisioned by `octospec seed`, not `install.sh --repo`.
 
 ## Impact
 

@@ -19,10 +19,10 @@
 
 ## 4. Replace install.sh
 
-- [ ] 4.1 Port schema install into the CLI (`cli/internal/seed/schema.go`)
-- [ ] 4.2 Port label provisioning into the CLI (`cli/internal/seed/labels.go`)
-- [ ] 4.3 Port the repo seed: issue forms, CI, `openspec/config.yaml` (`cli/internal/seed/repo.go`)
-- [ ] 4.4 Delete the old `install.sh` and the per-tool copies (`install.sh`, `repo-template/`, `.github/prompts/`, `.opencode/`, `.pi/`)
+- [x] 4.1 Port schema install into the CLI (`cli/internal/seed/schema.go`)
+- [x] 4.2 Port label provisioning into the CLI (`cli/internal/seed/labels.go`)
+- [x] 4.3 Port the repo seed: issue forms, CI, `openspec/config.yaml` (`cli/internal/seed/repo.go`)
+- [x] 4.4 Delete `install.sh` and the command copies (`install.sh`, `.github/prompts/`); `schema/` and `repo-template/` moved under `cli/internal/seed/`
 
 ## 5. Tests
 
