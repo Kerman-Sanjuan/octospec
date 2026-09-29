@@ -11,7 +11,7 @@
 
 ## 3. Approval
 
-- [ ] 3.1 Make "approach approved" a human action; `/spec` stops at `status:spec-ready` (`commands/spec.md`)
+- [x] 3.1 Make "approach approved" a human action; `/spec` stops at `status:spec-ready` (`commands/spec.md`)
 
 ## 4. Mirrors and docs
 

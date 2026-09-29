@@ -36,4 +36,6 @@ None. There are no in-flight changes at the time of writing.
 
 ## Open Questions
 
-- Does approval need its own label (e.g. `status:approved`), or is running `/apply` enough?
+- None. Resolved: approval is the human running `/apply`; no separate
+  `status:approved` label is added, so `/spec` stops at `status:spec-ready`
+  (drafted) and never marks its own work approved.
