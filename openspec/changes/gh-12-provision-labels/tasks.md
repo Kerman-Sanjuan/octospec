@@ -1,7 +1,7 @@
 ## 1. Add the label seeder
 
-- [ ] 1.1 Create `scripts/seed-labels.sh` defining the six labels and creating them idempotently with `gh label create --force` (`scripts/seed-labels.sh`)
-- [ ] 1.2 Resolve the target repo (from `$1`, else cwd) and skip with a warning when `gh` is unavailable (`scripts/seed-labels.sh`)
+- [x] 1.1 Create `scripts/seed-labels.sh` defining the six labels and creating them idempotently with `gh label create --force` (`scripts/seed-labels.sh`)
+- [x] 1.2 Resolve the target repo (from `$1`, else cwd) and skip with a warning when `gh` is unavailable (`scripts/seed-labels.sh`)
 
 ## 2. Wire into the seed
 
