@@ -1,3 +1,8 @@
 .DS_Store
 # Installer scratch
 .octospec-tmp/
+
+# OpenSpec-generated skills (run `openspec update` to regenerate)
+.pi/skills/
+.opencode/skills/
+.github/skills/
