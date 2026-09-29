@@ -31,8 +31,8 @@
 
 ## 6. CI
 
-- [ ] 6.1 Add a CLI workflow: build, `gofmt`, `go vet`, `go test ./...` (`.github/workflows/cli.yml`)
-- [ ] 6.2 Run the CLI workflow and the octospec gates on every pull request (`.github/workflows/openspec.yml`)
+- [x] 6.1 Add a CLI workflow: build, `gofmt`, `go vet`, `go test ./...` (`.github/workflows/cli.yml`)
+- [x] 6.2 Run the CLI workflow and the octospec gates on every pull request (`.github/workflows/openspec.yml`)
 
 ## 7. CD
 
