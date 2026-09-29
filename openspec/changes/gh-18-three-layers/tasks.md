@@ -1,8 +1,8 @@
 ## 1. Plan comment
 
-- [ ] 1.1 Make `/spec` post one plan comment with `### Proposal`, `### Capabilities`, `### Design`, `### Tasks`, recording the id in `.openspec.yaml` (`commands/spec.md`)
-- [ ] 1.2 Refresh the plan comment in place on re-run instead of posting per artifact (`commands/spec.md`)
-- [ ] 1.3 Add the ask-on-ambiguity rule: questions to the issue body, never invent requirements (`commands/spec.md`)
+- [x] 1.1 Make `/spec` post one plan comment with `### Proposal`, `### Capabilities`, `### Design`, `### Tasks`, recording the id in `.openspec.yaml` (`commands/spec.md`)
+- [x] 1.2 Refresh the plan comment in place on re-run instead of posting per artifact (`commands/spec.md`)
+- [x] 1.3 Add the ask-on-ambiguity rule: questions to the issue body, never invent requirements (`commands/spec.md`)
 
 ## 2. Implementation comment
 
