@@ -21,5 +21,5 @@
 
 ## 5. Verify
 
-- [ ] 5.1 Dry-run `/spec` on a sample issue: confirm branch + commit + push and in-place comment refresh (`commands/spec.md`)
-- [ ] 5.2 Confirm `/apply` starts clean on the branch with no baseline commit (`commands/apply.md`)
+- [x] 5.1 Dry-run `/spec` on a sample issue: confirm branch + commit + push and in-place comment refresh (`commands/spec.md`)
+- [x] 5.2 Confirm `/apply` starts clean on the branch with no baseline commit (`commands/apply.md`)

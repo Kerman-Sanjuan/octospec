@@ -36,7 +36,7 @@ from the `octospec` schema, not from this file.
    Record each comment id in `.openspec.yaml` as
    `github.comments.<artifact>: <id>`. On re-run, update that comment in
    place instead of adding a new one:
-   `gh api --method PATCH /repos/{owner}/{repo}/issues/comments/<id> -f body=@<file>`
+   `gh api --method PATCH /repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`
 8. Run `openspec validate "<change>" --strict`. If it fails, fix, commit,
    and push again.
 9. Add label `status:spec-ready`; remove `status:backlog`. Do **not** add an
