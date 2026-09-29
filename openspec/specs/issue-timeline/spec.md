@@ -4,7 +4,7 @@
 The fixed, three-layer comment structure an issue carries - the issue body, `## Plan`, and `## Implementation` - and how each layer is kept in sync in place.
 ## Requirements
 ### Requirement: `/spec` posts a single plan comment
-`/spec` SHALL publish exactly one comment on the issue — the plan — and SHALL NOT post one comment per artifact.
+`/spec` SHALL publish exactly one comment on the issue (the plan), and SHALL NOT post one comment per artifact.
 
 #### Scenario: One plan comment
 - **WHEN** `/spec` finishes on a fresh issue
@@ -22,7 +22,7 @@ The plan comment SHALL consolidate the artifacts under fixed headings: `### Prop
 - **THEN** it contains `### Proposal`, `### Capabilities`, `### Design`, and `### Tasks`, in that order.
 
 ### Requirement: `/apply` posts a single implementation comment
-`/apply` SHALL publish exactly one comment on the issue — the implementation — containing the task checklist with a short insight per task, and SHALL NOT post one comment per group.
+`/apply` SHALL publish exactly one comment on the issue (the implementation) containing the task checklist with a short insight per task, and SHALL NOT post one comment per group.
 
 #### Scenario: One implementation comment
 - **WHEN** `/apply` completes a group
