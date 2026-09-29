@@ -122,8 +122,10 @@ Seed the repo-local parts into an existing repository:
 ```
 
 This copies `repo-template/` — the issue forms, `.github/prompts/` for GitHub
-Copilot, the CI workflow, and `openspec/config.yaml` — and installs
-`scripts/check-gates.sh` into the target.
+Copilot, the CI workflow, and `openspec/config.yaml` — installs
+`scripts/check-gates.sh` into the target, and provisions the workflow labels
+(`type:feature`, `type:bug`, `status:backlog`, `status:spec-ready`,
+`status:in-progress`, `status:in-review`).
 
 - **pi** and **opencode** get their commands from the global install.
 - **GitHub Copilot** commands are repo-local (`.github/prompts/`), installed by

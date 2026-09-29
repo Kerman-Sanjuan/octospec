@@ -46,5 +46,7 @@ if [ "${1:-}" = "--repo" ]; then
     cp "$REPO_DIR/scripts/check-gates.sh" "$TARGET/scripts/"
   fi
   chmod +x "$TARGET/scripts/check-gates.sh"
+  sh "$REPO_DIR/scripts/seed-labels.sh" "$TARGET" || \
+    printf 'labels   -> skipped (label provisioning failed)\n' >&2
   printf 'repo     -> %s\n' "$TARGET"
 fi

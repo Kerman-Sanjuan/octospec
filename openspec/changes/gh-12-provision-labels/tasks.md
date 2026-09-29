@@ -5,8 +5,8 @@
 
 ## 2. Wire into the seed
 
-- [ ] 2.1 Invoke `scripts/seed-labels.sh` from the `--repo` step of `install.sh` (`install.sh`)
-- [ ] 2.2 Update the README install section to state that `--repo` provisions the labels (`README.md`)
+- [x] 2.1 Invoke `scripts/seed-labels.sh` from the `--repo` step of `install.sh` (`install.sh`)
+- [x] 2.2 Update the README install section to state that `--repo` provisions the labels (`README.md`)
 
 ## 3. Verify
 
