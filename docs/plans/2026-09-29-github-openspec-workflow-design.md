@@ -8,7 +8,7 @@
 
 ## Why
 
-The previous workflow (Plain Concepts `agent-harness`, removed) carried a lot of framework for a single developer and kept its GitHub logic in a large set of `pc-*` skills. We want the opposite: a small, inspectable workflow that is **based on OpenSpec** (its CLI, schema and skills) and adds only the GitHub behaviour we need - issues as the human-readable backlog, pull requests as the execution surface, and hard validation in CI.
+The previous workflow (Plain Concepts `agent-harness`, removed) carried a lot of framework for a single developer and kept its GitHub logic in a large set of `pc-*` skills. We want the opposite: a small, inspectable workflow that is **based on OpenSpec** (its CLI, schema and skills) and adds only the GitHub behaviour we need: issues as the human-readable backlog, pull requests as the execution surface, and hard validation in CI.
 
 The goal is to follow the OpenSpec workflow using GitHub's capabilities, and to do it in a way that satisfies GH-600's principles: plan before act, durable inspectable artifacts, human-in-the-loop at risky transitions, least privilege, and guardrails as enforced controls rather than prose.
 
@@ -38,7 +38,7 @@ OpenSpec resolves schemas by first match:
 
 The generated `/opsx:*` commands and the OpenSpec skills are **generic drivers**: they call `openspec new`, `openspec status`, `openspec instructions <artifact>`, and then follow whatever `instruction` and `template` the schema returns. Editing the schema therefore changes the behaviour of OpenSpec's own drivers too.
 
-Decision: add a project-local schema `octospec` and point `openspec/config.yaml` at it. Do **not** shadow `spec-driven`; it stays as a fallback and a reference. Do **not** edit generated command or skill files - `openspec update` overwrites them.
+Decision: add a project-local schema `octospec` and point `openspec/config.yaml` at it. Do **not** shadow `spec-driven`; it stays as a fallback and a reference. Do **not** edit generated command or skill files; `openspec update` overwrites them.
 
 ## Decision: source of truth is split by artifact
 
@@ -142,7 +142,7 @@ Hard gates block CI or merge; advisory gates warn.
 | G7 | All tasks checked before merge | advisory |
 | G8 | One OpenSpec change per issue (no duplicates) | advisory |
 
-G1-G2 are checked locally in `/spec`; G2-G6 are re-checked in a GitHub Actions workflow (`.github/workflows/openspec.yml`) so they cannot be skipped.
+G1 and G2 are checked locally in `/spec`; G2 to G6 are re-checked in a GitHub Actions workflow (`.github/workflows/openspec.yml`) so they cannot be skipped.
 
 ## Multi-tool layout
 
