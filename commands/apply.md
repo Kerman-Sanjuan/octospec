@@ -1,5 +1,5 @@
 ---
-description: Implement an OpenSpec change on its branch and sync the issue checklist.
+description: Implement an OpenSpec change on its branch and sync the implementation comment.
 argument-hint: "[change]"
 ---
 
@@ -14,8 +14,13 @@ Load the `openspec-apply-change` skill and follow it.
 3. Set the issue label: add `status:in-progress`, remove `status:spec-ready`.
 4. Work the tasks in `tasks.md` group by group. Commit each group with
    `<type>(#<issue>): <summary>` and push after each commit.
-5. After each group, tick the tasks and post the updated checklist as a new
-   comment on the issue, headed with the commit SHA.
+5. Keep a single **implementation comment** on the issue, headed
+   `## Implementation` and the group commit SHA. It lists every task, with a
+   short insight on each done task - what changed and how it was verified - so
+   the comment is worth reading, not just a copy of `tasks.md`. Record its id
+   in `.openspec.yaml` as `github.comments.implementation` and update it in
+   place after each group instead of posting a new comment:
+   `gh api --method PATCH /repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`
 6. Run the project's build and tests before reporting a group done. Report a
    failure as a failure.
 

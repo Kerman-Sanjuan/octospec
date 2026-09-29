@@ -116,7 +116,8 @@ apply:
     - The change branch was created and committed by `/spec`; work on it.
       Do not create a branch or commit a baseline.
     - Work one group at a time; commit per group, referencing the issue.
-    - Tick tasks in `tasks.md` as they complete and keep the issue
-      checklist comment in sync with `gh issue comment`.
+    - Tick tasks in `tasks.md` as they complete and keep the single
+      implementation comment on the issue in sync: update it in place with a
+      short insight per task, do not post a new comment per group.
     - Run the project's build and tests before reporting a group done.
     - Stop and ask on a blocker. Do not guess a requirement.
