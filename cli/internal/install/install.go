@@ -10,6 +10,7 @@ import (
 
 	"github.com/kerman-sanjuan/octospec/cli/internal/config"
 	"github.com/kerman-sanjuan/octospec/cli/internal/plan"
+	"github.com/kerman-sanjuan/octospec/cli/internal/skills"
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 )
 
@@ -57,6 +58,9 @@ func Run(opts Options) error {
 	}
 	if err := config.Save(repo, cfg); err != nil {
 		return err
+	}
+	if err := skills.Install(repo, tools); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 	}
 	fmt.Printf("installed %d files for %s\n", len(files), strings.Join(tools, ", "))
 	return nil

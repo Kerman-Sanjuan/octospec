@@ -155,6 +155,9 @@ octospec update
 
 Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
 
+`install` also brings the OpenSpec skills (`openspec-propose`, and the others)
+into each tool's skill directory by calling `openspec init --tools`.
+
 OpenSpec ships its own skills (`openspec-propose`, `openspec-apply-change`,
 `openspec-archive-change`, `openspec-explore`); run `openspec update` to
 (re)generate them per tool. They are not committed.
