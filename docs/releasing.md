@@ -22,6 +22,18 @@ The release workflow (`.github/workflows/release.yml`) runs `goreleaser` on a `v
    octospec version
    ```
 
+## Verifying and pinning
+
+The installer downloads the release `checksums.txt` and verifies the binary before it installs it. It fails, and installs nothing, on a mismatch. The checksum guards against a corrupted or truncated download. It does not protect against a compromised release, because the checksum and the binary come from the same origin.
+
+Install a specific version instead of the latest:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh -s -- --version v1.1.0
+```
+
+The `release-acceptance` workflow verifies the published binary on linux and macOS after every release.
+
 ## Versioning
 
 `vMAJOR.MINOR.PATCH`. A breaking change bumps the major, a new capability bumps the minor, a fix bumps the patch. The tag is the source of truth, so the version is not hand-edited in scattered files.
