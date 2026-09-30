@@ -2,6 +2,18 @@
 
 Grouped by impact. Newest first. Versions follow semantic versioning.
 
+## 1.1.0 - 2026-09-30
+
+### Added
+- Stage agents: one scoped agent per stage (idea, spec, apply, ship, archive), rendered for pi, opencode, GitHub Copilot, and Claude Code from one canonical payload.
+- A tool surface per agent, mapped to each tool's permission field. Claude and Copilot use `tools`, opencode uses `permissions`, and pi carries the surface in the body.
+- `octospec models`, a role-to-model TUI or `--set` flag, backed by one model configuration in `.octospec/octospec.json`.
+
+### Changed
+- `octospec install` and `octospec update` also write the agent definitions.
+- `octospec doctor` also reports the agents and the model configuration.
+- The build uses Go 1.23.
+
 ## 1.0.0 - 2026-09-30
 
 ### Added
