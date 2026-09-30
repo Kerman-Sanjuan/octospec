@@ -52,3 +52,10 @@ The README SHALL describe the agent that covers each stage of the loop and how t
 - **WHEN** a reader looks for how to set the model an agent uses
 - **THEN** the README points to the model configuration and the interactive TUI.
 
+### Requirement: The install section lists platforms and channels
+The README SHALL list the supported platforms and every install channel.
+
+#### Scenario: A reader picks a platform
+- **WHEN** a reader opens the install section
+- **THEN** they can see the supported platforms and the install channels.
+
