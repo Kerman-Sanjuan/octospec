@@ -2,7 +2,7 @@
 
 Grouped by impact. Newest first. Versions follow semantic versioning.
 
-## Unreleased
+## 1.0.0 - 2026-09-30
 
 ### Added
 - A Go CLI, `octospec`, that installs the commands and the OpenSpec skills into pi, opencode, GitHub Copilot, and Claude Code from one canonical payload.
@@ -22,7 +22,3 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 
 ### Removed
 - `install.sh` (the old seeding script) and the per-tool command copies.
-
-## 1.0.0
-
-The first minimum viable release: install, onboard, and ship through the loop.
