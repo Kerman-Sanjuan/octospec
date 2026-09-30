@@ -47,16 +47,20 @@ openspec validate --all --strict
 sh scripts/check-gates.sh
 ```
 
-## Writing
+## Writing (always)
 
-All text a human will read (issues, comments, pull requests, docs, commit
-messages) follows the `humanize` skill. The short version:
+Every piece of natural-language text octospec produces MUST use the `humanize`
+skill: issue and comment bodies, pull request titles and bodies, commit
+messages, docs, specs, and any reply to a human. This is a hard rule, not a
+style preference.
 
-- **No em dashes or en dashes as breaks.** Use a comma, a period, a colon, or a
-  spaced hyphen when you truly need a pause.
+- **Rewrite, never find-and-replace.** When prose needs fixing, write the
+  sentence again with the humanize skill. Do not swap characters.
+- **No em dashes or en dashes as breaks.** Use a comma, a period, a colon, or
+  parentheses.
 - Short sentences, active voice, plain words.
 - Lead with the point. Cut the wind-up.
-- No filler or machine tells: "delve", "robust", "seamless", "it's worth noting".
+- No machine tells: "delve", "robust", "seamless", "it's worth noting".
 
 ## Definition of done
 
