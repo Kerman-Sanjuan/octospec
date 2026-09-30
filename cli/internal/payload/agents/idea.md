@@ -4,6 +4,7 @@ stage: idea
 role: thinking
 description: Turn a rough idea or a bug report into a GitHub issue.
 skills: openspec-explore
+tools: read, search, shell
 writes: the GitHub issue
 ---
 

@@ -55,7 +55,7 @@ func Run(repo string) ([]Check, error) {
 	if len(cfg.Tools) == 0 {
 		checks = append(checks, Check{"commands", false, "run `octospec install`"})
 	} else {
-		files, err := plan.Files(cfg.Tools, repo, nil)
+		files, err := plan.Files(cfg.Tools, repo, cfg.Models)
 		if err != nil {
 			return checks, err
 		}

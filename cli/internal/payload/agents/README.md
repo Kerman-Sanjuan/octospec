@@ -13,11 +13,41 @@ per tool.
 | `role` | The model role: `thinking`, `implementer`, or `reviewer`. |
 | `description` | One line, shown by the tool. |
 | `skills` | The OpenSpec skills the agent may load, comma-separated. |
+| `tools` | The capability surface the agent may use, comma-separated. |
 | `writes` | The artifact the agent produces. |
 
 The body is the mission. It references only the stage command and the skills
 listed for that stage, so the rendered file shows exactly what the agent
-receives.
+receives. It also names no tool outside the `tools` surface.
+
+## Tool surface
+
+The `tools` field is a capability-group allowlist (B15 TOOL SUBSET). The
+canonical capabilities are `read`, `edit`, `search`, `shell`, `web`, and
+`agent`. The deployer maps them to each harness's native permission syntax, so
+the canonical body stays portable.
+
+| Stage | Role | tools |
+|---|---|---|
+| idea | thinking | read, search, shell |
+| spec | thinking | read, search, edit, shell |
+| apply | implementer | read, search, edit, shell |
+| ship | reviewer | read, search, shell |
+| archive | reviewer | read, search, edit, shell |
+
+## Portability
+
+Each harness realizes the tool surface to a different degree. A harness that
+cannot enforce it is declared, and the render does not emit a field the harness
+ignores.
+
+| Harness | Agent file | Tool surface |
+|---|---|---|
+| claude | `.claude/agents/<name>.md` | enforced, `tools` |
+| opencode | `~/.config/opencode/agents/<name>.md` | enforced, `permissions` (provisional shape) |
+| copilot | `.github/agents/<name>.agent.md` | enforced, `tools` |
+| pi | `~/.pi/agent/agents/<name>.md` | advisory, in the body only |
+| codex | none | unsupported, Codex has no persona file |
 
 ## Model roles
 

@@ -35,11 +35,11 @@ func Run(opts Options) error {
 			tools = append(tools, t.Name)
 		}
 	}
-	files, err := plan.Files(tools, repo, nil)
+	cfg, err := config.Load(repo)
 	if err != nil {
 		return err
 	}
-	cfg, err := config.Load(repo)
+	files, err := plan.Files(tools, repo, cfg.Models)
 	if err != nil {
 		return err
 	}

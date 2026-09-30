@@ -49,3 +49,25 @@ The repository that develops octospec SHALL follow the agent standard in its own
 #### Scenario: Contributor reads the rules
 - **WHEN** a contributor reads `AGENTS.md`
 - **THEN** it points to the canonical agent definitions and the model configuration.
+
+### Requirement: A tool surface per agent
+The canonical agent SHALL declare a tool surface from a fixed capability set (`read`, `edit`, `search`, `shell`, `web`, `agent`), and the body SHALL name no tool outside that surface.
+
+#### Scenario: The surface is declared
+- **WHEN** an agent is rendered for a harness that accepts a tool field
+- **THEN** its file carries only the capabilities the agent declares.
+
+#### Scenario: The body matches the surface
+- **WHEN** an agent body names a tool
+- **THEN** that tool is inside the agent's declared surface.
+
+### Requirement: Declared portability per harness
+A harness that cannot enforce a tool surface SHALL be declared, and the render SHALL NOT emit a permission field the harness does not accept.
+
+#### Scenario: Advisory harness
+- **WHEN** an agent is rendered for a harness with no permission field
+- **THEN** the tool surface appears in the body only and the harness is marked advisory.
+
+#### Scenario: Unsupported harness
+- **WHEN** a harness has no persona file
+- **THEN** octospec declares the agent render unsupported for it instead of emitting a file the harness ignores.

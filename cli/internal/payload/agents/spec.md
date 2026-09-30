@@ -4,6 +4,7 @@ stage: spec
 role: thinking
 description: Turn a GitHub issue into a committed, validated OpenSpec change.
 skills: openspec-propose
+tools: read, search, edit, shell
 writes: the change artifacts under openspec/changes/
 ---
 

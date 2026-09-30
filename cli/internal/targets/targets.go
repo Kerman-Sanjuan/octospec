@@ -31,18 +31,28 @@ type Target struct {
 	AgentDir    string // directory for the target's agent files
 	AgentExt    string // file extension for the target's agent files
 	AgentFormat string // agent renderer: formatDefault or formatCopilot
+	ToolFormat  string // how the agent's tool surface is rendered
 }
+
+// Tool surface renderers. A harness with no permission field is toolAdvisory:
+// the scope goes in the body. A harness with no persona file is not a target.
+const (
+	toolClaude   = "claude"
+	toolCopilot  = "copilot"
+	toolOpencode = "opencode"
+	toolAdvisory = "advisory"
+)
 
 // Targets is the single source of tool mappings.
 var Targets = []Target{
 	{Name: "pi", Scope: Global, Dir: "~/.pi/agent/prompts", Ext: ".md", Format: formatDefault,
-		AgentDir: "~/.pi/agent/agents", AgentExt: ".md", AgentFormat: formatDefault},
+		AgentDir: "~/.pi/agent/agents", AgentExt: ".md", AgentFormat: formatDefault, ToolFormat: toolAdvisory},
 	{Name: "opencode", Scope: Global, Dir: "~/.config/opencode/command", Ext: ".md", Format: formatDefault,
-		AgentDir: "~/.config/opencode/agent", AgentExt: ".md", AgentFormat: formatDefault},
+		AgentDir: "~/.config/opencode/agents", AgentExt: ".md", AgentFormat: formatDefault, ToolFormat: toolOpencode},
 	{Name: "copilot", Scope: RepoLocal, Dir: ".github/prompts", Ext: ".prompt.md", Format: formatCopilot,
-		AgentDir: ".github/agents", AgentExt: ".md", AgentFormat: formatCopilot},
+		AgentDir: ".github/agents", AgentExt: ".agent.md", AgentFormat: formatCopilot, ToolFormat: toolCopilot},
 	{Name: "claude", Scope: RepoLocal, Dir: ".claude/commands", Ext: ".md", Format: formatDefault,
-		AgentDir: ".claude/agents", AgentExt: ".md", AgentFormat: formatDefault},
+		AgentDir: ".claude/agents", AgentExt: ".md", AgentFormat: formatDefault, ToolFormat: toolClaude},
 }
 
 // Get returns the target with the given name.

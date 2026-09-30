@@ -4,6 +4,7 @@ stage: ship
 role: reviewer
 description: Open the pull request once the gates are green.
 skills:
+tools: read, search, shell
 writes: the pull request
 ---
 

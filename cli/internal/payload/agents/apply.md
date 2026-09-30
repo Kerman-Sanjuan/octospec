@@ -4,6 +4,7 @@ stage: apply
 role: implementer
 description: Implement the tasks of an OpenSpec change on its branch.
 skills: openspec-apply-change
+tools: read, search, edit, shell
 writes: the code, the tests, and the ticked tasks.md
 ---
 

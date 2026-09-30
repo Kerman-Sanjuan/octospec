@@ -87,6 +87,7 @@ type Agent struct {
 	Role        string
 	Description string
 	Skills      []string
+	Tools       []string
 	Writes      string
 	Body        string
 }
@@ -154,6 +155,8 @@ func ParseAgent(name, content string) Agent {
 				a.Description = v
 			case "skills":
 				a.Skills = splitList(v)
+			case "tools":
+				a.Tools = splitList(v)
 			case "writes":
 				a.Writes = v
 			}
@@ -175,6 +178,9 @@ func ParseAgent(name, content string) Agent {
 func (a Agent) Validate() error {
 	if a.Name == "" || a.Stage == "" || a.Role == "" || a.Description == "" || a.Writes == "" {
 		return fmt.Errorf("agent %q is missing a required field", a.Name)
+	}
+	if len(a.Tools) == 0 {
+		return fmt.Errorf("agent %q declares no tools", a.Name)
 	}
 	if _, ok := stageOrder[a.Stage]; !ok {
 		return fmt.Errorf("agent %q has unknown stage %q", a.Name, a.Stage)

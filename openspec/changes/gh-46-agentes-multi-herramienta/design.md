@@ -26,6 +26,7 @@ Two things are missing. There is no definition of an agent per stage, and there 
 - **Roles, not stages.** The roles are `thinking`, `implementer`, and `reviewer`. The stages map as idea and spec to thinking, apply to implementer, and ship and archive to reviewer. *Alternative rejected:* one role per stage, which triples the configuration for little gain.
 - **An empty model means the tool default.** Install works before the user picks anything, and a rendered agent omits the model field when its role has no value. *Alternative rejected:* requiring a model at install, which blocks a first run.
 - **The multi-tool standard is a small set of canonical fields plus a per-tool render.** Extend `targets.Target` with an agent directory and an agent format, the way it already carries a command directory and format. A new tool is a new mapping. *Alternative rejected:* a generic file for every tool, which loses each tool's native agent mechanism.
+- **The agent definition declares a tool surface in substrate terms.** A `tools` field names the capabilities the agent may use from a small canonical set (`read`, `edit`, `search`, `shell`, `web`, `agent`). The deployer maps that set to each harness's native permission syntax, so the canonical body stays portable. The subset is decided at agent entry and held, and the body never names a tool outside it. *Alternative rejected:* no tool field, which leaves every agent with the harness's full surface. The genesis handoff packet in `docs/plans/2026-09-30-agent-standard-genesis.md` records the mapping and the per-harness support levels.
 - **Context injection is static and auditable.** Each agent references only its stage command and skills, so the rendered file shows exactly what the agent receives. *Alternative rejected:* a runtime prompt builder, which hides the effective prompt from inspection.
 - **The model TUI uses a small interactive library.** Use `github.com/charmbracelet/huh` for the role-to-model form, with a flag path for non-interactive use. *Alternative rejected:* hand-rolled `bufio` prompts, which are not a TUI, and a full `bubbletea` program, which is heavier than a form needs.
 - **The developing repo adopts the standard.** `AGENTS.md` and the workflow commands of this repo point at the canonical agents and the model config. *Alternative rejected:* leaving the repo on the old rules while consumers get the new ones, which breaks dogfooding.
@@ -43,5 +44,6 @@ Two things are missing. There is no definition of an agent per stage, and there 
 
 ## Open Questions
 
-- Does Codex expose a native agent format, or does it need a single-file render like a prompt set?
-- Which default model ids does the TUI offer per tool, and who maintains that list?
+- Which default model ids does the TUI offer per tool, and who maintains that list? The TUI uses free text until this is decided.
+- Does octospec add Codex as a target? The genesis pass found no persona file in Codex, so a discrete agent cannot be rendered there today.
+- Do any stage agents need the `agent` capability, so a stage can fan out to subagents?

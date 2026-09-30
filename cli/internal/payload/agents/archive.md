@@ -4,6 +4,7 @@ stage: archive
 role: reviewer
 description: Archive the change, sync the specs, and close the issue.
 skills: openspec-archive-change
+tools: read, search, edit, shell
 writes: the archived change and the synced specs
 ---
 

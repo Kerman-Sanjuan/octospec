@@ -5,13 +5,15 @@
 - [x] 1.3 Embed and parse the agent definitions beside the commands (`cli/internal/payload/embed.go`)
 - [x] 1.4 Extend each target with an agent directory and an agent format (`cli/internal/targets/targets.go`)
 - [x] 1.5 Render the agents into planned files (`cli/internal/plan/plan.go`)
+- [x] 1.6 Add the `tools` field to the canonical format and map it per harness (`cli/internal/payload/agents/*.md`, `cli/internal/targets/render.go`)
+- [x] 1.7 Declare the per-harness support levels in the standard doc (`cli/internal/payload/agents/README.md`)
 
 ## 2. Model configuration and TUI
 
-- [ ] 2.1 Add the `models` role map and its defaults to the state (`cli/internal/config/config.go`)
-- [ ] 2.2 Stamp the role model into a rendered agent, or omit it when empty (`cli/internal/targets/render.go`)
-- [ ] 2.3 Add the interactive role-to-model TUI (`cli/internal/models/models.go`)
-- [ ] 2.4 Add the `octospec models` command with a non-interactive flag (`cli/cmd/octospec/main.go`)
+- [x] 2.1 Add the `models` role map and its defaults to the state (`cli/internal/config/config.go`)
+- [x] 2.2 Stamp the role model into a rendered agent, or omit it when empty (`cli/internal/targets/render.go`)
+- [x] 2.3 Add the interactive role-to-model TUI (`cli/internal/models/models.go`)
+- [x] 2.4 Add the `octospec models` command with a non-interactive flag (`cli/cmd/octospec/main.go`)
 
 ## 3. Install, update, and doctor
 
@@ -32,3 +34,4 @@
 - [ ] 5.2 Add tests for the model config, install, and update (`cli/internal/install/install_test.go`, `cli/internal/update/update_test.go`)
 - [ ] 5.3 Add tests for doctor (`cli/internal/doctor/doctor_test.go`)
 - [ ] 5.4 Run gofmt, vet, tests, `openspec validate --all --strict`, and the gates (`scripts/check-gates.sh`)
+- [ ] 5.5 Add tests for the tool surface render and the declared support levels (`cli/internal/targets/targets_test.go`)
