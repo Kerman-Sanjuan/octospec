@@ -1,5 +1,5 @@
 ---
-description: Archive the change, update the specs, and close the issue.
+description: Archive the change, sync the specs, close the issue, and push.
 argument-hint: "[change]"
 ---
 
@@ -10,10 +10,17 @@ Load the `openspec-archive-change` skill and follow it.
 2. `openspec archive "<change>" --yes`
 3. For every `openspec/specs/<capability>/spec.md` whose `## Purpose` still
    reads `TBD`, replace it with a one-line purpose for that capability.
-4. If `Closes #<issue>` did not already close it, close the issue:
+4. Commit the archive and push it:
+   `git add -A openspec`
+   `git commit -m "chore(#<issue>): archive <change>"`
+   `git push origin main`
+5. If `Closes #<issue>` did not already close it, close the issue:
    `gh issue close <issue>`
-5. Remove `status:*` labels from the issue.
-6. Delete the merged branch: `git branch -d feat|fix/<issue>-<slug>` (the
+6. Remove `status:*` labels from the issue.
+7. Delete the merged branch: `git branch -d feat|fix/<issue>-<slug>` (the
    prefix comes from the issue's `type:*` label). Optionally delete it
    remotely: `git push origin --delete feat|fix/<issue>-<slug>`.
-7. Report the archive path and the spec files updated.
+8. Report the archive path and the spec files updated.
+
+The push in step 4 lands because the branch protection lets the owner push
+maintenance commits such as an archive (see `scripts/protect-main.sh`).

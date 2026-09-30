@@ -169,7 +169,7 @@ OpenSpec ships its own skills (`openspec-propose`, `openspec-apply-change`,
 | `/spec <#\|url>` | plan | Turn an issue into a change, commit it on `feat\|fix/<issue>-<slug>`, publish one `## Plan` comment, validate, and label `status:spec-ready`. |
 | `/apply [change]` | execute | Work the tasks on the branch `/spec` created, group by group, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI; on failure, loop back to `/apply`; open the PR once the gates are green. |
-| `/archive [change]` | archive | Archive the change, sync `openspec/specs/` (filling each Purpose), close the issue, and delete the merged branch. |
+| `/archive [change]` | archive | Archive the change, sync `openspec/specs/` (filling each Purpose), commit and push, close the issue, and delete the merged branch. |
 
 ## Deeper documentation
 
