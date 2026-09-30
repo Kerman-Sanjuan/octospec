@@ -53,7 +53,7 @@ func Load(repo string) (Config, error) {
 	b, err := os.ReadFile(Path(repo))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return Config{}, nil
+			return Config{Files: map[string]string{}, Models: map[string]string{}}, nil
 		}
 		return Config{}, err
 	}

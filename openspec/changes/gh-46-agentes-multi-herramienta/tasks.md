@@ -30,8 +30,8 @@
 
 ## 5. Tests and gates
 
-- [ ] 5.1 Add tests for the agent renderers (`cli/internal/targets/targets_test.go`, `cli/internal/payload/embed_test.go`)
-- [ ] 5.2 Add tests for the model config, install, and update (`cli/internal/install/install_test.go`, `cli/internal/update/update_test.go`)
-- [ ] 5.3 Add tests for doctor (`cli/internal/doctor/doctor_test.go`)
-- [ ] 5.4 Run gofmt, vet, tests, `openspec validate --all --strict`, and the gates (`scripts/check-gates.sh`)
-- [ ] 5.5 Add tests for the tool surface render and the declared support levels (`cli/internal/targets/targets_test.go`)
+- [x] 5.1 Add tests for the agent renderers (`cli/internal/targets/targets_test.go`, `cli/internal/payload/embed_test.go`)
+- [x] 5.2 Add tests for the model config, install, and update (`cli/internal/install/install_test.go`, `cli/internal/update/update_test.go`)
+- [x] 5.3 Add tests for doctor (`cli/internal/doctor/doctor_test.go`)
+- [x] 5.4 Run gofmt, vet, tests, `openspec validate --all --strict`, and the gates (`scripts/check-gates.sh`)
+- [x] 5.5 Add tests for the tool surface render and the declared support levels (`cli/internal/targets/targets_test.go`)
