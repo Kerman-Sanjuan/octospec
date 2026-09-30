@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/kerman-sanjuan/octospec/cli/internal/doctor"
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
@@ -31,7 +32,7 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newDoctorCmd(), newVersionCmd())
 	return root
 }
 
@@ -88,6 +89,39 @@ func newUpdateCmd() *cobra.Command {
 		Short: "Re-apply an install, preserving local edits",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return update.Run(repo)
+		},
+	}
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	return cmd
+}
+
+func newDoctorCmd() *cobra.Command {
+	var repo string
+	cmd := &cobra.Command{
+		Use:   "doctor",
+		Short: "Report the state of an octospec install",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			checks, err := doctor.Run(repo)
+			if err != nil {
+				return err
+			}
+			bad := 0
+			for _, c := range checks {
+				mark := "OK  "
+				if !c.OK {
+					mark = "MISS"
+					bad++
+				}
+				if c.Note != "" {
+					fmt.Printf("%s %-24s %s\n", mark, c.Name, c.Note)
+				} else {
+					fmt.Printf("%s %s\n", mark, c.Name)
+				}
+			}
+			if bad > 0 {
+				return fmt.Errorf("%d check(s) missing", bad)
+			}
+			return nil
 		},
 	}
 	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")

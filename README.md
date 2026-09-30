@@ -153,6 +153,12 @@ Update after a new release - re-applies and keeps your local edits:
 octospec update
 ```
 
+Check an install, and see what is missing:
+
+```sh
+octospec doctor
+```
+
 Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
 
 `install` also brings the OpenSpec skills (`openspec-propose`, and the others)
