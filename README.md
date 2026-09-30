@@ -185,6 +185,8 @@ OpenSpec ships its own skills (`openspec-propose`, `openspec-apply-change`,
 - [Getting started](docs/getting-started.md) - install octospec and run one change.
 - [Commands](docs/commands.md) - the CLI and the workflow commands.
 - [Troubleshooting](docs/troubleshooting.md) - the common failures.
+- [Releasing](docs/releasing.md) - how a version is cut.
+- [Changelog](CHANGELOG.md) - what changed, grouped by impact.
 - [Design](docs/plans/2026-09-29-github-openspec-workflow-design.md): decisions,
   artifact map, gates, and trade-offs.
 - [Implementation plan](docs/plans/2026-09-29-github-openspec-workflow-plan.md):
