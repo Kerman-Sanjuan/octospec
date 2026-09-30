@@ -3,6 +3,8 @@ description: Archive the change, sync the specs, close the issue, and push.
 argument-hint: "[change]"
 ---
 
+Runs the `archive` agent. The agent definition sets the scope and the tool surface.
+
 Load the `openspec-archive-change` skill and follow it.
 
 1. Resolve the change (`$ARGUMENTS`, or the only unarchived change) and read

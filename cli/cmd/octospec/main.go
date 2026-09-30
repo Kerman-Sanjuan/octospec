@@ -10,6 +10,7 @@ import (
 
 	"github.com/kerman-sanjuan/octospec/cli/internal/doctor"
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
+	"github.com/kerman-sanjuan/octospec/cli/internal/models"
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 	"github.com/kerman-sanjuan/octospec/cli/internal/update"
@@ -32,8 +33,32 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newDoctorCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newDoctorCmd(), newModelsCmd(), newVersionCmd())
 	return root
+}
+
+func newModelsCmd() *cobra.Command {
+	var repo string
+	var sets []string
+	cmd := &cobra.Command{
+		Use:   "models",
+		Short: "Set the model each agent role uses",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			pairs := map[string]string{}
+			for _, s := range sets {
+				role, model, ok := strings.Cut(s, "=")
+				if !ok {
+					return fmt.Errorf("want role=model, got %q", s)
+				}
+				pairs[strings.TrimSpace(role)] = strings.TrimSpace(model)
+			}
+			interactive := len(pairs) == 0 && isTerminal(os.Stdin)
+			return models.Set(models.Options{Repo: repo, Pairs: pairs, Interactive: interactive})
+		},
+	}
+	cmd.Flags().StringArrayVar(&sets, "set", nil, "set a role's model (role=model); repeatable")
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	return cmd
 }
 
 func newInstallCmd() *cobra.Command {

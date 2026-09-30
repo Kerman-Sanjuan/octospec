@@ -27,7 +27,7 @@ func Run(repo string) error {
 	if len(cfg.Tools) == 0 {
 		return errors.New("nothing installed here; run `octospec install` first")
 	}
-	files, err := plan.Files(cfg.Tools, repo)
+	files, err := plan.Files(cfg.Tools, repo, cfg.Models)
 	if err != nil {
 		return err
 	}

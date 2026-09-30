@@ -15,11 +15,34 @@ const (
 	File = "octospec.json"
 )
 
-// Config is the saved install state: which tools, and the hash of every file
-// octospec wrote (so `update` can tell a managed file from a hand edit).
+// Model roles. A stage agent names one of these, and the rendered agent gets
+// the model configured here. An empty model means the tool default.
+const (
+	RoleThinking    = "thinking"
+	RoleImplementer = "implementer"
+	RoleReviewer    = "reviewer"
+)
+
+// Roles is the fixed set of model roles, in display order.
+var Roles = []string{RoleThinking, RoleImplementer, RoleReviewer}
+
+// ValidRole reports whether role is one of the known model roles.
+func ValidRole(role string) bool {
+	for _, r := range Roles {
+		if r == role {
+			return true
+		}
+	}
+	return false
+}
+
+// Config is the saved install state: which tools, the model per role, and the
+// hash of every file octospec wrote (so `update` can tell a managed file from a
+// hand edit).
 type Config struct {
-	Tools []string          `json:"tools"`
-	Files map[string]string `json:"files"`
+	Tools  []string          `json:"tools"`
+	Models map[string]string `json:"models,omitempty"`
+	Files  map[string]string `json:"files"`
 }
 
 // Path returns the state file path for a repo.
@@ -30,7 +53,7 @@ func Load(repo string) (Config, error) {
 	b, err := os.ReadFile(Path(repo))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return Config{}, nil
+			return Config{Files: map[string]string{}, Models: map[string]string{}}, nil
 		}
 		return Config{}, err
 	}
@@ -40,6 +63,9 @@ func Load(repo string) (Config, error) {
 	}
 	if c.Files == nil {
 		c.Files = map[string]string{}
+	}
+	if c.Models == nil {
+		c.Models = map[string]string{}
 	}
 	return c, nil
 }

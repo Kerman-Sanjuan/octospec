@@ -82,7 +82,9 @@ octospec/
 ├── cli/                    # the Go CLI: one canonical payload, rendered per tool
 │   └── internal/
 │       ├── payload/commands/  # the canonical commands (embedded)
-│       ├── targets/           # tool -> directory + front matter
+│       ├── payload/agents/    # the canonical stage agents (embedded)
+│       ├── targets/           # tool -> directory, front matter, tools
+│       ├── models/            # the role-to-model TUI
 │       └── seed/              # OpenSpec schema + repo seed (embedded)
 ├── scripts/check-gates.sh  # gate checks, runnable locally and in CI
 ├── .github/workflows/      # cli (Go), openspec (gates), release
@@ -167,6 +169,33 @@ into each tool's skill directory by calling `openspec init --tools`.
 OpenSpec ships its own skills (`openspec-propose`, `openspec-apply-change`,
 `openspec-archive-change`, `openspec-explore`); run `openspec update` to
 (re)generate them per tool. They are not committed.
+
+## Agents and models
+
+Each stage runs on a scoped agent. The agents live once in
+`cli/internal/payload/agents/` and render into each tool's agent directory.
+
+| Stage | Agent | Role | Tool surface |
+|---|---|---|---|
+| intake | `idea` | thinking | read, search, shell |
+| plan | `spec` | thinking | read, search, edit, shell |
+| execute | `apply` | implementer | read, search, edit, shell |
+| ship | `ship` | reviewer | read, search, shell |
+| archive | `archive` | reviewer | read, search, edit, shell |
+
+The tool surface maps to each tool's native permission field. Claude, opencode,
+and Copilot enforce it. pi carries it as advice because it has no permission
+field, and Codex is not a target because it has no agent file.
+
+Pick the model each role uses with the TUI, or set one directly:
+
+```sh
+octospec models
+octospec models --set thinking=sonnet --set implementer=sonnet
+```
+
+The model per role lives in `.octospec/octospec.json`. An empty model means the
+tool default, and `octospec update` re-renders the agents with the new value.
 
 ## Commands
 

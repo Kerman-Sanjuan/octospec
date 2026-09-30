@@ -3,6 +3,8 @@ description: File a new bug issue.
 argument-hint: "[summary]"
 ---
 
+Runs the `idea` agent. The agent definition sets the scope and the tool surface.
+
 Create a bug issue. The issue is the intake artifact for a later fix.
 
 1. If `$ARGUMENTS` is empty, ask for a summary.

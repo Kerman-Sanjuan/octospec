@@ -3,6 +3,8 @@ description: File a new feature issue in the backlog and interview for its conte
 argument-hint: "[idea]"
 ---
 
+Runs the `idea` agent. The agent definition sets the scope and the tool surface.
+
 Create a feature issue in the GitHub backlog. The issue is the human source
 of truth; there is no OpenSpec change yet.
 

@@ -3,6 +3,8 @@ description: Run CI, open a pull request linked to the issue, and iterate failur
 argument-hint: "[change]"
 ---
 
+Runs the `ship` agent. The agent definition sets the scope and the tool surface.
+
 Open the PR for the current branch once the gates are green.
 
 1. Read `.openspec.yaml` for `github.issue`.
