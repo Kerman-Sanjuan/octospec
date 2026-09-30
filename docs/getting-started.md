@@ -36,7 +36,19 @@ octospec doctor
 
 Every line reports OK, or it tells you what is missing.
 
-## 5. Run one change
+## 5. Choose the models
+
+Each stage runs on a scoped agent, and each role (thinking, implementer,
+reviewer) uses one model. Set them with the TUI, or by flag:
+
+```sh
+octospec models
+octospec models --set thinking=sonnet --set implementer=sonnet
+```
+
+An empty model means the tool default.
+
+## 6. Run one change
 
 Start in your agent (pi, opencode, GitHub Copilot, or Claude Code):
 

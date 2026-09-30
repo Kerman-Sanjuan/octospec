@@ -23,10 +23,10 @@
 
 ## 4. Self-hosting and docs
 
-- [ ] 4.1 Migrate `AGENTS.md` to the agent standard (`AGENTS.md`)
-- [ ] 4.2 Point the workflow commands at the stage agents (`cli/internal/payload/commands/*.md`)
-- [ ] 4.3 Document the agents per stage and the model choice (`README.md`)
-- [ ] 4.4 Document the model TUI in the command reference and getting started (`docs/commands.md`, `docs/getting-started.md`)
+- [x] 4.1 Migrate `AGENTS.md` to the agent standard (`AGENTS.md`)
+- [x] 4.2 Point the workflow commands at the stage agents (`cli/internal/payload/commands/*.md`)
+- [x] 4.3 Document the agents per stage and the model choice (`README.md`)
+- [x] 4.4 Document the model TUI in the command reference and getting started (`docs/commands.md`, `docs/getting-started.md`)
 
 ## 5. Tests and gates
 

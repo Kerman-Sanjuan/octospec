@@ -3,6 +3,8 @@ description: Implement an OpenSpec change on its branch and sync the implementat
 argument-hint: "[change]"
 ---
 
+Runs the `apply` agent. The agent definition sets the scope and the tool surface.
+
 Load the `openspec-apply-change` skill and follow it.
 
 1. Resolve the change (`$ARGUMENTS`, or the only unarchived change).

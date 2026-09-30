@@ -3,6 +3,8 @@ description: Turn a GitHub issue into an OpenSpec change, commit it on the chang
 argument-hint: "<issue-number|url>"
 ---
 
+Runs the `spec` agent. The agent definition sets the scope and the tool surface.
+
 Load the `openspec-propose` skill and follow it. The artifact semantics come
 from the `octospec` schema, not from this file.
 

@@ -15,14 +15,18 @@ is the workflow used on this repo.
 - `openspec/specs/` - the living contracts, one `spec.md` per capability.
 - `openspec/changes/archive/` - every shipped change, with its proposal, design,
   specs and tasks. Read these to see how a past decision was made.
-- `docs/plans/` - the original design and plan from before the CLI. Historical;
-  treat `README.md` and `openspec/specs/` as current.
+- `docs/plans/` - design docs. The pre-CLI plan is historical; treat
+  `README.md` and `openspec/specs/` as current. The agent standard genesis
+  pass (`2026-09-30-agent-standard-genesis.md`) records the tool surface and
+  the per-harness mapping.
 
 ## Layout
 
 - `cli/` - the Go CLI.
   - `cli/internal/payload/commands/` - **the single canonical source** of the commands.
-  - `cli/internal/targets/` - maps each tool to its directory and front matter.
+  - `cli/internal/payload/agents/` - **the single canonical source** of the stage agents (idea, spec, apply, ship, archive).
+  - `cli/internal/targets/` - maps each tool to its directory, front matter, and agent tool surface.
+  - `cli/internal/models/` - the interactive role-to-model TUI.
   - `cli/internal/seed/` - the embedded OpenSpec schema and repo seed.
   - `cli/internal/{install,update,config,plan}/` - install, in-place update, state.
 - `scripts/check-gates.sh` - the gates (G2a, G2b, G3, G4, G6), run locally and in CI.
@@ -32,7 +36,11 @@ is the workflow used on this repo.
 ## Invariants
 
 - **One canonical payload.** Commands live once in `cli/internal/payload/commands/`
-  and are rendered per tool. Never add a per-tool copy in the repo.
+  and the stage agents live once in `cli/internal/payload/agents/`. Both render
+  per tool. Never add a per-tool copy in the repo.
+- **One model configuration.** The model per role lives in
+  `.octospec/octospec.json` under `models`. Never set a model per agent file or
+  per tool.
 - **Generated files are not committed.** `openspec update` output
   (`.pi/skills/`, `.opencode/skills/`, `.github/skills/`) is gitignored.
 - **The schema and repo seed are embedded** under `cli/internal/seed/`.
@@ -68,7 +76,8 @@ A change is not done until:
 
 - [ ] `gofmt -l` is clean; `go vet ./...` and `go test ./...` pass
 - [ ] `openspec validate --all --strict` passes and the change is archived
-- [ ] **Changed a command?** Update the README **Commands** table.
+- [ ] **Changed a command or an agent?** Update the README **Commands** table
+      and the agent standard doc in `cli/internal/payload/agents/README.md`.
 - [ ] **Added or removed a tool?** Update the README **Install** table and the target tests.
 - [ ] **Superseded a file or script?** Delete it. No dead files.
 - [ ] **Changed the repo structure?** Update this file and the README.
