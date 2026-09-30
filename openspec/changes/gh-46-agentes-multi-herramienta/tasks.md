@@ -17,9 +17,9 @@
 
 ## 3. Install, update, and doctor
 
-- [ ] 3.1 Write the agent definitions on install (`cli/internal/install/install.go`)
-- [ ] 3.2 Re-render the agents on update and preserve local edits (`cli/internal/update/update.go`)
-- [ ] 3.3 Report the agents and the model configuration in doctor (`cli/internal/doctor/doctor.go`)
+- [x] 3.1 Write the agent definitions on install (`cli/internal/install/install.go`)
+- [x] 3.2 Re-render the agents on update and preserve local edits (`cli/internal/update/update.go`)
+- [x] 3.3 Report the agents and the model configuration in doctor (`cli/internal/doctor/doctor.go`)
 
 ## 4. Self-hosting and docs
 

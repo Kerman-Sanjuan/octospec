@@ -54,23 +54,30 @@ func Run(repo string) ([]Check, error) {
 	}
 	if len(cfg.Tools) == 0 {
 		checks = append(checks, Check{"commands", false, "run `octospec install`"})
+		checks = append(checks, Check{"agents", false, "run `octospec install`"})
 	} else {
 		files, err := plan.Files(cfg.Tools, repo, cfg.Models)
 		if err != nil {
 			return checks, err
 		}
-		missing := 0
+		missingCmd, missingAgent := 0, 0
 		for _, f := range files {
 			if _, err := os.Stat(f.Path); err != nil {
-				missing++
+				if f.Kind == plan.KindAgent {
+					missingAgent++
+				} else {
+					missingCmd++
+				}
 			}
 		}
-		checks = append(checks, Check{
-			Name: "commands (" + strings.Join(cfg.Tools, ",") + ")",
-			OK:   missing == 0,
-			Note: fmt.Sprintf("%d missing", missing),
-		})
+		tools := strings.Join(cfg.Tools, ",")
+		checks = append(checks,
+			Check{"commands (" + tools + ")", missingCmd == 0, fmt.Sprintf("%d missing", missingCmd)},
+			Check{"agents (" + tools + ")", missingAgent == 0, fmt.Sprintf("%d missing", missingAgent)},
+		)
 	}
+
+	checks = append(checks, checkModels(cfg))
 
 	checks = append(checks, checkLabels(repo))
 
@@ -81,6 +88,21 @@ func Run(repo string) ([]Check, error) {
 	}
 
 	return checks, nil
+}
+
+// checkModels reports the configured role-to-model map. An empty map means the
+// tool defaults, which is healthy.
+func checkModels(cfg config.Config) Check {
+	var set []string
+	for _, role := range config.Roles {
+		if cfg.Models[role] != "" {
+			set = append(set, role+"="+cfg.Models[role])
+		}
+	}
+	if len(set) == 0 {
+		return Check{"models", true, "tool defaults"}
+	}
+	return Check{"models", true, strings.Join(set, " ")}
 }
 
 func checkLabels(repo string) Check {
