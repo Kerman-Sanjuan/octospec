@@ -219,8 +219,8 @@ tool default, and `octospec update` re-renders the agents with the new value.
 | Command | Phase | Behaviour |
 |---|---|---|
 | `/explore <topic>` | optional | Think through an idea. No files, no issue, no change. |
-| `/idea [idea]` | intake | Interview for a feature and file the issue from the feature form. |
-| `/bug [summary]` | intake | File a bug issue from the bug form. |
+| `/idea [idea]` | intake | Interview for a feature and file the issue with those sections as the body. |
+| `/bug [summary]` | intake | Interview for a bug and file the issue with those sections as the body. |
 | `/spec <#\|url>` | plan | Turn an issue into a change, commit it on `feat\|fix/<issue>-<slug>`, publish one `## Plan` comment, validate, and label `status:spec-ready`. |
 | `/apply [change]` | execute | Work the tasks on the branch `/spec` created, group by group, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI; on failure, loop back to `/apply`; open the PR once the gates are green. |

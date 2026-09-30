@@ -27,8 +27,8 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 | Command | Phase | Behaviour |
 |---|---|---|
 | `/explore <topic>` | optional | Think through an idea. No files, no issue, no change. |
-| `/idea [idea]` | intake | Interview you, then file the issue from the feature form. |
-| `/bug [summary]` | intake | File a bug issue from the bug form. |
+| `/idea [idea]` | intake | Interview you, then file the issue with those sections as the body. |
+| `/bug [summary]` | intake | Interview you, then file the bug issue with those sections as the body. |
 | `/spec <#\|url>` | plan | Turn the issue into a change, commit it on the branch, publish one `## Plan` comment, and validate. |
 | `/apply [change]` | execute | Work the tasks on the branch, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI, loop failures back to `/apply`, and open the PR once it is green. |
