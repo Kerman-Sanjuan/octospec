@@ -1,7 +1,7 @@
 ## 1. Version and changelog
 
-- [ ] 1.1 Bump the CLI version to `1.0.0` (`cli/cmd/octospec/main.go`)
-- [ ] 1.2 Finalize `CHANGELOG.md` for `1.0.0` with the release date (`CHANGELOG.md`)
+- [x] 1.1 Bump the CLI version to `1.0.0` (`cli/cmd/octospec/main.go`)
+- [x] 1.2 Finalize `CHANGELOG.md` for `1.0.0` with the release date (`CHANGELOG.md`)
 
 ## 2. Release
 

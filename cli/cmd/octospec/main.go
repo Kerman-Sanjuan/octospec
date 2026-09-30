@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const version = "0.1.0"
+const version = "1.0.0"
 
 func main() {
 	if err := newRootCmd().Execute(); err != nil {
