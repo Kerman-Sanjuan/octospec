@@ -11,14 +11,14 @@ The Go CLI: one canonical command payload rendered into each tool's directory (p
 - **THEN** it runs without Node or any other runtime.
 
 ### Requirement: Install from one canonical payload
-The CLI SHALL install the commands for a target tool from one canonical payload embedded in the binary, and the repo SHALL NOT store per-tool derived copies.
+The CLI SHALL install the commands and the agent definitions for a target tool from one canonical payload embedded in the binary, and the repo SHALL NOT store per-tool derived copies.
 
 #### Scenario: One source, many destinations
 - **WHEN** the canonical payload changes
 - **THEN** every target is regenerated from it with no per-tool copy to edit.
 
 ### Requirement: Target mapping
-Each supported tool SHALL be defined by a target mapping (destination directory plus file format); adding a tool SHALL NOT add a source copy.
+Each supported tool SHALL be defined by a target mapping (destination directory plus file format for commands and for agents); adding a tool SHALL NOT add a source copy.
 
 #### Scenario: Adding a tool
 - **WHEN** a new tool is added
@@ -62,4 +62,15 @@ The CLI SHALL be installed via a `curl | sh` installer from a release (and `go i
 #### Scenario: Missing OpenSpec is reported
 - **WHEN** the `openspec` CLI is not on the PATH
 - **THEN** `install` reports that the skills were skipped, and the commands still install.
+
+### Requirement: Install and update render the agents
+The CLI SHALL write the agent definitions for the selected tools on install and update, and SHALL preserve local edits to them like any managed file.
+
+#### Scenario: Install writes the agents
+- **WHEN** `octospec install --tool <pi|opencode|copilot|claude>` runs
+- **THEN** the agent definitions are written to that tool's agent location.
+
+#### Scenario: Hand edit to an agent survives update
+- **WHEN** a managed agent file is edited locally and `octospec update` runs
+- **THEN** the edit is preserved and reported.
 
