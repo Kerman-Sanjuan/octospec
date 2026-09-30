@@ -129,6 +129,23 @@ curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/instal
 
 Contributors can instead `go install github.com/kerman-sanjuan/octospec/cli/cmd/octospec@latest`.
 
+### Platforms and channels
+
+| Platform | `curl \| sh` | `go install` | Release binary |
+|---|---|---|---|
+| linux amd64 | yes | yes | `octospec_linux_amd64` |
+| linux arm64 | yes | yes | `octospec_linux_arm64` |
+| darwin amd64 | yes | yes | `octospec_darwin_amd64` |
+| darwin arm64 | yes | yes | `octospec_darwin_arm64` |
+
+These are the channels: the `curl | sh` installer, `go install`, and the release binaries. There is no package manager channel yet.
+
+The installer verifies the release checksum and accepts a version to pin:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh -s -- --version v1.1.0
+```
+
 Install the commands for a tool - repeat `--tool`, or omit it for all:
 
 ```sh
@@ -212,6 +229,7 @@ tool default, and `octospec update` re-renders the agents with the new value.
 ## Deeper documentation
 
 - [Getting started](docs/getting-started.md) - install octospec and run one change.
+- [Contributing](CONTRIBUTING.md) - how to send a change to octospec.
 - [Commands](docs/commands.md) - the CLI and the workflow commands.
 - [Troubleshooting](docs/troubleshooting.md) - the common failures.
 - [Releasing](docs/releasing.md) - how a version is cut.
