@@ -1,0 +1,71 @@
+name: release-acceptance
+
+on:
+  workflow_run:
+    workflows: ["release"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag to verify (for example v1.1.0)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    name: acceptance (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve the version
+        id: v
+        run: |
+          version="${INPUT_VERSION:-}"
+          if [ -z "$version" ]; then
+            version="${{ github.event.workflow_run.head_branch }}"
+          fi
+          if [ -z "$version" ]; then
+            echo "no version to verify" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+      - name: Install the published binary
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+          OCTOSPEC_BIN_DIR: ${{ runner.temp }}/octospec-bin
+        run: |
+          set -eu
+          scratch="$RUNNER_TEMP/scratch"
+          mkdir -p "$scratch"
+          cd "$scratch"
+          curl -fsSL "https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh" \
+            | sh -s -- --version "$VERSION" --tool claude
+      - name: Assert the install
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+          OCTOSPEC_BIN_DIR: ${{ runner.temp }}/octospec-bin
+        run: |
+          set -eu
+          scratch="$RUNNER_TEMP/scratch"
+          bin="$OCTOSPEC_BIN_DIR/octospec"
+          got=$("$bin" version)
+          case "$got" in
+            *"${VERSION#v}"*) ;;
+            *) echo "version mismatch: got '$got', want '$VERSION'" >&2; exit 1 ;;
+          esac
+          "$bin" seed --no-labels --repo "$scratch"
+          test -f "$scratch/.claude/agents/spec.md"
+          test "$(ls "$scratch/.claude/agents" | wc -l | tr -d ' ')" = "5"
+          test "$(ls "$scratch/.claude/commands" | wc -l | tr -d ' ')" = "7"
+          grep -q "tools:" "$scratch/.claude/agents/spec.md"
+          test -f "${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas/octospec/schema.yaml"
+          echo "acceptance passed for $VERSION"

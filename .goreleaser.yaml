@@ -23,6 +23,10 @@ archives:
 checksum:
   name_template: checksums.txt
 
+changelog:
+  use: github
+  sort: asc
+
 release:
   github:
     owner: Kerman-Sanjuan

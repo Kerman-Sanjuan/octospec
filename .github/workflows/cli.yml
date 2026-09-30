@@ -26,3 +26,6 @@ jobs:
         run: go test ./...
       - name: build
         run: go build ./...
+      - name: installer
+        working-directory: ${{ github.workspace }}
+        run: sh scripts/install-test.sh
