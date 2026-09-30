@@ -1,10 +1,10 @@
 ## 1. Multi-tool standard and canonical definitions
 
-- [ ] 1.1 Write the canonical agent format and the per-tool render rules (`cli/internal/payload/agents/README.md`)
-- [ ] 1.2 Add the five stage agent definitions, one per stage (`cli/internal/payload/agents/*.md`)
-- [ ] 1.3 Embed and parse the agent definitions beside the commands (`cli/internal/payload/embed.go`)
-- [ ] 1.4 Extend each target with an agent directory and an agent format (`cli/internal/targets/targets.go`)
-- [ ] 1.5 Render the agents into planned files (`cli/internal/plan/plan.go`)
+- [x] 1.1 Write the canonical agent format and the per-tool render rules (`cli/internal/payload/agents/README.md`)
+- [x] 1.2 Add the five stage agent definitions, one per stage (`cli/internal/payload/agents/*.md`)
+- [x] 1.3 Embed and parse the agent definitions beside the commands (`cli/internal/payload/embed.go`)
+- [x] 1.4 Extend each target with an agent directory and an agent format (`cli/internal/targets/targets.go`)
+- [x] 1.5 Render the agents into planned files (`cli/internal/plan/plan.go`)
 
 ## 2. Model configuration and TUI
 

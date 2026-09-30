@@ -35,7 +35,7 @@ func Run(opts Options) error {
 			tools = append(tools, t.Name)
 		}
 	}
-	files, err := plan.Files(tools, repo)
+	files, err := plan.Files(tools, repo, nil)
 	if err != nil {
 		return err
 	}
