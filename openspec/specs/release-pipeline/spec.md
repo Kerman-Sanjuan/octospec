@@ -60,3 +60,14 @@ A release workflow SHALL run the gates, then run an acceptance test against the 
 - **WHEN** `scripts/check-gates.sh` runs with a `feat|fix/<issue>-<slug>` ref
 - **THEN** it checks the branch name and passes.
 
+### Requirement: Lint, race, and coverage in CI
+The `cli` job SHALL run a Go linter, `go test -race ./...`, and report coverage.
+
+#### Scenario: Lint runs
+- **WHEN** a pull request is opened
+- **THEN** the linter runs and a finding fails the job.
+
+#### Scenario: Race and coverage
+- **WHEN** a pull request is opened
+- **THEN** the tests run with the race detector and coverage is reported.
+
