@@ -9,6 +9,25 @@ development GitHub-native. It adds only the GitHub behaviour OpenSpec does not
 have: issues as the human-readable backlog, pull requests as the execution
 surface, and hard validation in CI.
 
+## Quickstart
+
+Prerequisites: the [OpenSpec CLI](https://github.com/Fission-AI/OpenSpec) 1.3.1
+or newer (installed with npm, so Node.js is needed), and
+the [`gh` CLI](https://cli.github.com) 2.x, authenticated.
+
+```sh
+# 1. install the CLI
+curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh
+
+# 2. in your repository: install the commands and seed the workflow
+octospec install --tool claude    # or pi, opencode, copilot
+octospec seed
+
+# 3. in your agent, run the loop: /idea -> /spec -> /apply -> /ship -> /archive
+```
+
+See [Install](#install) for every tool and every channel.
+
 ## Why
 
 Most spec frameworks keep everything in the repository. That is great for the
@@ -118,7 +137,8 @@ repository adds its own build/test gate for G5.
 
 ## Install
 
-Requirements: [OpenSpec CLI](https://github.com/Fission-AI/OpenSpec) ≥ 1.3.1 and
+Requirements: [OpenSpec CLI](https://github.com/Fission-AI/OpenSpec) ≥ 1.3.1
+(installed with npm, so Node.js is needed) and
 [`gh`](https://cli.github.com) ≥ 2.x, authenticated (`gh auth status`).
 
 Install the CLI (fetches the latest release, then runs `octospec install`):
