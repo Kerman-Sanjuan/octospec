@@ -140,6 +140,8 @@ Contributors can instead `go install github.com/kerman-sanjuan/octospec/cli/cmd/
 
 These are the channels: the `curl | sh` installer, `go install`, and the release binaries. There is no package manager channel yet.
 
+Windows is not supported yet. The installer is a POSIX `sh` script, and there is no Windows release binary or PowerShell installer.
+
 The installer verifies the release checksum and accepts a version to pin:
 
 ```sh
