@@ -28,3 +28,10 @@ The repository SHALL have a pull request template and an `ISSUE_TEMPLATE/config.
 - **WHEN** a visitor opens the new-issue chooser
 - **THEN** it links the security policy.
 
+### Requirement: A question channel
+The repository SHALL provide a question channel, GitHub Discussions, and the issue chooser SHALL link it.
+
+#### Scenario: A visitor has a question
+- **WHEN** a visitor wants to ask a question
+- **THEN** the issue chooser and `CONTRIBUTING.md` point at GitHub Discussions.
+
