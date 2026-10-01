@@ -56,7 +56,6 @@ func Run(opts Options) (Result, error) {
 	r.Labels, err = InstallLabels(opts.Repo)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "warning: %v\n", err)
-		err = nil
 	}
 	return r, nil
 }
