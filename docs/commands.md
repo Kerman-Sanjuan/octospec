@@ -6,7 +6,7 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 
 | Command | Purpose |
 |---|---|
-| `octospec install [--tool <name>] [--repo <path>]` | Install the commands, and the OpenSpec skills, for each tool. |
+| `octospec install [--tool <name>] [--repo <path>] [--global]` | Install the commands, the agents, and the OpenSpec skills for each tool. Repo-local by default; `--global` warns and installs into the home directory. |
 | `octospec seed [--repo <path>] [--no-labels]` | Install the OpenSpec schema, the repo seed files, and the workflow labels. |
 | `octospec update [--repo <path>]` | Re-apply an install from the saved state, keeping your local edits. |
 | `octospec doctor [--repo <path>]` | Report what is missing, without changing anything. |
@@ -15,12 +15,16 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 
 ## Tools
 
-| Tool | Commands land in | Agents land in | Skills land in |
+| Tool | Repo-local (default) | Global | Skills |
 |---|---|---|---|
-| pi | `~/.pi/agent/prompts/` | `~/.pi/agent/agents/` | `.pi/skills/` |
-| opencode | `~/.config/opencode/command/` | `~/.config/opencode/agents/` | `.opencode/skills/` |
-| GitHub Copilot | `.github/prompts/` | `.github/agents/` | `.github/skills/` |
-| Claude Code | `.claude/commands/` | `.claude/agents/` | `.claude/skills/` |
+| pi | `.pi/prompts/` | `~/.pi/agent/prompts/` | `.pi/skills/` |
+| opencode | `.opencode/command/`, `.opencode/agents/` | `~/.config/opencode/command/`, `~/.config/opencode/agents/` | `.opencode/skills/` |
+| GitHub Copilot | `.github/prompts/`, `.github/agents/` | `~/.copilot/prompts/`, `~/.copilot/agents/` | `.github/skills/` |
+| Claude Code | `.claude/commands/`, `.claude/agents/` | `~/.claude/commands/`, `~/.claude/agents/` | `.claude/skills/` |
+
+Repo-local is the default. A global install warns that the commands, agents, and
+skills appear in every project. pi has no agent mechanism, so it installs no
+agents. The scope per tool is recorded in `.octospec/octospec.json`.
 
 ## Workflow commands
 
