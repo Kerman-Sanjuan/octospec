@@ -1,7 +1,7 @@
 # supply-chain Specification
 
 ## Purpose
-TBD - created by archiving change gh-63-dependabot-codeql. Update Purpose after archive.
+Dependency updates and code scanning for the repository.
 ## Requirements
 ### Requirement: Dependency updates
 The repository SHALL have a Dependabot config for Go modules and GitHub Actions.
