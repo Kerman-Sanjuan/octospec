@@ -3,7 +3,7 @@ description: Implement an OpenSpec change on its branch and sync the implementat
 argument-hint: "[change]"
 ---
 
-Runs the `apply` agent. The agent definition sets the scope and the tool surface.
+Runs the `apply` stage in the current session. The `apply` agent defines its scope, tools, and model.
 
 Load the `openspec-apply-change` skill and follow it.
 

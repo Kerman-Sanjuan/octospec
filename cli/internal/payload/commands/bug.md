@@ -3,7 +3,7 @@ description: File a new bug issue.
 argument-hint: "[summary]"
 ---
 
-Runs the `idea` agent. The agent definition sets the scope and the tool surface.
+Runs the `idea` stage in the current session. The `idea` agent defines its scope, tools, and model.
 
 Create a bug issue. The issue is the intake artifact for a later fix.
 
