@@ -1,0 +1,6 @@
+linters:
+  disable-all: true
+  enable:
+    - staticcheck
+    - ineffassign
+    - unused
