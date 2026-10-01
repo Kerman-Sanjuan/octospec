@@ -75,3 +75,16 @@ func TestRunGlobalWritesHome(t *testing.T) {
 		t.Fatal("a global install should not write the command into the repo")
 	}
 }
+
+func TestRunDryRunWritesNothing(t *testing.T) {
+	repo := t.TempDir()
+	if err := Run(Options{Tools: []string{"claude"}, Repo: repo, DryRun: true}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".claude")); err == nil {
+		t.Fatal("a dry run should write nothing")
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".octospec")); err == nil {
+		t.Fatal("a dry run should not write the state")
+	}
+}
