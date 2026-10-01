@@ -30,7 +30,6 @@ agents. The scope per tool is recorded in `.octospec/octospec.json`.
 
 | Command | Phase | Behaviour |
 |---|---|---|
-| `/explore <topic>` | optional | Think through an idea. No files, no issue, no change. |
 | `/idea [idea]` | intake | Interview you, then file the issue with those sections as the body. |
 | `/bug [summary]` | intake | Interview you, then file the bug issue with those sections as the body. |
 | `/spec <#\|url>` | plan | Turn the issue into a change, commit it on the branch, publish one `## Plan` comment, and validate. |
