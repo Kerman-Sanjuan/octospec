@@ -15,6 +15,7 @@ import (
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 	"github.com/kerman-sanjuan/octospec/cli/internal/update"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 const version = "1.1.0"
@@ -64,6 +65,7 @@ func newModelsCmd() *cobra.Command {
 func newInstallCmd() *cobra.Command {
 	var tools []string
 	var repo string
+	var global bool
 	cmd := &cobra.Command{
 		Use:   "install",
 		Short: "Install the commands into each tool's native location",
@@ -75,11 +77,13 @@ func newInstallCmd() *cobra.Command {
 				}
 				tools = t
 			}
-			return install.Run(install.Options{Tools: tools, Repo: repo})
+			interactive := !global && isTerminal(os.Stdin)
+			return install.Run(install.Options{Tools: tools, Repo: repo, Global: global, Interactive: interactive})
 		},
 	}
 	cmd.Flags().StringArrayVarP(&tools, "tool", "t", nil, "tool to install for (pi, opencode, copilot, claude); repeatable")
 	cmd.Flags().StringVar(&repo, "repo", "", "repository root for repo-local tools (default: cwd)")
+	cmd.Flags().BoolVar(&global, "global", false, "install into each tool's global directory (warned)")
 	return cmd
 }
 
@@ -190,6 +194,5 @@ func wizard() ([]string, error) {
 }
 
 func isTerminal(f *os.File) bool {
-	fi, err := f.Stat()
-	return err == nil && (fi.Mode()&os.ModeCharDevice) != 0
+	return term.IsTerminal(int(f.Fd()))
 }
