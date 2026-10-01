@@ -22,6 +22,7 @@ type Options struct {
 	Repo        string   // repo root for repo-local targets; defaults to the cwd
 	Global      bool     // install every selected tool globally
 	Interactive bool     // a terminal is available, so ask for the scope
+	DryRun      bool     // print the plan and write nothing
 }
 
 // Run installs the canonical commands into every selected target.
@@ -66,6 +67,13 @@ func Run(opts Options) error {
 	files, err := plan.Files(tools, repo, cfg.Models, cfg.Scopes)
 	if err != nil {
 		return err
+	}
+	if opts.DryRun {
+		fmt.Printf("dry run: would write %d files for %s (%s)\n", len(files), strings.Join(tools, ", "), scope)
+		for _, f := range files {
+			fmt.Printf("  %s\n", f.Path)
+		}
+		return nil
 	}
 	if cfg.Files == nil {
 		cfg.Files = map[string]string{}

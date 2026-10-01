@@ -13,6 +13,7 @@ import (
 	"github.com/kerman-sanjuan/octospec/cli/internal/models"
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
+	"github.com/kerman-sanjuan/octospec/cli/internal/uninstall"
 	"github.com/kerman-sanjuan/octospec/cli/internal/update"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -34,8 +35,21 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newDoctorCmd(), newModelsCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newVersionCmd())
 	return root
+}
+
+func newUninstallCmd() *cobra.Command {
+	var repo string
+	cmd := &cobra.Command{
+		Use:   "uninstall",
+		Short: "Remove the files octospec manages, keeping local edits",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return uninstall.Run(repo)
+		},
+	}
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	return cmd
 }
 
 func newModelsCmd() *cobra.Command {
@@ -66,30 +80,33 @@ func newInstallCmd() *cobra.Command {
 	var tools []string
 	var repo string
 	var global bool
+	var dryRun bool
 	cmd := &cobra.Command{
 		Use:   "install",
 		Short: "Install the commands into each tool's native location",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(tools) == 0 && isTerminal(os.Stdin) {
+			if len(tools) == 0 && isTerminal(os.Stdin) && !dryRun {
 				t, err := wizard()
 				if err != nil {
 					return err
 				}
 				tools = t
 			}
-			interactive := !global && isTerminal(os.Stdin)
-			return install.Run(install.Options{Tools: tools, Repo: repo, Global: global, Interactive: interactive})
+			interactive := !global && !dryRun && isTerminal(os.Stdin)
+			return install.Run(install.Options{Tools: tools, Repo: repo, Global: global, Interactive: interactive, DryRun: dryRun})
 		},
 	}
 	cmd.Flags().StringArrayVarP(&tools, "tool", "t", nil, "tool to install for (pi, opencode, copilot, claude); repeatable")
 	cmd.Flags().StringVar(&repo, "repo", "", "repository root for repo-local tools (default: cwd)")
 	cmd.Flags().BoolVar(&global, "global", false, "install into each tool's global directory (warned)")
+	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "print what would be written and change nothing")
 	return cmd
 }
 
 func newSeedCmd() *cobra.Command {
 	var repo string
 	var noLabels bool
+	var dryRun bool
 	cmd := &cobra.Command{
 		Use:   "seed",
 		Short: "Install the OpenSpec schema, the repo seed files, and the labels",
@@ -97,9 +114,12 @@ func newSeedCmd() *cobra.Command {
 			if repo == "" {
 				repo, _ = os.Getwd()
 			}
-			r, err := seed.Run(seed.Options{Repo: repo, SkipLabels: noLabels})
+			r, err := seed.Run(seed.Options{Repo: repo, SkipLabels: noLabels, DryRun: dryRun})
 			if err != nil {
 				return err
+			}
+			if dryRun {
+				return nil
 			}
 			fmt.Printf("schema -> %s (%d files)\nrepo -> %s (%d files)\nlabels -> %d\n",
 				seed.SchemaDir(), r.Schema, repo, r.Repo, r.Labels)
@@ -108,6 +128,7 @@ func newSeedCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
 	cmd.Flags().BoolVar(&noLabels, "no-labels", false, "skip label provisioning")
+	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "print what would be installed and change nothing")
 	return cmd
 }
 
