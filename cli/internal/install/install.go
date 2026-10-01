@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
+	"github.com/kerman-sanjuan/octospec/cli/internal/cleanup"
 	"github.com/kerman-sanjuan/octospec/cli/internal/config"
 	"github.com/kerman-sanjuan/octospec/cli/internal/plan"
 	"github.com/kerman-sanjuan/octospec/cli/internal/skills"
@@ -70,6 +71,11 @@ func Run(opts Options) error {
 		cfg.Files = map[string]string{}
 	}
 	cfg.Tools = tools
+	keep := make(map[string]bool, len(files))
+	for _, f := range files {
+		keep[f.Path] = true
+	}
+	cleanup.Global(&cfg, keep, opts.Interactive)
 	for _, f := range files {
 		if err := os.MkdirAll(filepath.Dir(f.Path), 0o755); err != nil {
 			return err
