@@ -44,6 +44,10 @@ artifacts:
         Modified capabilities only when an existing spec's REQUIREMENTS
         change. Leave Modified empty when unsure.
       - **Impact**: affected code, APIs, dependencies, systems.
+      - **Changelog**: one bullet per user-visible change, under Added,
+        Changed, Fixed, or Removed. Write `None` when the change has no
+        user-visible effect. `/archive` copies this section into
+        `CHANGELOG.md`.
 
       Keep it under two pages. Link the issue; do not copy it wholesale.
     requires:
