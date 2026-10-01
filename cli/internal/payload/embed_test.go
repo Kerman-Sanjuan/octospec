@@ -1,6 +1,9 @@
 package payload
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestParseFrontMatter(t *testing.T) {
 	c := Parse("x", "---\ndescription: d\nargument-hint: <a>\n---\n\nhello\n")
@@ -66,5 +69,17 @@ func TestValidateRejectsAgentWithoutTools(t *testing.T) {
 	a := Agent{Name: "x", Stage: "idea", Role: "thinking", Description: "d", Writes: "w", Body: "b"}
 	if err := a.Validate(); err == nil {
 		t.Fatal("expected an error when the tool surface is empty")
+	}
+}
+
+func TestCommandsDoNotUseTemplateWithBody(t *testing.T) {
+	cmds, err := Commands()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range cmds {
+		if strings.Contains(c.Body, "--template") {
+			t.Errorf("command %q uses --template; gh rejects it together with --body", c.Name)
+		}
 	}
 }
