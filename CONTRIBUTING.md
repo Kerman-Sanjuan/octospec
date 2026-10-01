@@ -24,7 +24,7 @@ octospec makes OpenSpec GitHub-native. GitHub Issues are the backlog and the hum
 
 ## Code of Conduct
 
-Be respectful and constructive. Harassment, personal attacks, and dismissive behaviour are not welcome, in the repository or in any channel connected to it. Assume good faith, keep critiques about the work, and help newcomers. If a discussion gets heated, step back and let a maintainer moderate.
+This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md). Be respectful and constructive. Harassment, personal attacks, and dismissive behaviour are not welcome. Report unacceptable behaviour to the maintainer.
 
 ## Got a question or a problem?
 
