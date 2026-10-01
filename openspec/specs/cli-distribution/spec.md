@@ -18,18 +18,18 @@ The CLI SHALL install the commands and the agent definitions for a target tool f
 - **THEN** every target is regenerated from it with no per-tool copy to edit.
 
 ### Requirement: Target mapping
-Each supported tool SHALL be defined by a target mapping (destination directory plus file format for commands and for agents); adding a tool SHALL NOT add a source copy.
+Each supported tool SHALL be defined by a target mapping with a repo-local location and a global location (directory plus file format for commands and for agents); adding a tool SHALL NOT add a source copy.
 
 #### Scenario: Adding a tool
 - **WHEN** a new tool is added
 - **THEN** only a new mapping is added and the payload is unchanged.
 
 ### Requirement: Supported targets
-The CLI SHALL support pi, opencode, GitHub Copilot, and Claude Code, with global targets for pi and opencode and repo-local targets for Copilot and Claude.
+The CLI SHALL support pi, opencode, GitHub Copilot, and Claude Code, and SHALL offer a repo-local location and a global location for each of them.
 
 #### Scenario: Install per tool
 - **WHEN** `octospec install --tool <pi|opencode|copilot|claude>` runs
-- **THEN** the commands are written to that tool's directory.
+- **THEN** the commands are written to that tool's chosen directory.
 
 ### Requirement: Update preserves local edits
 The CLI SHALL provide `update`, which re-applies from saved answers and preserves local edits tracked by managed-file hashes.
@@ -95,4 +95,18 @@ The `curl | sh` installer SHALL accept a version to install, and SHALL default t
 #### Scenario: Default to latest
 - **WHEN** the installer runs without a version
 - **THEN** it installs the latest release.
+
+### Requirement: A repo-local install writes nothing under home
+A repo-local install SHALL NOT write under the user's home directory.
+
+#### Scenario: Nothing under home
+- **WHEN** every tool is installed repo-local
+- **THEN** no file is written under the home directory.
+
+### Requirement: pi has no agent files
+octospec SHALL NOT install agent files for pi, because pi has no agent mechanism.
+
+#### Scenario: pi install
+- **WHEN** pi is installed
+- **THEN** its commands and skills are written and no agent file is written.
 
