@@ -2,6 +2,20 @@
 
 Grouped by impact. Newest first. Versions follow semantic versioning.
 
+## Unreleased
+
+### Added
+- G1 in `scripts/check-gates.sh`: the linked issue must carry its required sections.
+- A living `gates` spec documenting G1 through G8.
+- A `## Changelog` section in every change proposal that `/archive` folds into `CHANGELOG.md`.
+- `scripts/e2e-test.sh`, a hermetic end-to-end test of seed, install, and the gates.
+
+### Changed
+- The release acceptance workflow runs the gates before it verifies the binary.
+
+### Removed
+- `/explore`, which duplicated the OpenSpec explore skill.
+
 ## 1.1.0 - 2026-09-30
 
 ### Added
