@@ -40,12 +40,20 @@ func TestFilenames(t *testing.T) {
 
 func TestScopes(t *testing.T) {
 	pi, _ := Get("pi")
-	if pi.Scope != Global {
-		t.Error("pi should be global")
+	if pi.HasAgents() {
+		t.Error("pi should have no agent location")
 	}
 	cp, _ := Get("copilot")
-	if cp.Scope != RepoLocal {
-		t.Error("copilot should be repo-local")
+	local := cp.Expand("repo", ScopeLocal)
+	global := cp.Expand("repo", ScopeGlobal)
+	if local == global {
+		t.Errorf("copilot local and global dirs should differ, both %q", local)
+	}
+	if !strings.HasPrefix(local, "repo") {
+		t.Errorf("copilot local dir = %q", local)
+	}
+	if !strings.HasPrefix(global, "/") {
+		t.Errorf("copilot global dir should be absolute: %q", global)
 	}
 }
 
@@ -95,11 +103,15 @@ func TestRenderAgentAdvisory(t *testing.T) {
 }
 
 func TestAgentFilenames(t *testing.T) {
-	want := map[string]string{"pi": "spec.md", "opencode": "spec.md", "copilot": "spec.agent.md", "claude": "spec.md"}
+	want := map[string]string{"opencode": "spec.md", "copilot": "spec.agent.md", "claude": "spec.md"}
 	for name, w := range want {
 		tp, _ := Get(name)
 		if got := tp.AgentFilename("spec"); got != w {
 			t.Errorf("%s agent filename = %q, want %q", name, got, w)
 		}
+	}
+	pi, _ := Get("pi")
+	if pi.HasAgents() {
+		t.Error("pi should not install agents")
 	}
 }

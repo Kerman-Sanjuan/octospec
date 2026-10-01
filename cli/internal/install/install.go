@@ -39,7 +39,7 @@ func Run(opts Options) error {
 	if err != nil {
 		return err
 	}
-	files, err := plan.Files(tools, repo, cfg.Models)
+	files, err := plan.Files(tools, repo, cfg.Models, cfg.Scopes)
 	if err != nil {
 		return err
 	}

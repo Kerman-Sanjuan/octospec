@@ -13,6 +13,11 @@ const (
 	formatCopilot = "copilot"
 )
 
+// Render returns the file content for a command on this target.
+func (t Target) Render(c payload.Command) string {
+	return render(t.Format, c)
+}
+
 // RenderAgent formats a canonical agent for this target, stamping the
 // configured model, or omitting it when empty, and mapping the tool surface to
 // the target's syntax.
