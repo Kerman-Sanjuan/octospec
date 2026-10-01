@@ -33,11 +33,15 @@ Adding a supported tool SHALL add a target mapping only and SHALL NOT touch the 
 - **THEN** only a target mapping is added and the agent definitions are unchanged.
 
 ### Requirement: The CLI orchestrates the stage
-The CLI SHALL stay the orchestrator: it validates the input, selects the agent for the stage, and the agent writes the stage artifact.
+The CLI SHALL stay the orchestrator: it validates the input and runs the stage in the current session. The stage agent definition SHALL be the stage's contract for its scope, tools, and model; the command SHALL NOT claim to dispatch to a subagent.
 
 #### Scenario: Run a stage
 - **WHEN** a stage command runs
-- **THEN** the CLI selects that stage's agent and the agent writes that stage's artifact.
+- **THEN** it runs the stage in the current session under the stage agent's scope and tools.
+
+#### Scenario: No dispatch claim
+- **WHEN** a command and the agent standard are read
+- **THEN** they do not claim that the stage is dispatched to a subagent.
 
 ### Requirement: The agents do not weaken the gates
 Adding the agents SHALL NOT change the gate rules, and the gates SHALL stay green.
