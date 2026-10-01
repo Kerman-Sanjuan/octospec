@@ -20,6 +20,7 @@ var repoFS embed.FS
 type Options struct {
 	Repo       string // target repository root
 	SkipLabels bool
+	DryRun     bool // print the plan and write nothing
 }
 
 // Result counts what a seed run wrote.
@@ -33,6 +34,16 @@ type Result struct {
 func Run(opts Options) (Result, error) {
 	var r Result
 	var err error
+	if opts.DryRun {
+		r.Schema = countTree(schemaFS, "schema")
+		r.Repo = countTree(repoFS, "repo")
+		fmt.Printf("dry run: would install the schema -> %s (%d files)\n", SchemaDir(), r.Schema)
+		fmt.Printf("dry run: would write the repo seed -> %s (%d files)\n", opts.Repo, r.Repo)
+		if !opts.SkipLabels {
+			fmt.Println("dry run: would provision the workflow labels")
+		}
+		return r, nil
+	}
 	if r.Schema, err = InstallSchema(); err != nil {
 		return r, err
 	}
@@ -48,6 +59,18 @@ func Run(opts Options) (Result, error) {
 		err = nil
 	}
 	return r, nil
+}
+
+// countTree returns the number of files under src in an embedded tree.
+func countTree(fsys fs.FS, src string) int {
+	n := 0
+	_ = fs.WalkDir(fsys, src, func(p string, d fs.DirEntry, err error) error {
+		if err == nil && !d.IsDir() {
+			n++
+		}
+		return nil
+	})
+	return n
 }
 
 // copyTree writes every file under src (an embedded dir) into dst, preserving
