@@ -17,3 +17,9 @@
 ## Impact
 
 <!-- Affected code, APIs, dependencies, systems. Link the issue. -->
+
+## Changelog
+
+<!-- One bullet per user-visible change, under Added/Changed/Fixed/Removed.
+     Write `None` when the change has no user-visible effect. `/archive`
+     copies this section into CHANGELOG.md. -->

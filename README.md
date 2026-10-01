@@ -102,8 +102,8 @@ octospec/
 ### Gates
 
 Hard gates block CI or merge; advisory gates warn. `scripts/check-gates.sh` runs
-the gates that do not depend on the target stack (G2 to G4, G6); a repository adds
-its own build/test gate for G5.
+the gates that do not depend on the target stack (G1 to G4, and G6 to G8); a
+repository adds its own build/test gate for G5.
 
 | Gate | Checks | Strength |
 |---|---|---|
@@ -197,7 +197,7 @@ Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
 into each tool's skill directory by calling `openspec init --tools`.
 
 OpenSpec ships its own skills (`openspec-propose`, `openspec-apply-change`,
-`openspec-archive-change`, `openspec-explore`); run `openspec update` to
+`; run `openspec update` to
 (re)generate them per tool. They are not committed.
 
 ## Agents and models
@@ -231,7 +231,6 @@ tool default, and `octospec update` re-renders the agents with the new value.
 
 | Command | Phase | Behaviour |
 |---|---|---|
-| `/explore <topic>` | optional | Think through an idea. No files, no issue, no change. |
 | `/idea [idea]` | intake | Interview for a feature and file the issue with those sections as the body. |
 | `/bug [summary]` | intake | Interview for a bug and file the issue with those sections as the body. |
 | `/spec <#\|url>` | plan | Turn an issue into a change, commit it on `feat\|fix/<issue>-<slug>`, publish one `## Plan` comment, validate, and label `status:spec-ready`. |

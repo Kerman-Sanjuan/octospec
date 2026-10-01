@@ -5,9 +5,12 @@ The release workflow (`.github/workflows/release.yml`) runs `goreleaser` on a `v
 ## Steps
 
 1. Make sure `main` is green (`cli` and `gates`).
-2. Update `CHANGELOG.md`: move the `Unreleased` entries under the new version and date.
+2. Land every change you want in the release. Each `/archive` folds the change's
+   `## Changelog` entry into `CHANGELOG.md`, so the file is generated from the
+   changes and is not edited by hand.
 3. Pick the version (see below).
-4. Land the changelog through a pull request.
+4. Cut the release: rename the unreleased heading in `CHANGELOG.md` to
+   `X.Y.Z - YYYY-MM-DD` and land it through a pull request.
 5. Tag and push:
 
    ```sh
