@@ -1,4 +1,5 @@
-// Package plan turns a set of tools into the concrete files they would write.
+// Package plan turns a set of tools and scopes into the concrete files they
+// would write.
 package plan
 
 import (
@@ -23,10 +24,11 @@ const (
 	KindAgent   = "agent"
 )
 
-// Files returns every file the given tools would write for a repo. An empty
-// tools slice means every target. The models map is keyed by role; an empty or
+// Files returns every file the given tools would write for a repo, using each
+// tool's scope from the scopes map (repo-local by default). An empty tools
+// slice means every target. The models map is keyed by role; an empty or
 // missing entry means the tool default.
-func Files(tools []string, repo string, models map[string]string) ([]File, error) {
+func Files(tools []string, repo string, models, scopes map[string]string) ([]File, error) {
 	cmds, err := payload.Commands()
 	if err != nil {
 		return nil, err
@@ -46,7 +48,11 @@ func Files(tools []string, repo string, models map[string]string) ([]File, error
 		if !ok {
 			return nil, fmt.Errorf("unknown tool %q (want one of pi, opencode, copilot, claude)", name)
 		}
-		dir := t.Expand(repo)
+		scope := scopes[name]
+		if scope != targets.ScopeGlobal {
+			scope = targets.ScopeLocal
+		}
+		dir := t.Expand(repo, scope)
 		for _, c := range cmds {
 			out = append(out, File{
 				Tool:    name,
@@ -55,7 +61,10 @@ func Files(tools []string, repo string, models map[string]string) ([]File, error
 				Content: t.Render(c),
 			})
 		}
-		agentDir := t.AgentExpand(repo)
+		if !t.HasAgents() {
+			continue
+		}
+		agentDir := t.AgentExpand(repo, scope)
 		for _, a := range agents {
 			out = append(out, File{
 				Tool:    name,

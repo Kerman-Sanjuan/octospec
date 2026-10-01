@@ -42,3 +42,36 @@ func TestRunInstallsAgents(t *testing.T) {
 		t.Fatalf("agent missing the tool surface:\n%s", b)
 	}
 }
+
+func TestRunLocalWritesNothingUnderHome(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	repo := t.TempDir()
+	if err := Run(Options{Tools: []string{"pi"}, Repo: repo}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".pi/prompts/spec.md")); err != nil {
+		t.Fatalf("expected a repo-local command: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(home, ".pi/agent/prompts/spec.md")); err == nil {
+		t.Fatal("a repo-local install must not write under home")
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".pi/agents/spec.md")); err == nil {
+		t.Fatal("pi should have no agent files")
+	}
+}
+
+func TestRunGlobalWritesHome(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	repo := t.TempDir()
+	if err := Run(Options{Tools: []string{"claude"}, Repo: repo, Global: true}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(home, ".claude/commands/spec.md")); err != nil {
+		t.Fatalf("expected a global command: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(repo, ".claude/commands/spec.md")); err == nil {
+		t.Fatal("a global install should not write the command into the repo")
+	}
+}

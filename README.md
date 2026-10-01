@@ -146,18 +146,31 @@ The installer verifies the release checksum and accepts a version to pin:
 curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh -s -- --version v1.1.0
 ```
 
-Install the commands for a tool - repeat `--tool`, or omit it for all:
+Install the commands for a tool - repeat `--tool`, or omit it for all. They
+install repo-local by default:
 
 ```sh
 octospec install --tool pi --tool opencode --tool copilot --tool claude --repo .
 ```
 
-| Tool | Destination | Scope |
+| Tool | Repo-local (default) | Global |
 |---|---|---|
-| pi | `~/.pi/agent/prompts/` | global |
-| opencode | `~/.config/opencode/command/` | global |
-| GitHub Copilot | `.github/prompts/` | repo-local |
-| Claude Code | `.claude/commands/` | repo-local |
+| pi | `.pi/prompts/` | `~/.pi/agent/prompts/` |
+| opencode | `.opencode/command/`, `.opencode/agents/` | `~/.config/opencode/command/`, `~/.config/opencode/agents/` |
+| GitHub Copilot | `.github/prompts/`, `.github/agents/` | `~/.copilot/prompts/`, `~/.copilot/agents/` |
+| Claude Code | `.claude/commands/`, `.claude/agents/` | `~/.claude/commands/`, `~/.claude/agents/` |
+
+A repo-local install writes nothing under your home directory. A global install
+warns that the commands, agents, and skills then appear in every project. Choose
+it with `--global`, or answer the prompt on a terminal:
+
+```sh
+octospec install --tool opencode --global
+```
+
+pi has no agent mechanism, so it installs commands and skills only. The scope per
+tool is recorded in `.octospec/octospec.json`, so `octospec update` re-applies it,
+and it offers to remove the files that earlier versions installed globally.
 
 Seed a repository - OpenSpec schema, issue forms, CI, config, and the workflow
 labels:

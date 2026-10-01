@@ -36,11 +36,12 @@ func ValidRole(role string) bool {
 	return false
 }
 
-// Config is the saved install state: which tools, the model per role, and the
-// hash of every file octospec wrote (so `update` can tell a managed file from a
-// hand edit).
+// Config is the saved install state: which tools, the scope per tool, the
+// model per role, and the hash of every file octospec wrote (so `update` can
+// tell a managed file from a hand edit).
 type Config struct {
 	Tools  []string          `json:"tools"`
+	Scopes map[string]string `json:"scopes,omitempty"`
 	Models map[string]string `json:"models,omitempty"`
 	Files  map[string]string `json:"files"`
 }
@@ -53,7 +54,7 @@ func Load(repo string) (Config, error) {
 	b, err := os.ReadFile(Path(repo))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return Config{Files: map[string]string{}, Models: map[string]string{}}, nil
+			return Config{Files: map[string]string{}, Models: map[string]string{}, Scopes: map[string]string{}}, nil
 		}
 		return Config{}, err
 	}
@@ -66,6 +67,9 @@ func Load(repo string) (Config, error) {
 	}
 	if c.Models == nil {
 		c.Models = map[string]string{}
+	}
+	if c.Scopes == nil {
+		c.Scopes = map[string]string{}
 	}
 	return c, nil
 }
