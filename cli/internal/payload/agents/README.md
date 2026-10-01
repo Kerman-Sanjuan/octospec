@@ -4,6 +4,14 @@ One canonical agent per stage of the octospec loop. octospec renders these
 files into each tool's agent directory, so the repository never stores a copy
 per tool.
 
+## How a stage runs
+
+An agent definition is the stage's contract: its scope, its skills, its tool
+surface, and its model role. The stage command runs the stage in the current
+session under that contract. octospec does not dispatch the stage to a subagent
+yet; some harnesses have no subagent mechanism at all, and pi is one of them.
+Real dispatch is a follow-up.
+
 ## Canonical fields
 
 | Field | Meaning |

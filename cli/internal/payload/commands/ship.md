@@ -3,7 +3,7 @@ description: Run CI, open a pull request linked to the issue, and iterate failur
 argument-hint: "[change]"
 ---
 
-Runs the `ship` agent. The agent definition sets the scope and the tool surface.
+Runs the `ship` stage in the current session. The `ship` agent defines its scope, tools, and model.
 
 Open the PR for the current branch once the gates are green.
 

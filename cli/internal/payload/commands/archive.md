@@ -3,7 +3,7 @@ description: Archive the change, sync the specs, close the issue, and push.
 argument-hint: "[change]"
 ---
 
-Runs the `archive` agent. The agent definition sets the scope and the tool surface.
+Runs the `archive` stage in the current session. The `archive` agent defines its scope, tools, and model.
 
 Load the `openspec-archive-change` skill and follow it.
 
