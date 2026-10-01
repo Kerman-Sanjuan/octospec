@@ -109,7 +109,7 @@ its own build/test gate for G5.
 |---|---|---|
 | G1 | issue has the required sections before `/spec` produces artifacts | hard |
 | G2 | `openspec validate --all --strict` and every unarchived change is complete | hard |
-| G3 | branch matches `feat\|fix/<issue>-<slug>` | hard |
+| G3 | branch matches `feat\|fix/<issue>-<slug>` (PR branches only) | hard |
 | G4 | PR body references the issue (`Closes #n`) | hard |
 | G5 | tests / build / lint pass | hard |
 | G6 | a PR touching `openspec/changes/<name>/` carries a spec delta | hard |

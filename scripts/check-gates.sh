@@ -9,13 +9,20 @@ fail=0
 
 report() { printf '%s %s\n' "$1" "$2"; }
 
-# G3: branch name
-if printf '%s' "$HEAD_REF" | grep -Eq '^(feat|fix)/[0-9]+-[a-z0-9-]+$'; then
-  report PASS "G3 branch name"
-else
-  report FAIL "G3 branch name: '$HEAD_REF' does not match feat|fix/<issue>-<slug>"
-  fail=1
-fi
+# G3: branch name. PR-only: skip on a long-lived branch.
+case "$HEAD_REF" in
+  main | master)
+    report SKIP "G3 branch name: long-lived branch '$HEAD_REF'"
+    ;;
+  *)
+    if printf '%s' "$HEAD_REF" | grep -Eq '^(feat|fix)/[0-9]+-[a-z0-9-]+$'; then
+      report PASS "G3 branch name"
+    else
+      report FAIL "G3 branch name: '$HEAD_REF' does not match feat|fix/<issue>-<slug>"
+      fail=1
+    fi
+    ;;
+esac
 
 # G2a: openspec validate (structural validity of specs and changes)
 if command -v openspec >/dev/null 2>&1 && openspec validate --all --strict >/dev/null 2>&1; then

@@ -25,3 +25,5 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: sh scripts/check-gates.sh
+      - name: Gate tests
+        run: sh scripts/check-gates-test.sh
