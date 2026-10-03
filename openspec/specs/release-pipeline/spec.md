@@ -59,11 +59,15 @@ A release workflow SHALL run the gates, then run an acceptance test against the 
 - **THEN** the commands, the 5 agents, and the schema are present and the test passes.
 
 ### Requirement: Generated release notes
-`goreleaser` SHALL generate the release notes from the commits.
+The release notes SHALL be the `CHANGELOG.md` section for the released version, grouped by impact, and SHALL NOT be the raw git commit log. When a version has no section, the release SHALL use a short fallback and SHALL NOT fail.
 
 #### Scenario: A release has notes
 - **WHEN** a version is released
-- **THEN** the GitHub release carries notes generated from the commit history.
+- **THEN** the GitHub release carries the `CHANGELOG.md` section for that version, with its `### Added / Changed / Fixed / Removed` structure.
+
+#### Scenario: A version without a section
+- **WHEN** no `CHANGELOG.md` section matches the released version
+- **THEN** the release still publishes, with a short fallback note.
 
 ### Requirement: The gate script runs on a non-PR ref
 `scripts/check-gates.sh` SHALL skip the PR-only branch gate when the ref is a long-lived branch, and SHALL report the skip instead of failing on it.
