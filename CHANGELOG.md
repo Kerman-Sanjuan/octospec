@@ -41,6 +41,7 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 - The README states the OpenSpec version the gates support and repairs a truncated sentence.
 - G2b and G7 report a SKIP when OpenSpec is missing, and the G6 message names `skip_specs: true`.
 - Gate G3 skips a tag ref, so the release acceptance check is green on a tag.
+- Release notes now come from the changelog section for the version, not the raw git commit log.
 
 ### Removed
 - `install.sh` (the old seeding script) and the per-tool command copies.
