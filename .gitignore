@@ -10,6 +10,3 @@
 # octospec-generated agents (run `octospec update` to regenerate)
 .github/agents/
 .claude/agents/
-
-# Parallel session worktrees (one per issue)
-.worktrees/

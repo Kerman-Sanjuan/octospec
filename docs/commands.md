@@ -12,27 +12,7 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 | `octospec uninstall [--repo <path>]` | Remove the files octospec manages, keeping any you edited by hand. |
 | `octospec doctor [--repo <path>]` | Report what is missing, without changing anything. |
 | `octospec models [--set <role>=<model>] [--repo <path>]` | Set the model each agent role uses. Opens a TUI when no `--set` is given, listing the known models for the installed tools with a free-form fallback. |
-| `octospec session start <issue> [--tool <name>] [--repo <path>]` | Create a git worktree for the issue on its change branch, register the session, and launch the tool's agent in it. Without `--tool`, print the worktree path. |
-| `octospec session list [--repo <path>]` | Show the active sessions with issue, branch, worktree, pid, and age. |
-| `octospec session end <issue> [--repo <path>]` | Remove the issue's worktree and unregister the session. |
 | `octospec version` | Print the version. |
-
-## Parallel sessions
-
-octospec runs one change at a time by default. To run several agents at once,
-one per issue, give each its own git worktree:
-
-```sh
-octospec session start 85 --tool opencode   # tab 1
-octospec session start 91 --tool claude     # tab 2
-```
-
-Each session is isolated on its own branch, so the agents never share a working
-tree, HEAD, or index. Sessions are optional: with no session, every stage runs in
-the current checkout exactly as before. The registry lives under the shared git
-dir (`.git/octospec/sessions.json`), never committed, so every worktree sees the
-same list. Git refuses to check out a branch another worktree holds, so starting
-the same issue twice fails structurally; `session start` warns and stops.
 
 ## Tools
 
