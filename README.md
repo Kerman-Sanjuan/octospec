@@ -177,7 +177,7 @@ Windows is not supported natively. WSL works, because it is Linux, so the linux 
 The installer verifies the release checksum and accepts a version to pin:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh -s -- --version v1.1.0
+curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh -s -- --version v1.0.0
 ```
 
 Install the commands for a tool - repeat `--tool`, or omit it for all. They
