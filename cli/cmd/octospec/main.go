@@ -5,12 +5,15 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kerman-sanjuan/octospec/cli/internal/doctor"
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
 	"github.com/kerman-sanjuan/octospec/cli/internal/models"
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
+	"github.com/kerman-sanjuan/octospec/cli/internal/session"
 	"github.com/kerman-sanjuan/octospec/cli/internal/uninstall"
 	"github.com/kerman-sanjuan/octospec/cli/internal/update"
 	"github.com/spf13/cobra"
@@ -33,7 +36,7 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newSessionCmd(), newVersionCmd())
 	return root
 }
 
@@ -167,6 +170,98 @@ func newDoctorCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
 	return cmd
+}
+
+func newSessionCmd() *cobra.Command {
+	var repo string
+	cmd := &cobra.Command{
+		Use:   "session",
+		Short: "Run independent agents in parallel, one worktree per issue",
+	}
+	cmd.PersistentFlags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+
+	var tool string
+	start := &cobra.Command{
+		Use:   "start <issue>",
+		Short: "Create an isolated worktree for an issue and launch its agent",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			issue, err := strconv.Atoi(args[0])
+			if err != nil {
+				return fmt.Errorf("issue must be a number, got %q", args[0])
+			}
+			s, err := session.Start(repo, issue, tool)
+			if err != nil {
+				return err
+			}
+			launched, err := session.Launch(s, tool)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("session for #%d: %s on %s\n", s.Issue, s.Worktree, s.Branch)
+			if launched {
+				fmt.Printf("launched %s in %s\n", tool, s.Worktree)
+			} else {
+				fmt.Printf("open your agent in %s, then run /spec %d\n", s.Worktree, s.Issue)
+			}
+			return nil
+		},
+	}
+	start.Flags().StringVar(&tool, "tool", "", "tool to launch in the worktree (opencode, claude, copilot, pi)")
+
+	list := &cobra.Command{
+		Use:   "list",
+		Short: "Show the active sessions",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			sessions, err := session.List(repo)
+			if err != nil {
+				return err
+			}
+			if len(sessions) == 0 {
+				fmt.Println("no active sessions")
+				return nil
+			}
+			for _, s := range sessions {
+				fmt.Printf("#%d  %s  %s  pid %d@%s  %s\n",
+					s.Issue, s.Branch, s.Worktree, s.PID, s.Host, age(s.StartedAt))
+			}
+			return nil
+		},
+	}
+
+	end := &cobra.Command{
+		Use:   "end <issue>",
+		Short: "Remove an issue's worktree and unregister it",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			issue, err := strconv.Atoi(args[0])
+			if err != nil {
+				return fmt.Errorf("issue must be a number, got %q", args[0])
+			}
+			if err := session.End(repo, issue); err != nil {
+				return err
+			}
+			fmt.Printf("session for #%d ended\n", issue)
+			return nil
+		},
+	}
+
+	cmd.AddCommand(start, list, end)
+	return cmd
+}
+
+// age renders how long ago a session started.
+func age(start time.Time) string {
+	d := time.Since(start)
+	switch {
+	case d < time.Minute:
+		return "just now"
+	case d < time.Hour:
+		return fmt.Sprintf("%dm", int(d.Minutes()))
+	default:
+		return fmt.Sprintf("%dh", int(d.Hours()))
+	}
 }
 
 func newVersionCmd() *cobra.Command {
