@@ -22,8 +22,10 @@ surface, and hard validation in CI.
 ## Quickstart
 
 Prerequisites: the [OpenSpec CLI](https://github.com/Fission-AI/OpenSpec) 1.3.1
-or newer (installed with npm, so Node.js is needed), and
-the [`gh` CLI](https://cli.github.com) 2.x, authenticated.
+(installed with npm, so Node.js is needed), and
+the [`gh` CLI](https://cli.github.com) 2.x, authenticated. octospec is tested
+against 1.3.1; newer versions reject the `github:` key that octospec writes to
+`.openspec.yaml`.
 
 ```sh
 # 1. install the CLI
@@ -147,7 +149,7 @@ repository adds its own build/test gate for G5.
 
 ## Install
 
-Requirements: [OpenSpec CLI](https://github.com/Fission-AI/OpenSpec) ≥ 1.3.1
+Requirements: [OpenSpec CLI](https://github.com/Fission-AI/OpenSpec) 1.3.1
 (installed with npm, so Node.js is needed) and
 [`gh`](https://cli.github.com) ≥ 2.x, authenticated (`gh auth status`).
 
@@ -233,7 +235,7 @@ Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
 into each tool's skill directory by calling `openspec init --tools`.
 
 OpenSpec ships its own skills (`openspec-propose`, `openspec-apply-change`,
-`; run `openspec update` to
+`openspec-archive-change`, `openspec-explore`). Run `openspec update` to
 (re)generate them per tool. They are not committed.
 
 ## Agents and models
