@@ -1,4 +1,14 @@
+<p align="center">
+  <img src="docs/logo.svg" alt="octospec logo" width="140" height="140">
+</p>
+
 # octospec
+
+[![cli](https://github.com/Kerman-Sanjuan/octospec/actions/workflows/cli.yml/badge.svg)](https://github.com/Kerman-Sanjuan/octospec/actions/workflows/cli.yml)
+[![openspec](https://github.com/Kerman-Sanjuan/octospec/actions/workflows/openspec.yml/badge.svg)](https://github.com/Kerman-Sanjuan/octospec/actions/workflows/openspec.yml)
+[![release](https://img.shields.io/github/v/release/Kerman-Sanjuan/octospec)](https://github.com/Kerman-Sanjuan/octospec/releases)
+[![license](https://img.shields.io/github/license/Kerman-Sanjuan/octospec)](LICENSE)
+[![go](https://img.shields.io/github/go-mod/go-version/Kerman-Sanjuan/octospec/main?filename=cli/go.mod)](cli/go.mod)
 
 **GitHub-native OpenSpec.** Issues are the backlog and the human layer; the repo
 holds the machine artifacts; CI enforces the gates.
@@ -276,6 +286,8 @@ tool default, and `octospec update` re-renders the agents with the new value.
 - [Troubleshooting](docs/troubleshooting.md) - the common failures.
 - [Releasing](docs/releasing.md) - how a version is cut.
 - [Changelog](CHANGELOG.md) - what changed, grouped by impact.
+- [About](https://github.com/Kerman-Sanjuan/octospec) - the project at a glance:
+  description, topics, and releases.
 - [Design](docs/plans/2026-09-29-github-openspec-workflow-design.md): decisions,
   artifact map, gates, and trade-offs.
 - [Implementation plan](docs/plans/2026-09-29-github-openspec-workflow-plan.md):
