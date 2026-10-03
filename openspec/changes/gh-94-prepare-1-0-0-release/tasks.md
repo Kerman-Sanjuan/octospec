@@ -11,8 +11,8 @@
 
 ## 3. Release reset
 
-- [ ] 3.1 Remove the v1.1.0 GitHub release and tag, and the pre-polish v1.0.0 release and tag.
-- [ ] 3.2 Fold the `CHANGELOG.md` 1.1.0 section into a single dated 1.0.0 section.
+- [ ] 3.1 Remove the v1.1.0 GitHub release and tag, and the pre-polish v1.0.0 release and tag. (Post-merge: acts on GitHub history.)
+- [x] 3.2 Fold the `CHANGELOG.md` 1.1.0 section into a single dated 1.0.0 section.
 
 ## 4. Release cut
 
