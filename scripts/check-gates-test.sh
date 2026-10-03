@@ -95,4 +95,25 @@ trap 'rm -rf "$g1"' EXIT
   esac
 )
 
+# G2b and G7 must report a SKIP (not pass silently) when openspec is missing.
+# Hide openspec by running with a PATH that contains only the essentials.
+(
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+  mkdir -p "$tmp/bin"
+  for tool in git grep sed awk tr basename printf mktemp sh; do
+    p=$(command -v "$tool" 2>/dev/null || true)
+    [ -n "$p" ] && ln -s "$p" "$tmp/bin/$tool"
+  done
+  out=$(PATH="$tmp/bin" BASE_REF=HEAD HEAD_REF=main sh "$root/scripts/check-gates.sh" 2>&1 || true)
+  case "$out" in
+    *"SKIP G2b"*) ;;
+    *) echo "FAIL: G2b did not report a SKIP without openspec" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
+  case "$out" in
+    *"SKIP G7"*) ;;
+    *) echo "FAIL: G7 did not report a SKIP without openspec" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
+)
+
 echo "gate tests passed"

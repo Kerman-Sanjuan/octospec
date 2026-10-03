@@ -96,6 +96,8 @@ if command -v openspec >/dev/null 2>&1; then
   else
     report PASS "G2b changes complete"
   fi
+else
+  report SKIP "G2b completeness: openspec not available"
 fi
 
 # G7 (advisory): every unarchived change has all tasks checked.
@@ -114,6 +116,8 @@ if command -v openspec >/dev/null 2>&1; then
   else
     report PASS "G7 tasks checked"
   fi
+else
+  report SKIP "G7 tasks checked: openspec not available"
 fi
 
 # G8 (advisory): one unarchived change per issue.
@@ -142,7 +146,7 @@ if [ -n "$change_touched" ]; then
   if printf '%s\n' "$changed" | grep -Eq '^openspec/changes/[^/]+/specs/.+\.md$'; then
     report PASS "G6 spec delta"
   else
-    report FAIL "G6 spec delta: change touched but no specs/*.md (use --skip-specs only for docs/tooling)"
+    report FAIL "G6 spec delta: change touched but no specs/*.md (set skip_specs: true in its .openspec.yaml only for docs/tooling)"
     fail=1
   fi
 else

@@ -7,8 +7,8 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 cd "$root"
 
 if ! command -v openspec >/dev/null 2>&1; then
-  echo "SKIP: openspec is not on PATH"
-  exit 0
+  echo "FAIL: openspec is not on PATH; install it with 'npm install -g @fission-ai/openspec@1.3.1'" >&2
+  exit 1
 fi
 
 tmp=$(mktemp -d)
@@ -35,8 +35,10 @@ test -f "$repo/scripts/check-gates.sh"
 test -f "$repo/.github/workflows/openspec.yml"
 test -f "$repo/.github/ISSUE_TEMPLATE/feature.yml"
 test -f "$repo/openspec/config.yaml"
-test "$(ls "$repo/.claude/commands" | wc -l | tr -d ' ')" = "6"
-test "$(ls "$repo/.claude/agents" | wc -l | tr -d ' ')" = "5"
+# Count only command files, not directories that OpenSpec may add (for
+# example .claude/commands/opsx/).
+test "$(find "$repo/.claude/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" = "6"
+test "$(find "$repo/.claude/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" = "5"
 test -f "$repo/.claude/agents/apply.md"
 grep -q "tools:" "$repo/.claude/agents/apply.md"
 

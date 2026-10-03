@@ -1,8 +1,8 @@
 ## 1. Version and changelog
 
-- [ ] 1.1 Bump the CLI version to `1.1.0` (`cli/cmd/octospec/main.go`)
-- [ ] 1.2 Add the `1.1.0` changelog entry, grouped by impact (`CHANGELOG.md`)
-- [ ] 1.3 Make the install check version-agnostic (`openspec/changes/gh-48-release-1-1-0/specs/release-process/spec.md`)
+- [x] 1.1 Bump the CLI version to `1.1.0` (`cli/cmd/octospec/main.go`)
+- [x] 1.2 Add the `1.1.0` changelog entry, grouped by impact (`CHANGELOG.md`)
+- [x] 1.3 Make the install check version-agnostic (`openspec/changes/gh-48-release-1-1-0/specs/release-process/spec.md`)
 
 ## 2. Release
 
