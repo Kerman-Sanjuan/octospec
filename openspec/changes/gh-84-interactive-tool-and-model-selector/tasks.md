@@ -10,10 +10,10 @@
 
 ## 3. Tool selector
 
-- [ ] 3.1 Add a huh multi-select helper in `cli/internal/install/install.go` that lists the targets with a short description and preselects the names in `cfg.Tools`.
-- [ ] 3.2 Call the selector from the interactive path in `install.Run`, passing the selection as the tool set and letting an empty selection mean all tools.
-- [ ] 3.3 Add a one-line description per tool, from the target name, for the selector labels.
-- [ ] 3.4 Remove `wizard()` from `cli/cmd/octospec/main.go` and let `install.Run` own the interactive choice.
+- [x] 3.1 Add a huh multi-select helper in `cli/internal/install/install.go` that lists the targets with a short description and preselects the names in `cfg.Tools`.
+- [x] 3.2 Call the selector from the interactive path in `install.Run`, passing the selection as the tool set and letting an empty selection mean all tools.
+- [x] 3.3 Add a one-line description per tool, from the target name, for the selector labels.
+- [x] 3.4 Remove `wizard()` from `cli/cmd/octospec/main.go` and let `install.Run` own the interactive choice.
 
 ## 4. Tests and docs
 
