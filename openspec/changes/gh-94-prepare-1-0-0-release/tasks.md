@@ -1,13 +1,13 @@
 ## 1. Logo and badges
 
-- [ ] 1.1 Add `docs/logo.svg`, a simple geometric mark for octospec.
-- [ ] 1.2 Render and commit `docs/logo.png` from the SVG.
-- [ ] 1.3 Display the logo at the top of `README.md`.
-- [ ] 1.4 Add shields.io badges to `README.md` for CI, the latest release, the license, and the Go version.
+- [x] 1.1 Add `docs/logo.svg`, a simple geometric mark for octospec.
+- [x] 1.2 Render and commit `docs/logo.png` from the SVG.
+- [x] 1.3 Display the logo at the top of `README.md`.
+- [x] 1.4 Add shields.io badges to `README.md` for CI, the latest release, the license, and the Go version.
 
 ## 2. README links
 
-- [ ] 2.1 Ensure `README.md` links the docs, `CHANGELOG.md`, and the About link, without changing existing prose.
+- [x] 2.1 Ensure `README.md` links the docs, `CHANGELOG.md`, and the About link, without changing existing prose.
 
 ## 3. Release reset
 
