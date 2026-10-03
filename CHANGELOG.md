@@ -2,6 +2,14 @@
 
 Grouped by impact. Newest first. Versions follow semantic versioning.
 
+## Unreleased
+
+### Fixed
+- Gate G3 skips a tag ref, so the release acceptance check is green on a tag.
+- Release notes now come from the changelog section for the version, not the raw git commit log.
+- A seeded repository's gates workflow now authenticates `gh`, so G1 no longer false-fails on a complete issue.
+- G1 skips, instead of failing, when `gh` cannot read the issue body.
+
 ## 1.0.0 - 2026-10-03
 
 ### Added
@@ -40,8 +48,6 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 - The `e2e` CI step now installs OpenSpec and fails instead of skipping when it is missing.
 - The README states the OpenSpec version the gates support and repairs a truncated sentence.
 - G2b and G7 report a SKIP when OpenSpec is missing, and the G6 message names `skip_specs: true`.
-- Gate G3 skips a tag ref, so the release acceptance check is green on a tag.
-- Release notes now come from the changelog section for the version, not the raw git commit log.
 
 ### Removed
 - `install.sh` (the old seeding script) and the per-tool command copies.
