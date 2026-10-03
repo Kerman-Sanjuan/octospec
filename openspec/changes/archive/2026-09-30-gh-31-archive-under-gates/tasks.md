@@ -14,4 +14,4 @@
 
 ## 4. Verify
 
-- [ ] 4.1 Dry-run `/archive` on a completed change and confirm the push lands with no manual step (`cli/internal/payload/commands/archive.md`)
+- [x] 4.1 Dry-run `/archive` on a completed change and confirm the push lands with no manual step (`cli/internal/payload/commands/archive.md`)
