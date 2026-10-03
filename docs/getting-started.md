@@ -18,6 +18,10 @@ Run this in your repository. Repeat `--tool`, or omit it to install for all.
 octospec install --tool pi --tool opencode --tool copilot --tool claude --repo .
 ```
 
+With no `--tool` on a terminal, `install` opens a multi-select of the tools,
+pre-checked with your last install. Space toggles a tool, enter confirms, and
+choosing none installs for all of them.
+
 `install` also brings the OpenSpec skills into each tool's skill directory.
 
 ## 3. Seed the repository
@@ -46,7 +50,9 @@ octospec models
 octospec models --set thinking=sonnet --set implementer=sonnet
 ```
 
-An empty model means the tool default.
+The TUI lists the known models for your installed tools, and `Custom...` lets
+you type any other identifier. `(tool default)` leaves the role without a
+model; an empty model means the tool default.
 
 ## 6. Run one change
 

@@ -6,12 +6,12 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 
 | Command | Purpose |
 |---|---|
-| `octospec install [--tool <name>] [--repo <path>] [--global] [--dry-run]` | Install the commands, the agents, and the OpenSpec skills for each tool. Repo-local by default; `--global` warns and installs into the home directory. `--dry-run` prints the plan and changes nothing. |
+| `octospec install [--tool <name>] [--repo <path>] [--global] [--dry-run]` | Install the commands, the agents, and the OpenSpec skills for each tool. With no `--tool` on a terminal it opens a multi-select, pre-checked with the last install. Repo-local by default; `--global` warns and installs into the home directory. `--dry-run` prints the plan and changes nothing. |
 | `octospec seed [--repo <path>] [--no-labels] [--dry-run]` | Install the OpenSpec schema, the repo seed files, and the workflow labels. `--dry-run` prints the plan and changes nothing. |
 | `octospec update [--repo <path>]` | Re-apply an install from the saved state, keeping your local edits. |
 | `octospec uninstall [--repo <path>]` | Remove the files octospec manages, keeping any you edited by hand. |
 | `octospec doctor [--repo <path>]` | Report what is missing, without changing anything. |
-| `octospec models [--set <role>=<model>] [--repo <path>]` | Set the model each agent role uses. Opens a TUI when no `--set` is given. |
+| `octospec models [--set <role>=<model>] [--repo <path>]` | Set the model each agent role uses. Opens a TUI when no `--set` is given, listing the known models for the installed tools with a free-form fallback. |
 | `octospec version` | Print the version. |
 
 ## Tools
