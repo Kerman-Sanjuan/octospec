@@ -12,4 +12,4 @@
 
 - [x] 3.1 Run `gofmt -l`, `go vet ./...`, `go test ./...`, `openspec validate --all --strict`, `sh scripts/check-gates.sh`, and `sh scripts/check-gates-test.sh`.
 - [x] 3.2 Verify `HEAD_REF=v1.0.0 sh scripts/check-gates.sh` reports SKIP G3 and does not fail.
-- [ ] 3.3 After merge, dispatch `release-acceptance` with `v1.0.0` and confirm the check is green.
+- [x] 3.3 After merge, dispatch `release-acceptance` with `v1.0.0` and confirm the check is green.

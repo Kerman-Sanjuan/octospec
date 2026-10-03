@@ -30,23 +30,27 @@ A gate SHALL fail when `openspec validate --all --strict` fails, or when an unar
 - **THEN** G2a and G2b report the same way, so neither passes silently.
 
 ### Requirement: G3 branch name
-A gate SHALL fail when the pull-request branch does not match `feat|fix/<issue>-<slug>`. The gate SHALL skip on a long-lived branch. The gate SHALL skip when the pull-request author is `dependabot[bot]`.
+A gate SHALL check the branch name only for `feat/`, `fix/`, and `dependabot/` refs. For `feat/` and `fix/` it SHALL fail unless the ref matches `feat|fix/<issue>-<slug>`. For `dependabot/` it SHALL skip when the author is `dependabot[bot]` and fail otherwise. For any other ref (main, a tag such as `v1.0.0`, or another long-lived ref) it SHALL skip.
 
 #### Scenario: A conforming branch
 - **WHEN** the branch is `feat/12-add-thing`
 - **THEN** G3 passes.
 
-#### Scenario: A long-lived branch
-- **WHEN** the branch is `main`
-- **THEN** G3 skips.
-
-#### Scenario: A non-conforming branch
-- **WHEN** the branch is `dependabot/go_modules/cli/x` and the author is not `dependabot[bot]`
+#### Scenario: A malformed branch
+- **WHEN** the branch is `feat/12` and does not match `<issue>-<slug>`
 - **THEN** G3 fails.
+
+#### Scenario: A long-lived branch or tag ref
+- **WHEN** `HEAD_REF` is `main` or a tag such as `v1.0.0`
+- **THEN** G3 skips instead of failing the run.
 
 #### Scenario: A dependency branch
 - **WHEN** the branch is `dependabot/go_modules/cli/x` and the author is `dependabot[bot]`
 - **THEN** G3 skips.
+
+#### Scenario: A dependency branch from a human
+- **WHEN** the branch is `dependabot/go_modules/cli/x` and the author is not `dependabot[bot]`
+- **THEN** G3 fails.
 
 ### Requirement: G4 pull request links the issue
 A gate SHALL fail when the pull request body does not reference the issue with `Closes`, `Fixes`, or `Resolves` and a number. The gate SHALL skip when the body is not provided. The gate SHALL skip when the pull-request author is `dependabot[bot]`.
