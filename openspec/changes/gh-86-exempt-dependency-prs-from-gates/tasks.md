@@ -6,8 +6,8 @@
 
 ## 2. Tests
 
-- [ ] 2.1 In `scripts/check-gates-test.sh`, add a case that runs with `PR_AUTHOR=dependabot[bot]` and a `dependabot/...` branch and asserts G3 and G4 report `SKIP`.
-- [ ] 2.2 In `scripts/check-gates-test.sh`, assert a run without `PR_AUTHOR` still fails G3 and G4 on the same branch and body.
+- [x] 2.1 In `scripts/check-gates-test.sh`, add a case that runs with `PR_AUTHOR=dependabot[bot]` and a `dependabot/...` branch and asserts G3 and G4 report `SKIP`.
+- [x] 2.2 In `scripts/check-gates-test.sh`, assert a run without `PR_AUTHOR` still fails G3 and G4 on the same branch and body.
 
 ## 3. Verification
 
