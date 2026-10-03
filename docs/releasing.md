@@ -32,10 +32,17 @@ The installer downloads the release `checksums.txt` and verifies the binary befo
 Install a specific version instead of the latest:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh -s -- --version v1.1.0
+curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/install.sh | sh -s -- --version v1.0.0
 ```
 
 The `release-acceptance` workflow verifies the published binary on linux and macOS after every release.
+
+## The 1.0.0 debut
+
+v1.0.0 is the first public release. It was reset from a pre-polish history: the
+earlier v1.1.0 and v1.0.0 releases and their tags were deleted, and `CHANGELOG.md`
+was folded into a single dated 1.0.0 section. From here, follow the steps above:
+each release renames the unreleased heading and tags a new version.
 
 ## Versioning
 
