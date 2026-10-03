@@ -1,7 +1,7 @@
 ## 1. Model catalog
 
-- [ ] 1.1 Add `cli/internal/models/catalog.go` with a known-model list per tool and a lookup that returns the models for the installed tools.
-- [ ] 1.2 Add a `catalog_test.go` case that every tool in `targets.Targets` has a catalog entry and every entry is non-empty.
+- [x] 1.1 Add `cli/internal/models/catalog.go` with a known-model list per tool and a lookup that returns the models for the installed tools.
+- [x] 1.2 Add a `catalog_test.go` case that every tool in `targets.Targets` has a catalog entry and every entry is non-empty.
 
 ## 2. Model selector
 
