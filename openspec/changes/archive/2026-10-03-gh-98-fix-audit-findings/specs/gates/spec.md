@@ -29,6 +29,8 @@ A gate SHALL warn, without failing, when an unarchived change has unchecked task
 - **WHEN** `openspec` is not on PATH
 - **THEN** G7 reports the same way as G2, so it does not pass silently.
 
+## ADDED Requirements
+
 ### Requirement: Archived changes carry no unchecked tasks
 Every archived change SHALL have all of its tasks checked, so an archived change never contradicts gate G7.
 
