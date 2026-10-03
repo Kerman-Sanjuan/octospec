@@ -93,6 +93,25 @@ trap 'rm -rf "$g1"' EXIT
     *"PASS G1 issue #1"*) ;;
     *) echo "FAIL: G1 did not pass a complete issue" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
   esac
+
+  # An unauthenticated gh must SKIP, not FAIL. A failing gh exits non-zero with
+  # no body; G1 must not read that as an incomplete issue.
+  cat > bin/gh <<'FAKE'
+#!/bin/sh
+echo "gh: To get started with GitHub CLI, please run: gh auth login" >&2
+exit 4
+FAKE
+  chmod +x bin/gh
+  out=$(PATH="$PWD/bin:$PATH" BASE_REF=main HEAD_REF=feat/1-x sh "$root/scripts/check-gates.sh" 2>&1 || true)
+  case "$out" in
+    *"SKIP G1"*) ;;
+    *) echo "FAIL: G1 did not skip when gh could not read the issue" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
+  if printf '%s\n' "$out" | grep -q "FAIL G1"; then
+    echo "FAIL: G1 failed when gh could not read the issue" >&2
+    printf '%s\n' "$out" >&2
+    exit 1
+  fi
 )
 
 # G3: a tag ref (as the release-acceptance workflow passes on a tag push) must

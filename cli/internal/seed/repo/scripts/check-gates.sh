@@ -23,7 +23,13 @@ if [ -n "$change_touched" ]; then
       issue=$(grep -A2 '^github:' "$cfg" 2>/dev/null | grep 'issue:' | awk '{print $2}' | tr -d '"' || true)
       [ -n "$issue" ] || continue
       checked=1
-      body=$(gh issue view "$issue" --json body --jq '.body' 2>/dev/null || true)
+      # Distinguish "gh cannot read the issue" (auth, permission, network, or a
+      # missing issue) from "the issue is incomplete". An unread body must not
+      # fail G1, or a seeded repo without a token reports a false negative.
+      if ! body=$(gh issue view "$issue" --json body --jq '.body' 2>/dev/null); then
+        report SKIP "G1 issue #$issue body: gh could not read it"
+        continue
+      fi
       missing=""
       for section in "User story" "Context" "Requirements" "Success criteria"; do
         if ! printf '%s' "$body" | grep -qE "^#{2,4}[[:space:]]+$section"; then
