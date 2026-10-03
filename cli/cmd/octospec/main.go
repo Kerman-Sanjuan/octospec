@@ -17,7 +17,9 @@ import (
 	"golang.org/x/term"
 )
 
-const version = "1.1.0"
+// version is the release the binary was built from. The release build injects
+// the tag with -X main.version=<tag>; a plain build keeps "dev".
+var version = "dev"
 
 func main() {
 	if err := newRootCmd().Execute(); err != nil {
