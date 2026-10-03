@@ -10,7 +10,6 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 - A `## Changelog` section in every change proposal that `/archive` folds into `CHANGELOG.md`.
 - `scripts/e2e-test.sh`, a hermetic end-to-end test of seed, install, and the gates.
 - An interactive multi-select for the tools to install, seeded from the previous install.
-- `octospec session start|list|end` to run several agents at once, each in its own git worktree, without clashing.
 
 ### Changed
 - The release acceptance workflow runs the gates before it verifies the binary.
