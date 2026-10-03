@@ -35,10 +35,10 @@
 
 ## 4. Docs and tests
 
-- [ ] 4.1 Document `session start|list|end` and the worktree model in
+- [x] 4.1 Document `session start|list|end` and the worktree model in
       `README.md` (Install or a new Parallel work section) and
       `docs/commands.md`.
-- [ ] 4.2 Add `cli/internal/session/session_test.go`: registry round-trip,
+- [x] 4.2 Add `cli/internal/session/session_test.go`: registry round-trip,
       concurrent write, duplicate-session warning, and worktree creation.
-- [ ] 4.3 Run `gofmt -l . && go vet ./... && go test ./...` in `cli/`,
+- [x] 4.3 Run `gofmt -l . && go vet ./... && go test ./...` in `cli/`,
       `openspec validate --all --strict`, and `sh scripts/check-gates.sh`.

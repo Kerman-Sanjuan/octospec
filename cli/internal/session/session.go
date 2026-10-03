@@ -47,7 +47,13 @@ func CommonDir(repo string) (string, error) {
 		}
 		dir = filepath.Join(repo, dir)
 	}
-	return filepath.Clean(dir), nil
+	dir = filepath.Clean(dir)
+	// Resolve symlinks so every worktree reports the same path (macOS /var vs
+	// /private/var, for example).
+	if resolved, err := filepath.EvalSymlinks(dir); err == nil {
+		dir = resolved
+	}
+	return dir, nil
 }
 
 // registryDir is the octospec state directory inside the shared git dir.

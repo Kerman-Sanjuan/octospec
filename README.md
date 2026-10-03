@@ -249,6 +249,33 @@ octospec models --set thinking=sonnet --set implementer=sonnet
 The model per role lives in `.octospec/octospec.json`. An empty model means the
 tool default, and `octospec update` re-renders the agents with the new value.
 
+## Parallel sessions
+
+By default octospec runs one change at a time. To run several agents at once,
+one per issue, give each its own git worktree:
+
+```sh
+octospec session start 85 --tool opencode   # one tab per issue
+octospec session start 91 --tool claude
+```
+
+Each session is isolated on its own branch, so the agents never share a working
+tree, HEAD, or index. Sessions are optional: with no session, every stage runs in
+the current checkout exactly as before. The registry lives under the shared git
+dir (`.git/octospec/sessions.json`), never committed, so every worktree sees the
+same list. Git refuses to check out a branch another worktree holds, so starting
+the same issue twice warns and stops rather than clashing.
+
+```sh
+octospec session list   # issue, branch, worktree, pid, age
+octospec session end 85 # remove the worktree and unregister
+```
+
+A stage refuses to run on another issue's checkout, so a `/spec` for one issue
+never switches the branch out from under a different task. At archive, `/archive`
+pushes to `main` with a bounded rebase-retry, so two independent archives both
+land or one stops cleanly on a real conflict.
+
 ## Commands
 
 | Command | Phase | Behaviour |

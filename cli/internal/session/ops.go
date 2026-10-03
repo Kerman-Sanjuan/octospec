@@ -35,9 +35,13 @@ func Start(repo string, issue int, tool string) (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	if prev := reg.find(issue); prev != nil && alive(prev.PID, prev.Host) {
-		return nil, fmt.Errorf("issue #%d already has a live session (pid %d on %s, started %s); run `octospec session list`",
-			issue, prev.PID, prev.Host, prev.StartedAt.Format(time.RFC3339))
+	// A session is live while its worktree exists. The recorded pid is only
+	// informational: without --tool the launcher exits at once, and the
+	// worktree is the session. A stale entry whose worktree is gone is dropped.
+	if prev := reg.find(issue); prev != nil && present(prev) {
+		return nil, duplicateError(prev)
+	} else if prev != nil {
+		reg.remove(issue)
 	}
 
 	root, err := toplevel(repo)
@@ -200,8 +204,9 @@ func addWorktree(root, wt, branch string) error {
 		return err
 	}
 	if _, err := os.Stat(wt); err == nil {
-		out, err := git(root, "worktree", "list", "--porcelain")
-		if err == nil && strings.Contains(out, "worktree "+wt+"\n") {
+		// A leftover directory that is already the top-level of a worktree in
+		// this repo is reused; anything else is not silently adopted.
+		if top, e := toplevel(wt); e == nil && samePath(top, wt) {
 			return nil
 		}
 		return fmt.Errorf("path already exists and is not a worktree for this repo: %s", wt)
@@ -253,6 +258,23 @@ func branchName(typ string, issue int, slug string) string {
 	return fmt.Sprintf("%s/%d-%s", prefix, issue, slug)
 }
 
+// present reports whether a session still owns a worktree. The worktree, not
+// the pid, is the session's identity.
+func present(s *Session) bool {
+	if s.Worktree == "" {
+		return false
+	}
+	_, err := os.Stat(s.Worktree)
+	return err == nil
+}
+
+// duplicateError is the message for a second session on a live issue. A session
+// is live while its worktree exists.
+func duplicateError(prev *Session) error {
+	return fmt.Errorf("issue #%d already has a session: %s on %s (pid %d on %s, started %s). Run `octospec session list`, or `octospec session end %d` to reclaim it",
+		prev.Issue, prev.Worktree, prev.Branch, prev.PID, prev.Host, prev.StartedAt.Format(time.RFC3339), prev.Issue)
+}
+
 // Slug turns a title into a kebab-case slug for the change and branch name.
 func Slug(title string) string {
 	var b strings.Builder
@@ -284,7 +306,21 @@ func toplevel(repo string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(out), nil
+	dir := strings.TrimSpace(out)
+	if resolved, err := filepath.EvalSymlinks(dir); err == nil {
+		dir = resolved
+	}
+	return dir, nil
+}
+
+// samePath compares two paths after resolving symlinks.
+func samePath(a, b string) bool {
+	ra, errA := filepath.EvalSymlinks(a)
+	rb, errB := filepath.EvalSymlinks(b)
+	if errA != nil || errB != nil {
+		return filepath.Clean(a) == filepath.Clean(b)
+	}
+	return ra == rb
 }
 
 func hostname() string {
@@ -294,6 +330,11 @@ func hostname() string {
 	}
 	return h
 }
+
+// Live reports whether the session's launcher process is still running on this
+// host. A session whose worktree exists but whose launcher exited (start without
+// --tool) still counts as present, so this is advisory only.
+func (s Session) Live() bool { return alive(s.PID, s.Host) }
 
 // alive reports whether pid is a live process on host. A session on another
 // host is assumed live, since we cannot check it here.
