@@ -25,12 +25,12 @@
 
 ## 3. Session-aware stages
 
-- [ ] 3.1 Add a shared session-check step to
+- [x] 3.1 Add a shared session-check step to
       `cli/internal/payload/commands/spec.md`: if a session exists, run in its
       worktree; if the checkout is on another issue's branch, stop.
-- [ ] 3.2 Apply the same session-check step to
+- [x] 3.2 Apply the same session-check step to
       `cli/internal/payload/commands/apply.md`, `ship.md`, and `archive.md`.
-- [ ] 3.3 Add the bounded fetch-rebase-push retry to
+- [x] 3.3 Add the bounded fetch-rebase-push retry to
       `cli/internal/payload/commands/archive.md`, stopping on a rebase conflict.
 
 ## 4. Docs and tests

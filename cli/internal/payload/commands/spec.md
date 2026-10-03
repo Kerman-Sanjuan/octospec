@@ -23,17 +23,25 @@ from the `octospec` schema, not from this file.
 4. If `openspec/changes/gh-<issue>-<slug>/` already exists, reuse it and its
    branch (idempotent re-run) - do not scaffold a second change. Otherwise:
    `openspec new change "gh-<issue>-<slug>" --schema octospec`
-5. Create or switch to the change branch:
+5. Session check. Run `octospec session list`. If it shows a session for this
+   issue, make sure you are in its worktree (the tab opened by
+   `octospec session start <issue>`); work there. If `git branch
+   --show-current` is a change branch for a different issue (`feat|fix/<other>-<slug>`),
+   STOP. This checkout belongs to another task; do not run `git checkout`, do
+   not commit, do not push. Tell the user to run `octospec session start <issue>`
+   or move to the right checkout. No session is fine: continue in the current
+   checkout as before.
+6. Create or switch to the change branch:
    `git checkout -b feat|fix/<issue>-<slug>` (or `git checkout` it if it
    already exists).
-6. Let the skill create every artifact required by
+7. Let the skill create every artifact required by
    `openspec status --change "<change>" --json` (`issue`, `proposal`,
    `specs`, `design`, `tasks`).
-7. Commit the artifacts on the branch and push:
+8. Commit the artifacts on the branch and push:
    `git add openspec/changes/<change>`
    `git commit -m "docs(#<issue>): add spec artifacts"`
    `git push -u origin HEAD`
-8. Publish a single **plan comment** to the issue, headed with the commit SHA
+9. Publish a single **plan comment** to the issue, headed with the commit SHA
    the artifacts were committed at (`git rev-parse HEAD`), with fixed
    headings:
    - `## Plan`
@@ -44,9 +52,9 @@ from the `octospec` schema, not from this file.
    Record its id in `.openspec.yaml` as `github.comments.plan`. On re-run,
    update that comment in place instead of adding a new one:
    `gh api --method PATCH /repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`
-9. Run `openspec validate "<change>" --strict`. If it fails, fix, commit,
-   and push again, then refresh the plan comment.
-10. Add label `status:spec-ready`; remove `status:backlog`. Do **not** add an
+10. Run `openspec validate "<change>" --strict`. If it fails, fix, commit,
+    and push again, then refresh the plan comment.
+11. Add label `status:spec-ready`; remove `status:backlog`. Do **not** add an
     approval label: `status:spec-ready` means the approach is drafted. The
     human approves the approach by running `/apply`.
 
