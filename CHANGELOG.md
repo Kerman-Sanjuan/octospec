@@ -9,9 +9,11 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 - A living `gates` spec documenting G1 through G8.
 - A `## Changelog` section in every change proposal that `/archive` folds into `CHANGELOG.md`.
 - `scripts/e2e-test.sh`, a hermetic end-to-end test of seed, install, and the gates.
+- An interactive multi-select for the tools to install, seeded from the previous install.
 
 ### Changed
 - The release acceptance workflow runs the gates before it verifies the binary.
+- `octospec models` offers a known-model list per tool with a free-form fallback instead of a bare text input.
 
 ### Fixed
 - Dependency PRs from Dependabot no longer fail the G3 and G4 gates.
