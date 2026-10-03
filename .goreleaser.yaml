@@ -25,9 +25,10 @@ archives:
 checksum:
   name_template: checksums.txt
 
+# The release notes come from CHANGELOG.md (see scripts/release-notes.sh and
+# .github/workflows/release.yml --release-notes), not from the git log.
 changelog:
-  use: github
-  sort: asc
+  disable: true
 
 release:
   github:

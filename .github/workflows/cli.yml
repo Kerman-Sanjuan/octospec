@@ -41,6 +41,9 @@ jobs:
       - name: installer
         working-directory: ${{ github.workspace }}
         run: sh scripts/install-test.sh
+      - name: release notes
+        working-directory: ${{ github.workspace }}
+        run: sh scripts/release-notes-test.sh
       - name: e2e
         working-directory: ${{ github.workspace }}
         run: sh scripts/e2e-test.sh
