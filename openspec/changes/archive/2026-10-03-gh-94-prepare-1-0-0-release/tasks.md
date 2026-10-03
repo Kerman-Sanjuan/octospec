@@ -16,8 +16,8 @@
 
 ## 4. Release cut
 
-- [ ] 4.1 Cut and push the `v1.0.0` tag and confirm the release workflow publishes binaries and checksums.
-- [ ] 4.2 Run the end-to-end check on the published binary: fresh clone, `curl | sh`, `seed`, `install`, one change through the loop, and `octospec version`.
+- [x] 4.1 Cut and push the `v1.0.0` tag and confirm the release workflow publishes binaries and checksums.
+- [x] 4.2 Run the end-to-end check on the published binary: fresh clone, `curl | sh`, `seed`, `install`, one change through the loop, and `octospec version`.
 - [x] 4.3 Fill in the repository About (description, topics, project link).
 
 ## 5. Checks
