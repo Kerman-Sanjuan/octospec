@@ -5,8 +5,8 @@
 
 ## 2. Model selector
 
-- [ ] 2.1 Rewrite `form` in `cli/internal/models/models.go` to use a per-role `huh.NewSelect` over the catalog plus a free-form fallback that reveals a `huh.NewInput`.
-- [ ] 2.2 Keep the existing empty-model-clears-the-role behaviour and the flag path unchanged in `cli/internal/models/models.go`.
+- [x] 2.1 Rewrite `form` in `cli/internal/models/models.go` to use a per-role `huh.NewSelect` over the catalog plus a free-form fallback that reveals a `huh.NewInput`.
+- [x] 2.2 Keep the existing empty-model-clears-the-role behaviour and the flag path unchanged in `cli/internal/models/models.go`.
 
 ## 3. Tool selector
 
