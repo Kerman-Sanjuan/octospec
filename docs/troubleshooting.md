@@ -24,6 +24,26 @@ If the branch name is wrong, use `feat|fix/<issue>-<slug>`.
 
 Run `octospec seed`. It writes the schema to `${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas/octospec/`.
 
+## A stage stops saying the checkout belongs to another issue
+
+You ran a stage in a tab that is on a different issue's branch. This is the
+guard that keeps parallel agents apart: the stage will not switch the branch out
+from under the other task. Start a session for the issue you want and work in
+that tab:
+
+```sh
+octospec session start <issue> --tool <tool>
+```
+
+If you are done with the other task, `octospec session end <other-issue>` frees
+its worktree first.
+
+## `session start` says the issue already has a session
+
+A worktree for that issue still exists. Run `octospec session list` to see it.
+Either keep working in that worktree, or reclaim it with
+`octospec session end <issue>` and start again.
+
 ## Nothing is installed, or the state is wrong
 
 Inspect `.octospec/octospec.json`. It lists the tools and the hash of every file octospec manages. `octospec update` re-applies from it and preserves your edits.

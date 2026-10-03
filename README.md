@@ -297,7 +297,7 @@ land or one stops cleanly on a real conflict.
 
 ## Deeper documentation
 
-- [Getting started](docs/getting-started.md) - install octospec and run one change.
+- [Getting started](docs/getting-started.md) - install octospec, run one change, then several at once.
 - [Contributing](CONTRIBUTING.md) - how to send a change to octospec.
 - [Commands](docs/commands.md) - the CLI and the workflow commands.
 - [Troubleshooting](docs/troubleshooting.md) - the common failures.

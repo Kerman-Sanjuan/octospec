@@ -64,6 +64,47 @@ Start in your agent (pi, opencode, GitHub Copilot, or Claude Code):
 4. `/ship` to open the pull request once CI is green.
 5. `/archive` after the PR merges, to sync the specs and close the issue.
 
+## 7. Run several changes at once
+
+One change at a time is fine to start, and it is the default. When you want to
+work several issues in parallel, give each its own session. A session is a git
+worktree on the issue's branch, so two agents never share a working tree, HEAD,
+or index.
+
+You are the orchestrator: open one tab per issue, and start its session there.
+
+```sh
+# tab 1                          # tab 2                          # tab 3
+cd /path/to/repo                 cd /path/to/repo                 cd /path/to/repo
+octospec session start 85        octospec session start 91        octospec session start 93
+opencode                         pi                               claude
+/spec 85                         /spec 91                         /spec 93
+```
+
+`session start` creates the worktree and, with `--tool`, launches that tool
+inside it, so the tab is already rooted in the right checkout. Without `--tool`
+it prints the path to open yourself.
+
+Then run the loop (`/spec`, `/apply`, `/ship`, `/archive`) in each tab as
+usual. The stages detect the session and stay in its worktree. When you finish
+an issue, `/archive` ends the session; you can also end one by hand:
+
+```sh
+octospec session list    # issue, branch, worktree, pid, age
+octospec session end 85  # remove the worktree and unregister
+```
+
+Two rules keep the tabs from colliding:
+
+- Starting the same issue twice stops, because git refuses to check out a branch
+  another worktree holds.
+- A stage refuses to run on another issue's checkout, so a `/spec` for one issue
+  never switches the branch out from under a different task. If it stops, run
+  `octospec session start <issue>` and work in that tab.
+
+Sessions are optional. If you never run `octospec session start`, every stage
+behaves exactly as in step 6, in the current checkout.
+
 ## Next
 
 - [Commands](commands.md) for the full reference.
