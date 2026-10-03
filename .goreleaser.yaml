@@ -6,6 +6,8 @@ builds:
     dir: cli
     main: ./cmd/octospec
     binary: octospec
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
     env:
       - CGO_ENABLED=0
     goos:
