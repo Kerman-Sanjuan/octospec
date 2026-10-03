@@ -25,3 +25,17 @@ func TestSetRejectsUnknownRole(t *testing.T) {
 		t.Fatal("expected an error for an unknown role")
 	}
 }
+
+func TestSeedChoice(t *testing.T) {
+	catalog := []string{"sonnet", "opus"}
+
+	if choice, custom := seedChoice("", catalog); choice != "" || custom != "" {
+		t.Fatalf("empty model should select the default, got %q %q", choice, custom)
+	}
+	if choice, custom := seedChoice("sonnet", catalog); choice != "sonnet" || custom != "" {
+		t.Fatalf("a known model should select itself, got %q %q", choice, custom)
+	}
+	if choice, custom := seedChoice("gpt-4o", catalog); choice != customChoice || custom != "gpt-4o" {
+		t.Fatalf("an unknown model should seed the custom input, got %q %q", choice, custom)
+	}
+}

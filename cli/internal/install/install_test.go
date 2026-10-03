@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 )
 
 func TestRunInstallsFiles(t *testing.T) {
@@ -20,6 +22,34 @@ func TestRunInstallsFiles(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(dir, p)); err != nil {
 			t.Errorf("missing %s: %v", p, err)
 		}
+	}
+}
+
+func TestValidPreselectKeepsKnownTools(t *testing.T) {
+	got := validPreselect([]string{"opencode", "nope", "claude"})
+	want := []string{"opencode", "claude"}
+	if len(got) != len(want) {
+		t.Fatalf("preselect = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("preselect = %v, want %v", got, want)
+		}
+	}
+}
+
+func TestWithAllTools(t *testing.T) {
+	if got := withAllTools(nil); len(got) != len(targets.Targets) {
+		t.Fatalf("empty should expand to every target, got %v", got)
+	}
+	if got := withAllTools([]string{"pi"}); len(got) != 1 || got[0] != "pi" {
+		t.Fatalf("a non-empty list should pass through, got %v", got)
+	}
+}
+
+func TestToolOptionsCoverEveryTarget(t *testing.T) {
+	if got := len(toolOptions()); got != len(targets.Targets) {
+		t.Fatalf("options = %d, want %d", got, len(targets.Targets))
 	}
 }
 

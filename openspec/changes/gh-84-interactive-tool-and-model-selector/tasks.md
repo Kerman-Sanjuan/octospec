@@ -17,7 +17,7 @@
 
 ## 4. Tests and docs
 
-- [ ] 4.1 Add tests in `cli/internal/install/install_test.go` for the preselection and the empty-means-all handling, without a terminal.
-- [ ] 4.2 Add tests in `cli/internal/models/models_test.go` for the catalog lookup and the free-form fallback.
-- [ ] 4.3 Update the README `Agents and models` section and the install example to describe the selector.
-- [ ] 4.4 Run `gofmt -l`, `go vet ./...`, `go test ./...`, `openspec validate --all --strict`, and `sh scripts/check-gates.sh`.
+- [x] 4.1 Add tests in `cli/internal/install/install_test.go` for the preselection and the empty-means-all handling, without a terminal.
+- [x] 4.2 Add tests in `cli/internal/models/models_test.go` for the catalog lookup and the free-form fallback.
+- [x] 4.3 Update the README `Agents and models` section and the install example to describe the selector.
+- [x] 4.4 Run `gofmt -l`, `go vet ./...`, `go test ./...`, `openspec validate --all --strict`, and `sh scripts/check-gates.sh`.

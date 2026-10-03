@@ -175,6 +175,10 @@ install repo-local by default:
 octospec install --tool pi --tool opencode --tool copilot --tool claude --repo .
 ```
 
+Run `octospec install` with no `--tool` on a terminal and it opens a
+multi-select of the tools, pre-checked with the last install. Space toggles a
+tool, enter confirms, and choosing none installs for all of them.
+
 | Tool | Repo-local (default) | Global |
 |---|---|---|
 | pi | `.pi/prompts/` | `~/.pi/agent/prompts/` |
@@ -245,6 +249,10 @@ Pick the model each role uses with the TUI, or set one directly:
 octospec models
 octospec models --set thinking=sonnet --set implementer=sonnet
 ```
+
+The TUI lists the known models for your installed tools, and `Custom...` lets
+you type any other identifier. `(tool default)` leaves the role without a
+model.
 
 The model per role lives in `.octospec/octospec.json`. An empty model means the
 tool default, and `octospec update` re-renders the agents with the new value.
