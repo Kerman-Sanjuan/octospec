@@ -47,12 +47,11 @@ else
   report SKIP "G1 issue body: no OpenSpec change in this PR"
 fi
 
-# G3: branch name. PR-only: skip on a long-lived branch, skip for Dependabot.
+# G3: branch name. A feat/ or fix/ branch (and a dependabot/ branch) is
+# checked. Any other ref (main, a tag such as v1.0.0, or another long-lived ref)
+# is skipped, because its name cannot tell a PR branch from a release ref.
 case "$HEAD_REF" in
-  main | master)
-    report SKIP "G3 branch name: long-lived branch '$HEAD_REF'"
-    ;;
-  *)
+  feat/* | fix/* | dependabot/*)
     if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
       report SKIP "G3 branch name: automated dependency PR"
     elif printf '%s' "$HEAD_REF" | grep -Eq '^(feat|fix)/[0-9]+-[a-z0-9-]+$'; then
@@ -61,6 +60,9 @@ case "$HEAD_REF" in
       report FAIL "G3 branch name: '$HEAD_REF' does not match feat|fix/<issue>-<slug>"
       fail=1
     fi
+    ;;
+  *)
+    report SKIP "G3 branch name: long-lived ref '$HEAD_REF'"
     ;;
 esac
 

@@ -95,6 +95,20 @@ trap 'rm -rf "$g1"' EXIT
   esac
 )
 
+# G3: a tag ref (as the release-acceptance workflow passes on a tag push) must
+# skip, not fail. This is the regression that reddened main after v1.0.0.
+out=$(BASE_REF=HEAD HEAD_REF=v1.0.0 sh scripts/check-gates.sh 2>&1 || true)
+if ! printf '%s\n' "$out" | grep -q "SKIP G3"; then
+  echo "FAIL: G3 is not skipped on a tag ref" >&2
+  printf '%s\n' "$out" >&2
+  exit 1
+fi
+if printf '%s\n' "$out" | grep -q "FAIL G3"; then
+  echo "FAIL: G3 failed on a tag ref" >&2
+  printf '%s\n' "$out" >&2
+  exit 1
+fi
+
 # G2b and G7 must report a SKIP (not pass silently) when openspec is missing.
 # Hide openspec by running with a PATH that contains only the essentials.
 (
