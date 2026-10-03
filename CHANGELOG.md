@@ -13,6 +13,9 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 ### Changed
 - The release acceptance workflow runs the gates before it verifies the binary.
 
+### Fixed
+- Dependency PRs from Dependabot no longer fail the G3 and G4 gates.
+
 ### Removed
 - `/explore`, which duplicated the OpenSpec explore skill.
 

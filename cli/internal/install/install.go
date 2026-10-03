@@ -16,6 +16,10 @@ import (
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 )
 
+// runForm runs a form. It is a variable so tests can drive the real forms in
+// huh's accessible mode without a terminal.
+var runForm = func(f *huh.Form) error { return f.Run() }
+
 // Options controls an install run.
 type Options struct {
 	Tools       []string // empty means all targets
@@ -34,12 +38,6 @@ func Run(opts Options) error {
 			return err
 		}
 	}
-	tools := opts.Tools
-	if len(tools) == 0 {
-		for _, t := range targets.Targets {
-			tools = append(tools, t.Name)
-		}
-	}
 	cfg, err := config.Load(repo)
 	if err != nil {
 		return err
@@ -47,6 +45,14 @@ func Run(opts Options) error {
 	if cfg.Scopes == nil {
 		cfg.Scopes = map[string]string{}
 	}
+
+	tools := opts.Tools
+	if len(tools) == 0 && opts.Interactive {
+		if tools, err = selectTools(cfg.Tools); err != nil {
+			return err
+		}
+	}
+	tools = withAllTools(tools)
 
 	scope := targets.ScopeLocal
 	switch {
@@ -103,6 +109,76 @@ func Run(opts Options) error {
 	return nil
 }
 
+// selectTools opens a multi-select of the supported tools, pre-checking the
+// names in preselect that are still targets. It returns the chosen names; an
+// empty choice is returned as-is, and the caller reads it as "all tools".
+func selectTools(preselect []string) ([]string, error) {
+	options := toolOptions()
+	chosen := validPreselect(preselect)
+	if err := runForm(huh.NewForm(huh.NewGroup(
+		huh.NewMultiSelect[string]().
+			Title("Install octospec for which tools?").
+			Description("Space toggles a tool, enter confirms. Choose none to install for all tools.").
+			Options(options...).
+			Value(&chosen),
+	))); err != nil {
+		return nil, err
+	}
+	return chosen, nil
+}
+
+// toolOptions builds the multi-select options from the targets, in order.
+func toolOptions() []huh.Option[string] {
+	options := make([]huh.Option[string], 0, len(targets.Targets))
+	for _, t := range targets.Targets {
+		options = append(options, huh.NewOption(t.Name+" ("+toolDescription(t.Name)+")", t.Name))
+	}
+	return options
+}
+
+// validPreselect keeps the names that are still targets, dropping the rest.
+func validPreselect(preselect []string) []string {
+	known := make(map[string]bool, len(targets.Targets))
+	for _, t := range targets.Targets {
+		known[t.Name] = true
+	}
+	var chosen []string
+	for _, name := range preselect {
+		if known[name] {
+			chosen = append(chosen, name)
+		}
+	}
+	return chosen
+}
+
+// withAllTools turns an empty tool slice into every target, matching the
+// selector's "choose none to install all" contract.
+func withAllTools(tools []string) []string {
+	if len(tools) > 0 {
+		return tools
+	}
+	all := make([]string, 0, len(targets.Targets))
+	for _, t := range targets.Targets {
+		all = append(all, t.Name)
+	}
+	return all
+}
+
+// toolDescription is the one-line description for a tool in the selector.
+func toolDescription(name string) string {
+	switch name {
+	case "pi":
+		return "prompt templates"
+	case "opencode":
+		return "commands and agents"
+	case "copilot":
+		return "prompts and agents"
+	case "claude":
+		return "commands and agents"
+	}
+	return "commands"
+}
+
 // askScope warns about a global install and asks which one to use. It defaults
 // to repo-local.
 func askScope() (string, error) {
@@ -113,7 +189,7 @@ func askScope() (string, error) {
 		Affirmative("Global").
 		Negative("Repo-local (recommended)").
 		Value(&global)
-	if err := huh.NewForm(huh.NewGroup(confirm)).Run(); err != nil {
+	if err := runForm(huh.NewForm(huh.NewGroup(confirm))); err != nil {
 		return "", err
 	}
 	if global {

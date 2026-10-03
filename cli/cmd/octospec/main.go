@@ -3,7 +3,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strconv"
@@ -15,7 +14,6 @@ import (
 	"github.com/kerman-sanjuan/octospec/cli/internal/models"
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/session"
-	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 	"github.com/kerman-sanjuan/octospec/cli/internal/uninstall"
 	"github.com/kerman-sanjuan/octospec/cli/internal/update"
 	"github.com/spf13/cobra"
@@ -88,13 +86,6 @@ func newInstallCmd() *cobra.Command {
 		Use:   "install",
 		Short: "Install the commands into each tool's native location",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(tools) == 0 && isTerminal(os.Stdin) && !dryRun {
-				t, err := wizard()
-				if err != nil {
-					return err
-				}
-				tools = t
-			}
 			interactive := !global && !dryRun && isTerminal(os.Stdin)
 			return install.Run(install.Options{Tools: tools, Repo: repo, Global: global, Interactive: interactive, DryRun: dryRun})
 		},
@@ -281,32 +272,6 @@ func newVersionCmd() *cobra.Command {
 			fmt.Println("octospec", version)
 		},
 	}
-}
-
-// wizard asks which tools to install for. An empty answer means all of them.
-func wizard() ([]string, error) {
-	names := make([]string, 0, len(targets.Targets))
-	for _, t := range targets.Targets {
-		names = append(names, t.Name)
-	}
-	fmt.Printf("Install octospec for which tools? [%s] (blank = all)\n", strings.Join(names, " "))
-	fmt.Print("> ")
-	line, err := bufio.NewReader(os.Stdin).ReadString('\n')
-	if err != nil {
-		return nil, nil // no input available: install for all tools
-	}
-	line = strings.TrimSpace(line)
-	if line == "" || line == "all" {
-		return nil, nil
-	}
-	var out []string
-	for _, p := range strings.FieldsFunc(line, func(r rune) bool { return r == ',' || r == ' ' }) {
-		if _, ok := targets.Get(p); !ok {
-			return nil, fmt.Errorf("unknown tool %q", p)
-		}
-		out = append(out, p)
-	}
-	return out, nil
 }
 
 func isTerminal(f *os.File) bool {

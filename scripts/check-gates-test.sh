@@ -25,6 +25,35 @@ if ! printf '%s\n' "$out" | grep -q "PASS G3"; then
   exit 1
 fi
 
+# G3/G4: a Dependabot pull request is exempt from both. A non-bot pull request on
+# the same branch and body still fails. No gh or network call is involved.
+dep_branch='dependabot/go_modules/cli/x'
+dep_body='Bumps x from 1 to 2.'
+
+out=$(BASE_REF=HEAD HEAD_REF="$dep_branch" PR_AUTHOR='dependabot[bot]' PR_BODY="$dep_body" sh scripts/check-gates.sh 2>&1 || true)
+if ! printf '%s\n' "$out" | grep -q "SKIP G3"; then
+  echo "FAIL: G3 is not skipped for a dependabot PR" >&2
+  printf '%s\n' "$out" >&2
+  exit 1
+fi
+if ! printf '%s\n' "$out" | grep -q "SKIP G4"; then
+  echo "FAIL: G4 is not skipped for a dependabot PR" >&2
+  printf '%s\n' "$out" >&2
+  exit 1
+fi
+
+out=$(BASE_REF=HEAD HEAD_REF="$dep_branch" PR_BODY="$dep_body" sh scripts/check-gates.sh 2>&1 || true)
+if ! printf '%s\n' "$out" | grep -q "FAIL G3"; then
+  echo "FAIL: G3 is not enforced for a non-bot PR" >&2
+  printf '%s\n' "$out" >&2
+  exit 1
+fi
+if ! printf '%s\n' "$out" | grep -q "FAIL G4"; then
+  echo "FAIL: G4 is not enforced for a non-bot PR" >&2
+  printf '%s\n' "$out" >&2
+  exit 1
+fi
+
 # G1: a change whose linked issue is missing a section fails; a complete body
 # passes. The gh call is faked, so the test stays hermetic.
 g1=$(mktemp -d)

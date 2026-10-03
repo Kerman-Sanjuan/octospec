@@ -49,24 +49,80 @@ func Set(opts Options) error {
 	return config.Save(repo, cfg)
 }
 
-// form opens the role-to-model TUI.
+// customChoice is the sentinel select value that reveals the free-form input.
+const customChoice = "\x00custom"
+
+// runForm runs a form. It is a variable so tests can drive the real form in
+// huh's accessible mode without a terminal.
+var runForm = func(f *huh.Form) error { return f.Run() }
+
+// form opens the role-to-model TUI. Each role gets a select over the known
+// models, plus a free-form input shown only when the operator picks
+// "Custom...". An empty choice clears the role back to the tool default.
 func form(cfg *config.Config) error {
-	values := make([]string, len(config.Roles))
-	fields := make([]huh.Field, 0, len(config.Roles))
-	for i, role := range config.Roles {
-		values[i] = cfg.Models[role]
-		fields = append(fields, huh.NewInput().
-			Title(role).
-			Description(roleHint(role)).
-			Value(&values[i]))
+	available := Catalog(cfg.Tools)
+	roles := config.Roles
+	choices := make([]string, len(roles))
+	customs := make([]string, len(roles))
+	groups := make([]*huh.Group, 0, len(roles)*2)
+	for i, role := range roles {
+		choices[i], customs[i] = seedChoice(cfg.Models[role], available)
+
+		options := make([]huh.Option[string], 0, len(available)+2)
+		options = append(options, huh.NewOption("(tool default)", ""))
+		for _, m := range available {
+			options = append(options, huh.NewOption(m, m))
+		}
+		options = append(options, huh.NewOption("Custom...", customChoice))
+
+		selectIdx, customIdx := i, i
+		groups = append(groups,
+			huh.NewGroup(huh.NewSelect[string]().
+				Title(role).
+				Description(roleHint(role)).
+				Options(options...).
+				Value(&choices[selectIdx])),
+			huh.NewGroup(huh.NewInput().
+				Title(role+" (custom)").
+				Description("Type any model identifier.").
+				Value(&customs[customIdx])).
+				WithHideFunc(func() bool { return choices[selectIdx] != customChoice }),
+		)
 	}
-	if err := huh.NewForm(huh.NewGroup(fields...)).Run(); err != nil {
+	if err := runForm(huh.NewForm(groups...)); err != nil {
 		return err
 	}
-	for i, role := range config.Roles {
-		cfg.Models[role] = strings.TrimSpace(values[i])
+	for i, role := range roles {
+		if choices[i] == customChoice {
+			cfg.Models[role] = strings.TrimSpace(customs[i])
+			continue
+		}
+		cfg.Models[role] = strings.TrimSpace(choices[i])
 	}
 	return nil
+}
+
+// seedChoice maps a stored model to a select value and a custom value. A model
+// in the catalog selects itself; anything else selects "Custom..." and seeds
+// the input; an empty model selects the tool default.
+func seedChoice(model string, available []string) (choice, custom string) {
+	switch {
+	case model == "":
+		return "", ""
+	case contains(available, model):
+		return model, ""
+	default:
+		return customChoice, model
+	}
+}
+
+func contains(list []string, want string) bool {
+	for _, s := range list {
+		if s == want {
+			return true
+		}
+	}
+	return false
 }
 
 func roleHint(role string) string {
