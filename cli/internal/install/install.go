@@ -16,6 +16,10 @@ import (
 	"github.com/kerman-sanjuan/octospec/cli/internal/targets"
 )
 
+// runForm runs a form. It is a variable so tests can drive the real forms in
+// huh's accessible mode without a terminal.
+var runForm = func(f *huh.Form) error { return f.Run() }
+
 // Options controls an install run.
 type Options struct {
 	Tools       []string // empty means all targets
@@ -111,13 +115,13 @@ func Run(opts Options) error {
 func selectTools(preselect []string) ([]string, error) {
 	options := toolOptions()
 	chosen := validPreselect(preselect)
-	if err := huh.NewForm(huh.NewGroup(
+	if err := runForm(huh.NewForm(huh.NewGroup(
 		huh.NewMultiSelect[string]().
 			Title("Install octospec for which tools?").
 			Description("Space toggles a tool, enter confirms. Choose none to install for all tools.").
 			Options(options...).
 			Value(&chosen),
-	)).Run(); err != nil {
+	))); err != nil {
 		return nil, err
 	}
 	return chosen, nil
@@ -185,7 +189,7 @@ func askScope() (string, error) {
 		Affirmative("Global").
 		Negative("Repo-local (recommended)").
 		Value(&global)
-	if err := huh.NewForm(huh.NewGroup(confirm)).Run(); err != nil {
+	if err := runForm(huh.NewForm(huh.NewGroup(confirm))); err != nil {
 		return "", err
 	}
 	if global {

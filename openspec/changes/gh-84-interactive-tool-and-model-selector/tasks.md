@@ -21,3 +21,11 @@
 - [x] 4.2 Add tests in `cli/internal/models/models_test.go` for the catalog lookup and the free-form fallback.
 - [x] 4.3 Update the README `Agents and models` section and the install example to describe the selector.
 - [x] 4.4 Run `gofmt -l`, `go vet ./...`, `go test ./...`, `openspec validate --all --strict`, and `sh scripts/check-gates.sh`.
+
+## 5. Test hardening
+
+- [x] 5.1 Add a `runForm` seam in `cli/internal/models/models.go` and `cli/internal/install/install.go` so tests drive the real huh forms in accessible mode.
+- [x] 5.2 Integration-test the model form in `cli/internal/models/models_test.go`: catalog choice, custom model, and a seeded custom model.
+- [x] 5.3 Integration-test `models.Set` on the interactive path, including a `--set` pair combined with the form.
+- [x] 5.4 Integration-test `install.Run` on the interactive path in `cli/internal/install/install_test.go`: subset, none-means-all, preselection, global confirm, and no form without a terminal.
+- [x] 5.5 Run the full suite with `-race` and confirm the coverage of the touched packages.

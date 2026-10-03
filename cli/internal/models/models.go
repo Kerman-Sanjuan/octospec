@@ -52,6 +52,10 @@ func Set(opts Options) error {
 // customChoice is the sentinel select value that reveals the free-form input.
 const customChoice = "\x00custom"
 
+// runForm runs a form. It is a variable so tests can drive the real form in
+// huh's accessible mode without a terminal.
+var runForm = func(f *huh.Form) error { return f.Run() }
+
 // form opens the role-to-model TUI. Each role gets a select over the known
 // models, plus a free-form input shown only when the operator picks
 // "Custom...". An empty choice clears the role back to the tool default.
@@ -85,7 +89,7 @@ func form(cfg *config.Config) error {
 				WithHideFunc(func() bool { return choices[selectIdx] != customChoice }),
 		)
 	}
-	if err := huh.NewForm(groups...).Run(); err != nil {
+	if err := runForm(huh.NewForm(groups...)); err != nil {
 		return err
 	}
 	for i, role := range roles {
