@@ -24,4 +24,4 @@
 
 - [x] 5.1 Run `gofmt -l`, `go vet ./...`, `go test ./...`, `openspec validate --all --strict`, and `sh scripts/check-gates.sh`.
 - [x] 5.2 Update `docs/releasing.md` for the reset and the 1.0.0 debut.
-- [ ] 5.3 Confirm the `cli` and `gates` checks are green on the pull request (done in `/ship`).
+- [x] 5.3 Confirm the `cli` and `gates` checks are green on the pull request (done in `/ship`).
