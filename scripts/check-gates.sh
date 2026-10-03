@@ -1,10 +1,11 @@
 #!/usr/bin/env sh
 # Gate checks G1-G8. Runnable locally and in CI.
-# Env: BASE_REF (default origin/main), HEAD_REF, PR_BODY (optional).
+# Env: BASE_REF (default origin/main), HEAD_REF, PR_BODY, PR_AUTHOR (optional).
 set -eu
 
 BASE_REF=${BASE_REF:-origin/main}
 HEAD_REF=${HEAD_REF:-$(git rev-parse --abbrev-ref HEAD)}
+PR_AUTHOR=${PR_AUTHOR:-}
 fail=0
 
 report() { printf '%s %s\n' "$1" "$2"; }
@@ -46,13 +47,15 @@ else
   report SKIP "G1 issue body: no OpenSpec change in this PR"
 fi
 
-# G3: branch name. PR-only: skip on a long-lived branch.
+# G3: branch name. PR-only: skip on a long-lived branch, skip for Dependabot.
 case "$HEAD_REF" in
   main | master)
     report SKIP "G3 branch name: long-lived branch '$HEAD_REF'"
     ;;
   *)
-    if printf '%s' "$HEAD_REF" | grep -Eq '^(feat|fix)/[0-9]+-[a-z0-9-]+$'; then
+    if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
+      report SKIP "G3 branch name: automated dependency PR"
+    elif printf '%s' "$HEAD_REF" | grep -Eq '^(feat|fix)/[0-9]+-[a-z0-9-]+$'; then
       report PASS "G3 branch name"
     else
       report FAIL "G3 branch name: '$HEAD_REF' does not match feat|fix/<issue>-<slug>"
@@ -146,9 +149,11 @@ else
   report SKIP "G6 spec delta: no OpenSpec change in this PR"
 fi
 
-# G4: PR body links the issue
+# G4: PR body links the issue. Skip for Dependabot, whose body is generated.
 body=${PR_BODY:-}
-if [ -n "$body" ]; then
+if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
+  report SKIP "G4 PR links issue: automated dependency PR"
+elif [ -n "$body" ]; then
   if printf '%s' "$body" | grep -Eq '(Closes|Fixes|Resolves) #[0-9]+'; then
     report PASS "G4 PR links issue"
   else

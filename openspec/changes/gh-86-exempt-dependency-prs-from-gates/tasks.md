@@ -1,8 +1,8 @@
 ## 1. Gate exemption
 
-- [ ] 1.1 In `scripts/check-gates.sh`, add a `PR_AUTHOR` env var (default empty) and skip G3 with a `SKIP` report when it is `dependabot[bot]`.
-- [ ] 1.2 In `scripts/check-gates.sh`, skip G4 with a `SKIP` report when `PR_AUTHOR` is `dependabot[bot]`, leaving the missing-body skip in place.
-- [ ] 1.3 In `.github/workflows/openspec.yml`, pass `PR_AUTHOR: ${{ github.event.pull_request.user.login }}` to the gate step.
+- [x] 1.1 In `scripts/check-gates.sh`, add a `PR_AUTHOR` env var (default empty) and skip G3 with a `SKIP` report when it is `dependabot[bot]`.
+- [x] 1.2 In `scripts/check-gates.sh`, skip G4 with a `SKIP` report when `PR_AUTHOR` is `dependabot[bot]`, leaving the missing-body skip in place.
+- [x] 1.3 In `.github/workflows/openspec.yml`, pass `PR_AUTHOR: ${{ github.event.pull_request.user.login }}` to the gate step.
 
 ## 2. Tests
 
