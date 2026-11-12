@@ -6,8 +6,8 @@
 
 ## 2. Issue selection
 
-- [ ] 2.1 Implement issue selection logic (CLI or command instructions) that queries GitHub for issues in an active status (`status:in-progress` or equivalent) via `gh issue list`.
-- [ ] 2.2 Document the bug-discovery path: how the mode files a new issue through the existing intake when it finds behaviour contradicting `openspec/specs/`, without inventing requirements.
+- [x] 2.1 Implement issue selection logic (CLI or command instructions) that queries GitHub for issues in an active status (`status:in-progress` or equivalent) via `gh issue list`.
+- [x] 2.2 Document the bug-discovery path: how the mode files a new issue through the existing intake when it finds behaviour contradicting `openspec/specs/`, without inventing requirements.
 
 ## 3. Stage sequencing and retry
 
