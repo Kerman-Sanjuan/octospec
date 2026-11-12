@@ -37,7 +37,7 @@ test -f "$repo/.github/ISSUE_TEMPLATE/feature.yml"
 test -f "$repo/openspec/config.yaml"
 # Count only command files, not directories that OpenSpec may add (for
 # example .claude/commands/opsx/).
-test "$(find "$repo/.claude/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" = "6"
+test "$(find "$repo/.claude/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" = "7"
 test "$(find "$repo/.claude/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" = "5"
 test -f "$repo/.claude/agents/apply.md"
 grep -q "tools:" "$repo/.claude/agents/apply.md"
