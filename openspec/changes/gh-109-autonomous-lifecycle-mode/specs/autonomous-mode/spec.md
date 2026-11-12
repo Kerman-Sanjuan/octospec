@@ -29,6 +29,13 @@ When a stage fails or its gate does not pass, the autonomous mode SHALL retry th
 - **WHEN** a stage keeps failing past the retry limit
 - **THEN** the autonomous mode posts a comment on the issue describing the failure and stops working that issue, rather than leaving it in a silent or ambiguous state.
 
+### Requirement: The CLI can invoke autonomous mode directly
+The CLI SHALL provide a subcommand that invokes the autonomous mode, so a human can start it from the terminal without going through a per-tool slash command.
+
+#### Scenario: Start the loop from the CLI
+- **WHEN** a developer runs the CLI's autonomous mode subcommand
+- **THEN** the CLI starts the same unattended idea-to-archive loop described above, without requiring a harness-specific slash command.
+
 ### Requirement: Every action is recorded on GitHub
 The autonomous mode SHALL record every action it takes (comments, commits, pull requests, label changes) on GitHub, in the same way the manual stage commands do.
 

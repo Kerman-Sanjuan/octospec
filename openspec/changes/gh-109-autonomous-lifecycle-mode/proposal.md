@@ -8,6 +8,7 @@ Today every stage of the octospec loop (`idea`, `spec`, `apply`, `ship`, `archiv
 - The mode selects issues to work on from the GitHub backlog's active statuses (`status:in-progress` and similar) and also picks up bugs discovered while working, always against the existing product definition in `openspec/specs/`.
 - On a stage failure or a failed gate, the mode retries that stage until it passes before moving on.
 - The mode keeps using GitHub as the single record of work: comments, commits, pull requests, and label updates, exactly as the manual stages do today.
+- The CLI gains a subcommand that invokes the autonomous mode directly, so a human can start the overnight run from the terminal instead of only through a per-tool slash command.
 
 ## Capabilities
 
@@ -20,7 +21,7 @@ Today every stage of the octospec loop (`idea`, `spec`, `apply`, `ship`, `archiv
 
 ## Impact
 
-- Affected code: a new orchestration entry point in `cli/` (and/or a new payload command) that sequences the existing `idea`, `spec`, `apply`, `ship`, `archive` stages for a single issue.
+- Affected code: a new orchestration entry point in `cli/` (a new payload command plus a new CLI subcommand) that sequences the existing `idea`, `spec`, `apply`, `ship`, `archive` stages for a single issue.
 - Affected systems: GitHub Issues (status labels, comments), GitHub Actions gates (G2a, G2b, G3, G4, G6) remain the pass/fail contract for retries.
 - No change to the gates themselves, and no change to the requirement that work lands through a pull request.
 - Issue: https://github.com/Kerman-Sanjuan/octospec/issues/109
@@ -29,3 +30,4 @@ Today every stage of the octospec loop (`idea`, `spec`, `apply`, `ship`, `archiv
 
 ### Added
 - An autonomous mode that runs the idea → spec → apply → ship → archive loop for an issue without human confirmation between stages, retrying a stage until its gate passes, with the full trail recorded on GitHub.
+- A CLI subcommand that invokes the autonomous mode directly.

@@ -15,12 +15,17 @@
 - [ ] 3.2 Implement the retry behaviour: on a failing gate (G2a, G2b, G3, G4, G6), re-run the current stage instead of advancing, up to the bound from 1.3.
 - [ ] 3.3 Implement the give-up path: past the retry bound, post a failure comment on the issue (reusing the plan/implementation comment pattern) and stop working that issue.
 
-## 4. GitHub trail parity
+## 4. CLI invocation
 
-- [ ] 4.1 Verify the autonomous run produces the same artifacts a manual run would: status labels, plan comment, implementation comment, pull request, archive state.
-- [ ] 4.2 Add or update tests in `cli/` covering issue selection and retry/give-up behaviour.
+- [ ] 4.1 Add a CLI subcommand (e.g. `octospec auto`) in `cli/` that invokes the autonomous mode, so a human can start the overnight run from the terminal without going through a per-tool slash command.
+- [ ] 4.2 Document the new subcommand's flags (issue selector, retry bound override) in the CLI's help output and in the README **Install**/**Commands** tables.
 
-## 5. Docs
+## 5. GitHub trail parity
 
-- [ ] 5.1 Update the README **Commands** table with the new autonomous mode command (per AGENTS.md definition of done).
-- [ ] 5.2 Update `cli/internal/payload/agents/README.md` if the autonomous mode introduces a new agent definition or changes the stage table.
+- [ ] 5.1 Verify the autonomous run produces the same artifacts a manual run would: status labels, plan comment, implementation comment, pull request, archive state.
+- [ ] 5.2 Add or update tests in `cli/` covering issue selection and retry/give-up behaviour.
+
+## 6. Docs
+
+- [ ] 6.1 Update the README **Commands** table with the new autonomous mode command (per AGENTS.md definition of done).
+- [ ] 6.2 Update `cli/internal/payload/agents/README.md` if the autonomous mode introduces a new agent definition or changes the stage table.
