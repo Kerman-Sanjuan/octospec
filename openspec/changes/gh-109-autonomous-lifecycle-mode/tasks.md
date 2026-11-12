@@ -1,8 +1,8 @@
 ## 1. Orchestration entry point
 
-- [ ] 1.1 Add a new payload command (e.g. `cli/internal/payload/commands/auto.md`) that documents the autonomous mode's contract: select an active issue, run idea → spec → apply → ship → archive in sequence, retry on gate failure, stop on a bounded failure.
-- [ ] 1.2 Wire the new command into `cli/internal/targets/` so it renders per tool like the other five commands.
-- [ ] 1.3 Decide and document the retry bound per stage in the command body (`cli/internal/payload/commands/auto.md`).
+- [x] 1.1 Add a new payload command (e.g. `cli/internal/payload/commands/auto.md`) that documents the autonomous mode's contract: select an active issue, run idea → spec → apply → ship → archive in sequence, retry on gate failure, stop on a bounded failure.
+- [x] 1.2 Wire the new command into `cli/internal/targets/` so it renders per tool like the other five commands.
+- [x] 1.3 Decide and document the retry bound per stage in the command body (`cli/internal/payload/commands/auto.md`).
 
 ## 2. Issue selection
 
