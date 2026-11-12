@@ -12,6 +12,7 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 | `octospec uninstall [--repo <path>]` | Remove the files octospec manages, keeping any you edited by hand. |
 | `octospec doctor [--repo <path>]` | Report what is missing, without changing anything. |
 | `octospec models [--set <role>=<model>] [--repo <path>]` | Set the model each agent role uses. Opens a TUI when no `--set` is given, listing the known models for the installed tools with a free-form fallback. |
+| `octospec auto [--issue <n>] [--max-retries <n>] [--repo <path>]` | Plan an autonomous run: select the lowest-numbered open issue with an active status (`status:spec-ready`, `status:in-progress`, `status:in-review`) and print the stage the loop resumes at, the remaining stages, and the retry bound (default 3 per stage). The loop itself runs in an agent session through the `/auto` command. |
 | `octospec version` | Print the version. |
 
 ## Tools

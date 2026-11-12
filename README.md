@@ -229,6 +229,19 @@ Check an install, and see what is missing:
 octospec doctor
 ```
 
+Plan an autonomous run - selects the lowest-numbered open issue with an
+active status and prints where the loop resumes, the remaining stages, and
+the retry bound:
+
+```sh
+octospec auto
+octospec auto --issue 109 --max-retries 5
+```
+
+The CLI cannot dispatch agents, so the run plan is executed by the `/auto`
+workflow command in an agent session; `octospec auto` prints what that loop
+will work on.
+
 Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
 
 `install` also brings the OpenSpec skills (`openspec-propose`, and the others)

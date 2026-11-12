@@ -2,6 +2,7 @@ package auto
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -103,6 +104,8 @@ func TestRemainingStagesResume(t *testing.T) {
 		{[]string{StatusSpecReady}, []string{"apply", "ship", "archive"}},
 		{[]string{StatusInProgress, StatusInReview}, []string{"ship", "archive"}},
 		{[]string{StatusInReview}, []string{"ship", "archive"}},
+		{[]string{"status:backlog"}, []string{"spec", "apply", "ship", "archive"}},
+		{nil, []string{"spec", "apply", "ship", "archive"}},
 	}
 	for _, c := range cases {
 		got := RemainingStages(Issue{Number: 1, Labels: c.labels})
@@ -169,5 +172,49 @@ func TestGiveUpComment(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("give-up comment missing %q:\n%s", want, body)
 		}
+	}
+}
+
+func TestPlanForDefaults(t *testing.T) {
+	issue := Issue{Number: 109, Title: "Title", Labels: []string{StatusInProgress, "type:feature"}}
+	p := PlanFor(issue, 0)
+	if p.MaxRetries != DefaultMaxRetries {
+		t.Fatalf("MaxRetries = %d, want the default %d", p.MaxRetries, DefaultMaxRetries)
+	}
+	p = PlanFor(issue, 5)
+	if p.MaxRetries != 5 {
+		t.Fatalf("MaxRetries = %d, want 5", p.MaxRetries)
+	}
+}
+
+func TestPlanString(t *testing.T) {
+	issue := Issue{Number: 109, Title: "Autonomous mode", Labels: []string{"type:feature", StatusInProgress}}
+	got := PlanFor(issue, 0).String()
+	for _, want := range []string{
+		"issue:   #109 Autonomous mode",
+		"status:  status:in-progress",
+		"resume:  /apply",
+		"stages:  apply -> ship -> archive",
+		fmt.Sprintf("retries: %d per stage", DefaultMaxRetries),
+		"/auto command",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("plan missing %q:\n%s", want, got)
+		}
+	}
+}
+
+func TestPlanStringInReview(t *testing.T) {
+	issue := Issue{Number: 7, Title: "T", Labels: []string{StatusInReview}}
+	got := PlanFor(issue, 0).String()
+	if !strings.Contains(got, "resume:  /ship\n") {
+		t.Fatalf("resume should be /ship for an issue in review:\n%s", got)
+	}
+}
+
+func TestPlanStringNoStatus(t *testing.T) {
+	got := PlanFor(Issue{Number: 1, Title: "T"}, 0).String()
+	if !strings.Contains(got, "status:  (none)\n") {
+		t.Fatalf("empty status should print (none):\n%s", got)
 	}
 }

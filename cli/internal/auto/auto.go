@@ -11,6 +11,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os/exec"
+	"strings"
 )
 
 // Status labels an issue can be resumed from. Issues in status:backlog wait
@@ -90,26 +92,25 @@ type Stage struct {
 	Command string // the rendered slash command, e.g. "/apply"
 }
 
-// StagesAfterPlan returns the stages the loop runs for an issue whose plan
-// is drafted. Idea and spec produce the issue and its plan, so a resumed
-// loop always starts at apply.
-func StagesAfterPlan() []Stage {
-	return []Stage{
+// RemainingStages returns the stage sequence left for the issue, resuming
+// from its status labels: an issue in review already has its pull request
+// and resumes at ship; spec-ready and in-progress resume at apply; anything
+// else (an explicitly named backlog issue) starts at spec.
+func RemainingStages(i Issue) []Stage {
+	stages := []Stage{
+		{Name: "spec", Command: "/spec"},
 		{Name: "apply", Command: "/apply"},
 		{Name: "ship", Command: "/ship"},
 		{Name: "archive", Command: "/archive"},
 	}
-}
-
-// RemainingStages returns the stage sequence left for the issue, resuming
-// from its status labels: an issue in review already has its pull request
-// and resumes at ship; anything else active resumes at apply.
-func RemainingStages(i Issue) []Stage {
-	stages := StagesAfterPlan()
-	if hasLabel(i, StatusInReview) {
-		return stages[1:]
+	var from int
+	switch {
+	case hasLabel(i, StatusInReview):
+		from = 2
+	case hasLabel(i, StatusSpecReady), hasLabel(i, StatusInProgress):
+		from = 1
 	}
-	return stages
+	return stages[from:]
 }
 
 func hasLabel(i Issue, want string) bool {
@@ -164,4 +165,119 @@ func GiveUpComment(stage string, attempts int, maxRetries int, lastErr string) s
 	body := fmt.Sprintf("## Autonomous run failed\n\nStage `%s` failed %d attempt(s), the retry bound is %d.\n\nLast error:\n\n```\n%s\n```\n\nThe loop stopped working this issue. Re-run `/auto` after fixing, or work the stage manually.",
 		stage, attempts, maxRetries, lastErr)
 	return body
+}
+
+// Options configures one terminal invocation of the autonomous mode.
+type Options struct {
+	Repo       string // repository root for gh (default: cwd)
+	Issue      int    // explicit issue number; 0 selects automatically
+	MaxRetries int    // per-stage bound; <= 0 becomes DefaultMaxRetries
+}
+
+// Plan is one run's computed state: what to work and where to resume.
+type Plan struct {
+	Issue      Issue
+	MaxRetries int
+}
+
+// PlanFor computes the run plan for an issue.
+func PlanFor(issue Issue, maxRetries int) Plan {
+	if maxRetries <= 0 {
+		maxRetries = DefaultMaxRetries
+	}
+	return Plan{Issue: issue, MaxRetries: maxRetries}
+}
+
+// StatusLabels returns the issue's status labels, for display.
+func (i Issue) StatusLabels() []string {
+	var out []string
+	for _, l := range i.Labels {
+		if strings.HasPrefix(l, "status:") {
+			out = append(out, l)
+		}
+	}
+	return out
+}
+
+// String renders the plan for the terminal.
+func (p Plan) String() string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "issue:   #%d %s\n", p.Issue.Number, p.Issue.Title)
+	status := strings.Join(p.Issue.StatusLabels(), ", ")
+	if status == "" {
+		status = "(none)"
+	}
+	fmt.Fprintf(&b, "status:  %s\n", status)
+	stages := RemainingStages(p.Issue)
+	fmt.Fprintf(&b, "resume:  %s\n", stages[0].Command)
+	names := make([]string, len(stages))
+	for i, s := range stages {
+		names[i] = s.Name
+	}
+	fmt.Fprintf(&b, "stages:  %s\n", strings.Join(names, " -> "))
+	fmt.Fprintf(&b, "retries: %d per stage\n", p.MaxRetries)
+	b.WriteString("\nThe loop runs in an agent session through the /auto command\n(cli/internal/payload/commands/auto.md).\n")
+	return b.String()
+}
+
+// Run selects the issue and prints the run plan. The CLI cannot dispatch
+// agents, so the terminal invocation computes and prints the plan; the loop
+// itself executes in an agent session following the autonomous-mode command.
+// With no --issue it selects the oldest open issue carrying an active
+// status, and stops cleanly when the backlog has nothing resumable.
+func Run(opts Options) error {
+	gh, err := exec.LookPath("gh")
+	if err != nil {
+		return fmt.Errorf("gh not on PATH")
+	}
+	var issue Issue
+	if opts.Issue > 0 {
+		out, err := ghRun(gh, opts.Repo, "issue", "view", fmt.Sprint(opts.Issue), "--json", "number,title,labels")
+		if err != nil {
+			return fmt.Errorf("gh issue view %d (is this a GitHub repo?): %w", opts.Issue, err)
+		}
+		if issue, err = parseIssue(out); err != nil {
+			return err
+		}
+	} else {
+		out, err := ghRun(gh, opts.Repo, "issue", "list", "--state", "open", "--json", "number,title,labels")
+		if err != nil {
+			return fmt.Errorf("gh issue list (is this a GitHub repo?): %w", err)
+		}
+		issue, err = SelectIssue(out)
+		if errors.Is(err, ErrNoActiveIssue) {
+			fmt.Println(ErrNoActiveIssue)
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+	}
+	fmt.Print(PlanFor(issue, opts.MaxRetries))
+	return nil
+}
+
+// ghRun runs gh with args in repo (cwd when empty) and returns stdout.
+func ghRun(gh, repo string, args ...string) ([]byte, error) {
+	cmd := exec.Command(gh, args...)
+	if repo != "" {
+		cmd.Dir = repo
+	}
+	return cmd.Output()
+}
+
+// parseIssue parses `gh issue view --json number,title,labels` output.
+func parseIssue(data []byte) (Issue, error) {
+	var w ghIssue
+	if err := json.Unmarshal(data, &w); err != nil {
+		return Issue{}, fmt.Errorf("parse gh issue view: %w", err)
+	}
+	i := Issue{Number: w.Number, Title: w.Title}
+	for _, l := range w.Labels {
+		i.Labels = append(i.Labels, l.Name)
+	}
+	if i.Number == 0 {
+		return Issue{}, fmt.Errorf("issue has no number: %s", data)
+	}
+	return i, nil
 }

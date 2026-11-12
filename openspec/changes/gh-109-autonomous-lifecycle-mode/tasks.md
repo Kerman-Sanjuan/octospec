@@ -17,8 +17,8 @@
 
 ## 4. CLI invocation
 
-- [ ] 4.1 Add a CLI subcommand (e.g. `octospec auto`) in `cli/` that invokes the autonomous mode, so a human can start the overnight run from the terminal without going through a per-tool slash command.
-- [ ] 4.2 Document the new subcommand's flags (issue selector, retry bound override) in the CLI's help output and in the README **Install**/**Commands** tables.
+- [x] 4.1 Add a CLI subcommand (e.g. `octospec auto`) in `cli/` that invokes the autonomous mode, so a human can start the overnight run from the terminal without going through a per-tool slash command.
+- [x] 4.2 Document the new subcommand's flags (issue selector, retry bound override) in the CLI's help output and in the README **Install**/**Commands** tables.
 
 ## 5. GitHub trail parity
 
