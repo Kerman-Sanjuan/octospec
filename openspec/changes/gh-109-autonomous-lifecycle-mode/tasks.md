@@ -22,8 +22,8 @@
 
 ## 5. GitHub trail parity
 
-- [ ] 5.1 Verify the autonomous run produces the same artifacts a manual run would: status labels, plan comment, implementation comment, pull request, archive state.
-- [ ] 5.2 Add or update tests in `cli/` covering issue selection and retry/give-up behaviour.
+- [x] 5.1 Verify the autonomous run produces the same artifacts a manual run would: status labels, plan comment, implementation comment, pull request, archive state.
+- [x] 5.2 Add or update tests in `cli/` covering issue selection and retry/give-up behaviour.
 
 ## 6. Docs
 

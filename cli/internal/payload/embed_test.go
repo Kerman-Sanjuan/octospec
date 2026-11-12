@@ -83,3 +83,35 @@ func TestCommandsDoNotUseTemplateWithBody(t *testing.T) {
 		}
 	}
 }
+
+func TestAutoCommandKeepsTrailContract(t *testing.T) {
+	// The autonomous loop must reuse the stage contracts and leave the same
+	// GitHub trail. These strings pin the spec's scenarios to the payload:
+	// selection, resume, retry, visible give-up, and the /bug intake path.
+	cmds, err := Commands()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var auto Command
+	for _, c := range cmds {
+		if c.Name == "auto" {
+			auto = c
+		}
+	}
+	if auto.Name != "auto" {
+		t.Fatal("auto command missing from the payload")
+	}
+	for _, want := range []string{
+		"Autonomous run failed", // give-up comment contract
+		"3 attempts",            // documented retry bound
+		"`/bug`",                // bug-discovery path through the intake
+		"status:backlog",        // never selected automatically
+		"`/apply`",              // resume contracts reference the stages
+		"`/ship`",
+		"`/archive`",
+	} {
+		if !strings.Contains(auto.Body, want) {
+			t.Errorf("auto command body lost the %q trail contract", want)
+		}
+	}
+}
