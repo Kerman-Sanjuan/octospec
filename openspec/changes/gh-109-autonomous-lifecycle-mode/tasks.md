@@ -27,5 +27,5 @@
 
 ## 6. Docs
 
-- [ ] 6.1 Update the README **Commands** table with the new autonomous mode command (per AGENTS.md definition of done).
-- [ ] 6.2 Update `cli/internal/payload/agents/README.md` if the autonomous mode introduces a new agent definition or changes the stage table.
+- [x] 6.1 Update the README **Commands** table with the new autonomous mode command (per AGENTS.md definition of done).
+- [x] 6.2 Update `cli/internal/payload/agents/README.md` if the autonomous mode introduces a new agent definition or changes the stage table.

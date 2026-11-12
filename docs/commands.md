@@ -38,6 +38,7 @@ agents. The scope per tool is recorded in `.octospec/octospec.json`.
 | `/apply [change]` | execute | Work the tasks on the branch, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI, loop failures back to `/apply`, and open the PR once it is green. |
 | `/archive [change]` | archive | Archive the change, sync the specs, commit and push, close the issue, and delete the branch. |
+| `/auto [issue-number]` | loop | Run the cycle unattended on the lowest-numbered open issue with an active status: resume from its state, drive the remaining stages, retry a failing stage up to 3 times, then give up visibly and move on. |
 
 Each command runs its stage agent. The agent per stage and its tool surface live
 in `cli/internal/payload/agents/`. Set the model each role uses with
