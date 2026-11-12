@@ -12,6 +12,7 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 | `octospec uninstall [--repo <path>]` | Remove the files octospec manages, keeping any you edited by hand. |
 | `octospec doctor [--repo <path>]` | Report what is missing, without changing anything. |
 | `octospec models [--set <role>=<model>] [--repo <path>]` | Set the model each agent role uses. Opens a TUI when no `--set` is given, listing the known models for the installed tools with a free-form fallback. |
+| `octospec auto [--issue <n>] [--max-retries <n>] [--repo <path>]` | Plan an autonomous run: select the lowest-numbered open issue with an active status (`status:spec-ready`, `status:in-progress`, `status:in-review`) and print the stage the loop resumes at, the remaining stages, and the retry bound (default 3 per stage). The loop itself runs in an agent session through the `/auto` command. |
 | `octospec version` | Print the version. |
 
 ## Tools
@@ -37,6 +38,7 @@ agents. The scope per tool is recorded in `.octospec/octospec.json`.
 | `/apply [change]` | execute | Work the tasks on the branch, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI, loop failures back to `/apply`, and open the PR once it is green. |
 | `/archive [change]` | archive | Archive the change, sync the specs, commit and push, close the issue, and delete the branch. |
+| `/auto [issue-number]` | loop | Run the cycle unattended on the lowest-numbered open issue with an active status: resume from its state, drive the remaining stages, retry a failing stage up to 3 times, then give up visibly and move on. |
 
 Each command runs its stage agent. The agent per stage and its tool surface live
 in `cli/internal/payload/agents/`. Set the model each role uses with

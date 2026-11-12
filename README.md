@@ -229,6 +229,19 @@ Check an install, and see what is missing:
 octospec doctor
 ```
 
+Plan an autonomous run - selects the lowest-numbered open issue with an
+active status and prints where the loop resumes, the remaining stages, and
+the retry bound:
+
+```sh
+octospec auto
+octospec auto --issue 109 --max-retries 5
+```
+
+The CLI cannot dispatch agents, so the run plan is executed by the `/auto`
+workflow command in an agent session; `octospec auto` prints what that loop
+will work on.
+
 Adding a tool is a new entry in `cli/internal/targets` - never a new copy.
 
 `install` also brings the OpenSpec skills (`openspec-propose`, and the others)
@@ -279,6 +292,7 @@ tool default, and `octospec update` re-renders the agents with the new value.
 | `/apply [change]` | execute | Work the tasks on the branch `/spec` created, group by group, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI; on failure, loop back to `/apply`; open the PR once the gates are green. |
 | `/archive [change]` | archive | Archive the change, sync `openspec/specs/` (filling each Purpose), commit and push, close the issue, and delete the merged branch. |
+| `/auto [issue-number]` | loop | Run the cycle unattended: pick the lowest-numbered open issue with an active status, resume from its state, drive the remaining stages, retrying a failing stage up to 3 times before posting a `## Autonomous run failed` comment and moving on. |
 
 ## Deeper documentation
 

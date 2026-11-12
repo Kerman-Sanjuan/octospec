@@ -68,3 +68,23 @@ func TestVersionOverrideMatchesLdflags(t *testing.T) {
 		t.Fatalf("version output = %q, want %q", got, "octospec 1.0.0")
 	}
 }
+
+func TestAutoCmdHelpDocumentsFlags(t *testing.T) {
+	out := runCapture(t, func() {
+		cmd := newAutoCmd()
+		cmd.SetArgs([]string{"--help"})
+		if err := cmd.Execute(); err != nil {
+			t.Fatal(err)
+		}
+	})
+	for _, want := range []string{
+		"--issue",
+		"--max-retries",
+		"--repo",
+		"/auto command",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("auto help missing %q:\n%s", want, out)
+		}
+	}
+}

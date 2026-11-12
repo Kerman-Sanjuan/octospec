@@ -12,6 +12,10 @@ session under that contract. octospec does not dispatch the stage to a subagent
 yet; some harnesses have no subagent mechanism at all, and pi is one of them.
 Real dispatch is a follow-up.
 
+The autonomous mode (`/auto`) is not a stage and defines no agent. It is a
+driver that runs the stage commands above in sequence, reusing each stage
+agent unchanged.
+
 ## Canonical fields
 
 | Field | Meaning |

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/kerman-sanjuan/octospec/cli/internal/auto"
 	"github.com/kerman-sanjuan/octospec/cli/internal/doctor"
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
 	"github.com/kerman-sanjuan/octospec/cli/internal/models"
@@ -35,7 +36,7 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newAutoCmd(), newVersionCmd())
 	return root
 }
 
@@ -167,6 +168,24 @@ func newDoctorCmd() *cobra.Command {
 			return nil
 		},
 	}
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	return cmd
+}
+
+func newAutoCmd() *cobra.Command {
+	var repo string
+	var number int
+	var maxRetries int
+	cmd := &cobra.Command{
+		Use:   "auto",
+		Short: "Plan an autonomous idea-to-archive run and print where it resumes",
+		Long:  "Select the issue for an autonomous run and print the plan: the issue, the stage the loop resumes at, the remaining stages, and the retry bound per stage.\n\nThe CLI cannot dispatch agents, so the loop itself runs in an agent session through the /auto command; this prints what that loop will work on.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return auto.Run(auto.Options{Repo: repo, Issue: number, MaxRetries: maxRetries})
+		},
+	}
+	cmd.Flags().IntVar(&number, "issue", 0, "issue number to work (default: the lowest-numbered open issue with an active status)")
+	cmd.Flags().IntVar(&maxRetries, "max-retries", auto.DefaultMaxRetries, "attempts per stage before the loop gives up on the issue")
 	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
 	return cmd
 }
