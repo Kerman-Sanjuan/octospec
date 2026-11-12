@@ -11,9 +11,9 @@
 
 ## 3. Stage sequencing and retry
 
-- [ ] 3.1 Implement the sequencing loop that runs `/idea`, `/spec`, `/apply`, `/ship`, `/archive` in order for the selected issue, reusing each stage's existing contract unchanged.
-- [ ] 3.2 Implement the retry behaviour: on a failing gate (G2a, G2b, G3, G4, G6), re-run the current stage instead of advancing, up to the bound from 1.3.
-- [ ] 3.3 Implement the give-up path: past the retry bound, post a failure comment on the issue (reusing the plan/implementation comment pattern) and stop working that issue.
+- [x] 3.1 Implement the sequencing loop that runs `/idea`, `/spec`, `/apply`, `/ship`, `/archive` in order for the selected issue, reusing each stage's existing contract unchanged.
+- [x] 3.2 Implement the retry behaviour: on a failing gate (G2a, G2b, G3, G4, G6), re-run the current stage instead of advancing, up to the bound from 1.3.
+- [x] 3.3 Implement the give-up path: past the retry bound, post a failure comment on the issue (reusing the plan/implementation comment pattern) and stop working that issue.
 
 ## 4. CLI invocation
 

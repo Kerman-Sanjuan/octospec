@@ -2,6 +2,7 @@ package auto
 
 import (
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -89,6 +90,84 @@ func TestHasActiveStatus(t *testing.T) {
 	for _, c := range cases {
 		if got := (Issue{Labels: c.labels}).HasActiveStatus(); got != c.want {
 			t.Errorf("HasActiveStatus(%v) = %v, want %v", c.labels, got, c.want)
+		}
+	}
+}
+
+func TestRemainingStagesResume(t *testing.T) {
+	cases := []struct {
+		labels []string
+		want   []string
+	}{
+		{[]string{StatusInProgress}, []string{"apply", "ship", "archive"}},
+		{[]string{StatusSpecReady}, []string{"apply", "ship", "archive"}},
+		{[]string{StatusInProgress, StatusInReview}, []string{"ship", "archive"}},
+		{[]string{StatusInReview}, []string{"ship", "archive"}},
+	}
+	for _, c := range cases {
+		got := RemainingStages(Issue{Number: 1, Labels: c.labels})
+		var names []string
+		for _, s := range got {
+			names = append(names, s.Name)
+		}
+		if len(names) != len(c.want) {
+			t.Fatalf("RemainingStages(%v) = %v, want %v", c.labels, names, c.want)
+		}
+		for i := range names {
+			if names[i] != c.want[i] {
+				t.Errorf("RemainingStages(%v)[%d] = %q, want %q", c.labels, i, names[i], c.want[i])
+			}
+		}
+	}
+}
+
+func TestNextStep(t *testing.T) {
+	cases := []struct {
+		name    string
+		i       int
+		attempt int
+		max     int
+		passed  bool
+		want    Step
+	}{
+		{"pass advances", 0, 1, DefaultMaxRetries, true, StepAdvance},
+		{"first failure retries", 0, 1, DefaultMaxRetries, false, StepRetry},
+		{"mid failure retries", 1, 2, DefaultMaxRetries, false, StepRetry},
+		{"bound reached gives up", 0, DefaultMaxRetries, DefaultMaxRetries, false, StepGiveUp},
+		{"pass on last allowed attempt still advances", 2, DefaultMaxRetries, DefaultMaxRetries, true, StepAdvance},
+		{"bound 1 gives up first try", 1, 1, 1, false, StepGiveUp},
+	}
+	for _, c := range cases {
+		got, err := NextStep(c.i, c.attempt, c.max, c.passed)
+		if err != nil {
+			t.Errorf("%s: %v", c.name, err)
+			continue
+		}
+		if got != c.want {
+			t.Errorf("%s: NextStep = %v, want %v", c.name, got, c.want)
+		}
+	}
+}
+
+func TestNextStepRejectsBadInput(t *testing.T) {
+	if _, err := NextStep(-1, 1, 3, true); err == nil {
+		t.Error("expected an error for a negative stage index")
+	}
+	if _, err := NextStep(0, 0, 3, true); err == nil {
+		t.Error("expected an error for a zero attempt number")
+	}
+}
+
+func TestGiveUpComment(t *testing.T) {
+	body := GiveUpComment("apply", 3, DefaultMaxRetries, "go test failed: TestX")
+	for _, want := range []string{
+		"## Autonomous run failed",
+		"Stage `apply` failed 3 attempt(s), the retry bound is 3.",
+		"go test failed: TestX",
+		"The loop stopped working this issue.",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("give-up comment missing %q:\n%s", want, body)
 		}
 	}
 }
