@@ -78,8 +78,10 @@ There is no dual write. Each artifact has exactly one authoritative home:
 /archive ──▶ specs updated, issue closed                ← human merges
 ```
 
-1. **`/idea`** interviews you for a feature and files the issue. The issue body
-   is the human source of truth.
+1. **`/idea`** grills the decision frontier — rounds of numbered questions, each
+   with a recommended answer — and files the issue only when nothing is left
+   open. The closed decisions land in the issue under `## Grill`, which is the
+   human source of truth and what `/spec` reads.
 2. **`/spec`** creates the change branch (`feat|fix/<issue>-<slug>`), commits
    the change artifacts on it, publishes them as a single `## Plan` comment
    headed with the commit SHA, and validates. `/spec` does not approve its own
@@ -145,7 +147,7 @@ repository adds its own build/test gate for G5.
 
 | Gate | Checks | Strength |
 |---|---|---|
-| G1 | issue has the required sections before `/spec` produces artifacts | hard |
+| G1 | issue has the required sections, every requirement states SHALL/MUST, and no open question remains | hard |
 | G2 | `openspec validate --all --strict` and every unarchived change is complete | hard |
 | G3 | branch matches `feat\|fix/<issue>-<slug>` (PR branches only) | hard |
 | G4 | PR body references the issue (`Closes #n`) | hard |

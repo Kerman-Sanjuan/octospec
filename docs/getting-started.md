@@ -58,7 +58,7 @@ model; an empty model means the tool default.
 
 Start in your agent (pi, opencode, GitHub Copilot, or Claude Code):
 
-1. `/idea` to file the feature as an issue.
+1. `/idea` to grill the idea and file it as an issue once nothing is open.
 2. `/spec <issue>` to turn the issue into a change and publish the plan.
 3. `/apply` to implement it on the change branch.
 4. `/ship` to open the pull request once CI is green.

@@ -21,7 +21,7 @@ body:
     id: requirements
     attributes:
       label: Requirements
-      description: One SHALL/MUST statement per line.
+      description: One SHALL/MUST statement per line. A line without SHALL or MUST is prose, and G1 rejects it.
     validations:
       required: true
   - type: textarea
@@ -35,11 +35,20 @@ body:
     id: out_of_scope
     attributes:
       label: Out of scope
+      description: What this change will not do, and why.
     validations:
       required: false
+  - type: textarea
+    id: grill
+    attributes:
+      label: Grill
+      description: One closed decision per line. `/idea` writes it; a human filing by hand leaves what was decided.
+    validations:
+      required: true
   - type: textarea
     id: open_questions
     attributes:
       label: Open questions
+      description: Write None when nothing is open. An open decision blocks the change.
     validations:
       required: false

@@ -75,23 +75,204 @@ trap 'rm -rf "$g1"' EXIT
   git commit -qm "feat: change"
 
   mkdir -p bin
-  incomplete() { printf '#!/bin/sh\nprintf "### User story\\n\\nA.\\n\\n### Context\\n\\nB.\\n\\n### Requirements\\n\\nC.\\n"\n'; }
-  complete() { printf '#!/bin/sh\nprintf "### User story\\n\\nA.\\n\\n### Context\\n\\nB.\\n\\n### Requirements\\n\\nC.\\n\\n### Success criteria\\n\\nD.\\n"\n'; }
+  body_file=$PWD/body.txt
 
-  incomplete > bin/gh
+  # The fake gh prints whatever body.txt holds, so each case is one heredoc.
+  cat > bin/gh <<'FAKE'
+#!/bin/sh
+cat "$(dirname "$0")/../body.txt"
+FAKE
   chmod +x bin/gh
-  out=$(PATH="$PWD/bin:$PATH" BASE_REF=main HEAD_REF=feat/1-x sh "$root/scripts/check-gates.sh" 2>&1 || true)
+
+  run_g1() {
+    PATH="$PWD/bin:$PATH" BASE_REF=main HEAD_REF=feat/1-x sh "$root/scripts/check-gates.sh" 2>&1 || true
+  }
+
+  # Missing a required section.
+  cat > "$body_file" <<'BODY'
+### User story
+
+A.
+
+### Context
+
+B.
+
+### Requirements
+
+- A SHALL b.
+
+### Success criteria
+
+- C.
+BODY
+  out=$(run_g1)
   case "$out" in
     *"FAIL G1 issue #1"*) ;;
     *) echo "FAIL: G1 did not flag a missing section" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
   esac
+  case "$out" in
+    *"missing section(s): Grill"*) ;;
+    *) echo "FAIL: G1 did not name the missing Grill section" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
 
-  complete > bin/gh
-  chmod +x bin/gh
-  out=$(PATH="$PWD/bin:$PATH" BASE_REF=main HEAD_REF=feat/1-x sh "$root/scripts/check-gates.sh" 2>&1 || true)
+  # A complete, decidable issue passes.
+  cat > "$body_file" <<'BODY'
+### User story
+
+A.
+
+### Context
+
+B.
+
+### Requirements
+
+- A SHALL b.
+
+### Success criteria
+
+- C.
+
+### Grill
+
+- The boundary is decided.
+
+### Open questions
+
+None
+BODY
+  out=$(run_g1)
   case "$out" in
     *"PASS G1 issue #1"*) ;;
     *) echo "FAIL: G1 did not pass a complete issue" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
+
+  # A subsection inside Requirements belongs to the section: the first version
+  # of this gate stopped at the first "###" and reported a false "no requirement".
+  cat > "$body_file" <<'BODY'
+## User story
+
+A.
+
+## Context
+
+B.
+
+## Requirements
+
+### The grill
+
+- The intake SHALL grill the frontier.
+
+### The gate
+
+- G1 MUST fail on an open question.
+
+## Success criteria
+
+- C.
+
+## Grill
+
+- The boundary is decided.
+BODY
+  out=$(run_g1)
+  case "$out" in
+    *"PASS G1 issue #1"*) ;;
+    *) echo "FAIL: G1 stopped reading Requirements at a subsection" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
+
+  # A requirement that states no obligation is prose, not a requirement.
+  cat > "$body_file" <<'BODY'
+### User story
+
+A.
+
+### Context
+
+B.
+
+### Requirements
+
+- Improve the intake.
+
+### Success criteria
+
+- C.
+
+### Grill
+
+- The boundary is decided.
+BODY
+  out=$(run_g1)
+  case "$out" in
+    *"requirement(s) without SHALL or MUST"*) ;;
+    *) echo "FAIL: G1 did not flag a requirement without SHALL or MUST" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
+
+  # An open question is an undecided issue; None is the empty form.
+  cat > "$body_file" <<'BODY'
+### User story
+
+A.
+
+### Context
+
+B.
+
+### Requirements
+
+- A SHALL b.
+
+### Success criteria
+
+- C.
+
+### Grill
+
+- The boundary is decided.
+
+### Open questions
+
+- Should the gate be advisory first?
+BODY
+  out=$(run_g1)
+  case "$out" in
+    *"open question(s)"*) ;;
+    *) echo "FAIL: G1 did not flag an open question" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
+
+  # "None" is the only accepted way to say there is nothing open.
+  cat > "$body_file" <<'BODY'
+### User story
+
+A.
+
+### Context
+
+B.
+
+### Requirements
+
+- A SHALL b.
+
+### Success criteria
+
+- C.
+
+### Grill
+
+- The boundary is decided.
+
+### Open questions
+
+None.
+BODY
+  out=$(run_g1)
+  case "$out" in
+    *"PASS G1 issue #1"*) ;;
+    *) echo "FAIL: G1 did not accept None as empty Open questions" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
   esac
 
   # An unauthenticated gh must SKIP, not FAIL. A failing gh exits non-zero with
