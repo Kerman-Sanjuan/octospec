@@ -185,6 +185,30 @@ func TestHeartbeatWithoutALock(t *testing.T) {
 	}
 }
 
+// A heartbeat that lost the race against a force-clear plus a fresh acquire must not overwrite the
+// new holder's record with a lease for work that is no longer happening.
+func TestHeartbeatDoesNotOverwriteANewHolder(t *testing.T) {
+	repo := t.TempDir()
+	before := Record{
+		Change:     "gh-1-demo",
+		Host:       host(t),
+		AcquiredAt: time.Now().UTC(),
+		ExpiresAt:  time.Now().UTC().Add(time.Minute),
+	}
+	next := before
+	next.Change = "gh-2-other"
+	next.AcquiredAt = before.AcquiredAt.Add(time.Second)
+	write(t, repo, next)
+
+	err := replaceUnchanged(Path(repo), before, before)
+	if !errors.Is(err, ErrHeld) {
+		t.Fatalf("want ErrHeld, got %v", err)
+	}
+	if st, _ := Status(repo); st.Record.Change != "gh-2-other" {
+		t.Fatalf("the new holder was overwritten: %+v", st.Record)
+	}
+}
+
 func TestUnreadableLockIsStale(t *testing.T) {
 	repo := t.TempDir()
 	if err := os.MkdirAll(filepath.Dir(Path(repo)), 0o755); err != nil {

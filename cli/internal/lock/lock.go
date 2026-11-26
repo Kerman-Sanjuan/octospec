@@ -158,6 +158,7 @@ func Heartbeat(repo, change string, ttl time.Duration) (Record, error) {
 	if err := json.Unmarshal(b, &r); err != nil {
 		return Record{}, fmt.Errorf("%w: the lock file is unreadable", ErrStale)
 	}
+	before := r
 	if r.Change != change {
 		return Record{}, fmt.Errorf("%w: held by %q, not %q", ErrHeld, r.Change, change)
 	}
@@ -167,7 +168,7 @@ func Heartbeat(repo, change string, ttl time.Duration) (Record, error) {
 			now.Sub(exp).Round(time.Second))
 	}
 	r.ExpiresAt = now.UTC().Add(ttl)
-	if err := replace(p, r); err != nil {
+	if err := replaceUnchanged(p, r, before); err != nil {
 		return Record{}, err
 	}
 	return r, nil
@@ -218,19 +219,44 @@ func tryCreate(p, change string, ttl time.Duration) (Record, bool, error) {
 	return rec, true, nil
 }
 
-// replace writes the record through a temporary file and renames it over the lock, so a reader
-// never sees half a lease.
-func replace(p string, r Record) error {
+// replaceUnchanged rewrites the lease only if the lock it read is still the lock on disk: same
+// change and same acquisition instant. A heartbeat that lost the race against a force-clear plus a
+// fresh acquire would otherwise overwrite that holder's record with a lease extending work that is
+// no longer happening. The window shrinks to microseconds rather than closing, which is the honest
+// limit of a lock built on a file.
+func replaceUnchanged(p string, r, before Record) error {
+	cur, err := os.ReadFile(p)
+	if errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("%w: the lock disappeared while extending it", ErrHeld)
+	}
+	if err != nil {
+		return err
+	}
+	var onDisk Record
+	if err := json.Unmarshal(cur, &onDisk); err != nil || onDisk.Change != before.Change ||
+		!onDisk.AcquiredAt.Equal(before.AcquiredAt) {
+		return fmt.Errorf("%w: the lock changed while extending it, now held by %q", ErrHeld, onDisk.Change)
+	}
 	b, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
 		return err
 	}
-	tmp := p + ".tmp"
-	if err := os.WriteFile(tmp, append(b, '\n'), 0o644); err != nil {
+	tmp, err := os.CreateTemp(filepath.Dir(p), "specs.lock.*")
+	if err != nil {
 		return err
 	}
-	if err := os.Rename(tmp, p); err != nil {
-		os.Remove(tmp)
+	name := tmp.Name()
+	if _, err := tmp.Write(append(b, '\n')); err != nil {
+		tmp.Close()
+		os.Remove(name)
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(name)
+		return err
+	}
+	if err := os.Rename(name, p); err != nil {
+		os.Remove(name)
 		return err
 	}
 	return nil
