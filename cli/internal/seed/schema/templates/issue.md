@@ -21,3 +21,13 @@ As a <role>, I want <capability>, so that <benefit>.
 ## Out of scope
 
 - ...
+
+## Grill
+
+<!-- One closed decision per line, as the intake recorded it -->
+
+- ...
+
+## Open questions
+
+None

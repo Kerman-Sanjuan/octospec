@@ -13,6 +13,7 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
+      description: The smallest reproduction, not every detail of the session.
     validations:
       required: true
   - type: textarea
@@ -31,5 +32,41 @@ body:
     id: impact
     attributes:
       label: Impact
+      description: Who is affected and how badly.
+    validations:
+      required: false
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requirements
+      description: What the fix SHALL do, one SHALL/MUST statement per line. G1 rejects a line without one.
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: Success criteria
+      description: The observation that shows it is fixed.
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: Adjacent behaviour this fix will not touch.
+    validations:
+      required: false
+  - type: textarea
+    id: grill
+    attributes:
+      label: Grill
+      description: One closed decision per line. `/bug` writes it; a human filing by hand leaves what was decided.
+    validations:
+      required: true
+  - type: textarea
+    id: open_questions
+    attributes:
+      label: Open questions
+      description: Write None when nothing is open. An open decision blocks the change.
     validations:
       required: false
