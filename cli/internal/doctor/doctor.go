@@ -94,7 +94,7 @@ func Run(repo string) ([]Check, error) {
 	return checks, nil
 }
 
-// checkLock reports who holds the archive lock. A free lock is healthy; a stale one is not,
+// checkLock reports who holds the archive lock. A free lock is healthy; an expired lease is not,
 // because the next /archive will refuse to run until somebody clears it.
 func checkLock(repo string) Check {
 	st, err := lock.Status(repo)
@@ -105,11 +105,12 @@ func checkLock(repo string) Check {
 	case !st.Held:
 		return Check{"archive lock", true, "free"}
 	case st.Stale:
-		return Check{"archive lock", false, fmt.Sprintf("stale: %s (%s); clear with `octospec lock release --force --change %s`",
-			st.Record.Change, st.Why, st.Record.Change)}
+		return Check{"archive lock", false, fmt.Sprintf("stale: %s; held by %s; clear with `octospec lock release --force --change %s`",
+			st.Why, st.Record.Change, st.Record.Change)}
 	default:
-		return Check{"archive lock", true, fmt.Sprintf("held by %s since %s on %s",
-			st.Record.Change, st.Record.AcquiredAt.Format(time.RFC3339), st.Record.Host)}
+		return Check{"archive lock", true, fmt.Sprintf("held by %s since %s on %s, lease expires in %s",
+			st.Record.Change, st.Record.AcquiredAt.Format(time.RFC3339), st.Record.Host,
+			time.Until(st.Record.Expiry()).Round(time.Minute))}
 	}
 }
 

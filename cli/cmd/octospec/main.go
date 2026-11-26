@@ -56,7 +56,7 @@ func newLockCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
 
 	var acquireChange string
-	var wait time.Duration
+	var wait, acquireTTL time.Duration
 	acquire := &cobra.Command{
 		Use:   "acquire",
 		Short: "Take the archive lock for a change",
@@ -65,17 +65,19 @@ func newLockCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			rec, err := lock.Acquire(root, acquireChange, wait)
+			rec, err := lock.Acquire(root, acquireChange, wait, acquireTTL)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "error:", err)
 				os.Exit(lockExitCode(err))
 			}
-			fmt.Printf("lock held by %s (pid %d on %s)\n", rec.Change, rec.PID, rec.Host)
+			fmt.Printf("lock held by %s on %s, lease expires in %s\n",
+				rec.Change, rec.Host, time.Until(rec.Expiry()).Round(time.Minute))
 			return nil
 		},
 	}
 	acquire.Flags().StringVar(&acquireChange, "change", "", "change that will hold the lock")
 	acquire.Flags().DurationVar(&wait, "wait", 0, "how long to wait for a free lock, e.g. 2m")
+	acquire.Flags().DurationVar(&acquireTTL, "ttl", 0, "how long the lease lasts without a heartbeat (default 30m)")
 
 	status := &cobra.Command{
 		Use:   "status",
@@ -93,11 +95,12 @@ func newLockCmd() *cobra.Command {
 			case !st.Held:
 				fmt.Println("free")
 			case st.Stale:
-				fmt.Printf("stale: held by %s on %s (%s); clear it with `octospec lock release --force --change %s`\n",
-					st.Record.Change, st.Record.Host, st.Why, st.Record.Change)
+				fmt.Printf("stale: %s; held by %s on %s; clear it with `octospec lock release --force --change %s`\n",
+					st.Why, st.Record.Change, st.Record.Host, st.Record.Change)
 			default:
-				fmt.Printf("held by %s since %s on %s (pid %d)\n",
-					st.Record.Change, st.Record.AcquiredAt.Format(time.RFC3339), st.Record.Host, st.Record.PID)
+				fmt.Printf("held by %s since %s on %s (pid %d), lease expires in %s\n",
+					st.Record.Change, st.Record.AcquiredAt.Format(time.RFC3339), st.Record.Host, st.Record.PID,
+					time.Until(st.Record.Expiry()).Round(time.Minute))
 			}
 			return nil
 		},
@@ -123,7 +126,30 @@ func newLockCmd() *cobra.Command {
 	release.Flags().StringVar(&releaseChange, "change", "", "change that holds the lock")
 	release.Flags().BoolVar(&force, "force", false, "clear the lock even if another change holds it")
 
-	cmd.AddCommand(acquire, status, release)
+	var heartbeatChange string
+	var heartbeatTTL time.Duration
+	heartbeat := &cobra.Command{
+		Use:   "heartbeat",
+		Short: "Extend the lease you already hold",
+		RunE: func(c *cobra.Command, args []string) error {
+			root, err := repoRoot(repo)
+			if err != nil {
+				return err
+			}
+			rec, err := lock.Heartbeat(root, heartbeatChange, heartbeatTTL)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "error:", err)
+				os.Exit(lockExitCode(err))
+			}
+			fmt.Printf("lease extended for %s, expires in %s\n",
+				rec.Change, time.Until(rec.Expiry()).Round(time.Minute))
+			return nil
+		},
+	}
+	heartbeat.Flags().StringVar(&heartbeatChange, "change", "", "change that holds the lock")
+	heartbeat.Flags().DurationVar(&heartbeatTTL, "ttl", 0, "how long the lease lasts from now (default 30m)")
+
+	cmd.AddCommand(acquire, status, release, heartbeat)
 	return cmd
 }
 
