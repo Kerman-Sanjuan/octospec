@@ -6,6 +6,18 @@ The command loads an OpenSpec skill (`openspec-propose`, and the others) that is
 
 Run `octospec install` again. It calls `openspec init --tools`, which writes the skills per tool. Then confirm with `octospec doctor`.
 
+## `/archive` says the archive lock is held
+
+Another archive is writing `openspec/specs/`. That is the lock doing its job: two changes folding
+deltas into the same capability at once lose requirements silently.
+
+- `octospec lock status` says who holds it, on which host, and since when.
+- If that run is still alive, wait or let it finish. Do not clear the lock.
+- If `status` says **stale** (the process is gone, or the lock was taken on another host more than
+  15 minutes ago), clear it deliberately: `octospec lock release --force --change <name>`.
+- Nothing clears a stale lock automatically, on purpose: a slow archive must never lose to an
+  impatient one.
+
 ## "label not found"
 
 The workflow labels are missing. Run `octospec seed --repo .`, which provisions them. Confirm with `octospec doctor`.
