@@ -12,9 +12,10 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 | `octospec uninstall [--repo <path>]` | Remove the files octospec manages, keeping any you edited by hand. |
 | `octospec doctor [--repo <path>]` | Report what is missing, without changing anything. |
 | `octospec models [--set <role>=<model>] [--repo <path>]` | Set the model each agent role uses. Opens a TUI when no `--set` is given, listing the known models for the installed tools with a free-form fallback. |
-| `octospec lock status [--repo <path>]` | Report whether the lock that guards `openspec/specs/` is free, held (by which change, on which host, since when) or stale. Read-only. |
-| `octospec lock acquire --change <name> [--wait 2m] [--repo <path>]` | Take the archive lock. Exit 3 when another change holds it and the wait expired, 4 when the holder is gone, 1 on any other error. |
-| `octospec lock release --change <name> [--force] [--repo <path>]` | Release the lock. `--force` clears a stale lock deliberately; nothing clears it automatically. |
+| `octospec lock status [--repo <path>]` | Report whether the lock that guards `openspec/specs/` is free, held (by which change, on which host, since when, and how long the lease has left) or stale. Read-only. |
+| `octospec lock acquire --change <name> [--wait 2m] [--ttl 30m] [--repo <path>]` | Take the archive lock as a lease. Exit 3 when another change holds it and the wait expired, 4 when the lease has expired, 1 on any other error. |
+| `octospec lock heartbeat --change <name> [--ttl 30m] [--repo <path>]` | Extend the lease you already hold. Fails on an expired lease instead of reviving it, because by then somebody else may hold the lock. |
+| `octospec lock release --change <name> [--force] [--repo <path>]` | Release the lock. `--force` breaks a lease that is still valid, deliberately; nothing expires it early and nothing clears it automatically. |
 | `octospec review --findings <file> [--json] [--enforce] [--changed-files a,b] [--diff-lines n] [--familiar]` | Score a pull request from a list of findings: 0-10, a risk level and a verdict. Reports by default; `--enforce` exits 5 when the verdict asks for a human. |
 | `octospec version` | Print the version. |
 
