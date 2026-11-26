@@ -50,5 +50,14 @@ You find; the command scores. Never write the number yourself: it comes from
 7. If the command failed because a finding named an unknown axis or type, fix the finding, not the
    command.
 
+10. Write the result, so a scheduler can tell a clean review from one that never happened:
+
+    ```
+    octospec result write --stage review --issue <issue> --change <change> --outcome ok \
+      --artifact <comment url>
+    ```
+
+    With `--outcome stalled --reason needs_human` when the verdict asks for a person.
+
 The repository's numbers live in `.octospec/review.json`. Changing the threshold is an edit there,
 never a release of octospec.

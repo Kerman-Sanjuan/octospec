@@ -50,7 +50,13 @@ does. If the fold is slow, extend it instead of hoping.
 12. Delete the merged branch: `git branch -d feat|fix/<issue>-<slug>` (the
     prefix comes from the issue's `type:*` label). Optionally delete it
     remotely: `git push origin --delete feat|fix/<issue>-<slug>`.
-13. Report the archive path, the spec files updated, and that the lock is free.
+13. Write the result:
+
+    ```
+    octospec result write --stage archive --issue <issue> --change <change> --outcome ok \
+      --artifact openspec/changes/archive/<archive-dir>
+    ```
+14. Report the archive path, the spec files updated, and that the lock is free.
 
 The push in step 8 lands because the branch protection lets the owner push
 maintenance commits such as an archive (see `scripts/protect-main.sh`).
