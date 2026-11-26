@@ -46,10 +46,18 @@ to wait and long enough to not interrupt. `--ttl` overrides it for the rare long
 If the lease has expired, somebody may already have taken it. Refusing the heartbeat turns a silent
 double-holder into an error the agent must report. Reviving would be the same bug in a new costume.
 
-### Rewriting the lease is atomic
+### Rewriting the lease is atomic, and refuses to clobber
 
-`heartbeat` writes a temporary file and renames it over the lock, so a reader never sees half a
-record. `O_EXCL` still governs creation, so acquire stays a single atomic act.
+`heartbeat` writes a uniquely named temporary file and renames it over the lock, so a reader never
+sees half a record and two heartbeats never share a temporary path. Before the rename it re-reads
+the lock and checks that the change and the acquisition instant are the ones it read; if they
+moved, somebody cleared and re-acquired in between and the heartbeat fails instead of extending a
+lease for work that is no longer happening. `O_EXCL` still governs creation, so acquire stays a
+single atomic act.
+
+The window between the check and the rename is microseconds and stays open: closing it needs an
+advisory lock on the file, which buys little for a guard whose worst case is a repository where two
+archives are minutes apart.
 
 ### Records without `expires_at` are read as `acquired_at + default TTL`
 

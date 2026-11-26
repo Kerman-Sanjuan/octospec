@@ -12,6 +12,8 @@
 - [x] 2.1 `lock.Heartbeat(repo, change, ttl)` extends a valid lease and fails on an expired one.
 - [x] 2.2 The rewrite is atomic: temporary file plus rename.
 - [x] 2.3 A heartbeat naming another change fails, and says who holds it.
+- [x] 2.4 The rewrite refuses when the record changed under it, so a heartbeat never clobbers a new
+  holder.
 
 ## 3. Command surface
 
