@@ -18,6 +18,8 @@ var workflowLabels = []label{
 	{"status:spec-ready", "0e8a16", "Spec artifacts created and validated"},
 	{"status:in-progress", "fbca04", "Work in progress"},
 	{"status:in-review", "1d76db", "Under review"},
+	{"mode:autonomous", "6f42c1", "Cleared to be implemented by the machine, unattended"},
+	{"risk:high", "b60205", "The review found high risk: read it before merging"},
 }
 
 // InstallLabels provisions the workflow labels in repo via gh, idempotently.

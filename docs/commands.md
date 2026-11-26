@@ -16,9 +16,11 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 | `octospec lock acquire --change <name> [--wait 2m] [--ttl 30m] [--repo <path>]` | Take the archive lock as a lease. Exit 3 when another change holds it and the wait expired, 4 when the lease has expired, 1 on any other error. |
 | `octospec lock heartbeat --change <name> [--ttl 30m] [--repo <path>]` | Extend the lease you already hold. Fails on an expired lease instead of reviving it, because by then somebody else may hold the lock. |
 | `octospec lock release --change <name> [--force] [--repo <path>]` | Release the lock. `--force` breaks a lease that is still valid, deliberately; nothing expires it early and nothing clears it automatically. |
-| `octospec review --findings <file> [--json] [--enforce] [--changed-files a,b] [--diff-lines n] [--familiar]` | Score a pull request from a list of findings: 0-10, a risk level and a verdict. Reports by default; `--enforce` exits 5 when the verdict asks for a human. |
+| `octospec review --findings <file> [--json] [--enforce] [--changed-files a,b] [--diff-lines n] [--familiar] [--ledger <dir> --pr <n>]` | Score a pull request from a list of findings: 0-10, a risk level and a verdict. Reports by default; `--enforce` exits 5 when the verdict asks for a human. `--ledger` writes one record per pull request, rewritten on every run. |
+| `octospec ledger [--dir .octospec/ledger]` | Print the review records as a table plus counts by risk and verdict and the mean score. Files only, works offline. |
 | `octospec result write --stage <s> --issue <n> --outcome ok\|stalled [--reason <r>] [--artifact <url>] [--change <c>] [--duration-ms <n>] [--sha <sha>] [--json]` | Write what one stage execution did, to `.octospec/runs/<stage>-<sha>.json`. The vocabulary is closed: `reason` is one of `timeout`, `crashed`, `empty_diff`, `no_pr_requested`, `needs_human`, `budget_exhausted`, and an `ok` from `ship` or `archive` must carry an artefact. |
 | `octospec result show <file>` | Print one record, and exit non-zero when it does not validate. |
+
 | `octospec version` | Print the version. |
 
 ## Tools
