@@ -51,7 +51,7 @@ func TestAgentsEmbedded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"idea", "spec", "apply", "ship", "archive"}
+	want := []string{"idea", "spec", "apply", "ship", "review", "archive"}
 	if len(agents) != len(want) {
 		t.Fatalf("want %d agents, got %d", len(want), len(agents))
 	}

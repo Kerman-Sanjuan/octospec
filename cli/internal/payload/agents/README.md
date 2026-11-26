@@ -17,7 +17,7 @@ Real dispatch is a follow-up.
 | Field | Meaning |
 |---|---|
 | `name` | The file name, without extension. |
-| `stage` | One of `idea`, `spec`, `apply`, `ship`, `archive`. |
+| `stage` | One of `idea`, `spec`, `apply`, `ship`, `review`, `archive`. |
 | `role` | The model role: `thinking`, `implementer`, or `reviewer`. |
 | `description` | One line, shown by the tool. |
 | `skills` | The OpenSpec skills the agent may load, comma-separated. |
@@ -41,7 +41,11 @@ the canonical body stays portable.
 | spec | thinking | read, search, edit, shell |
 | apply | implementer | read, search, edit, shell |
 | ship | reviewer | read, search, shell |
+| review | reviewer | read, search, shell |
 | archive | reviewer | read, search, edit, shell |
+
+`review` has no `edit` on purpose: a reviewer that can fix what it finds stops reading critically and
+becomes an implementer. `ship` has no `edit` for the same reason.
 
 ## Portability
 
@@ -67,7 +71,7 @@ default, so a rendered agent omits the `model` field.
 |---|---|
 | `thinking` | idea, spec |
 | `implementer` | apply |
-| `reviewer` | ship, archive |
+| `reviewer` | ship, review, archive |
 
 ## Render rules
 
