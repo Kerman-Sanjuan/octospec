@@ -39,6 +39,8 @@ test -f "$repo/.octospec/review.json"
 # Count only command files, not directories that OpenSpec may add (for
 # example .claude/commands/opsx/).
 test "$(find "$repo/.claude/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" = "7"
+# The PR is the artifact that gets merged, so the stage that opens it must copy the issue's kind.
+grep -q 'mode:autonomous' "$repo/.claude/commands/ship.md"
 test "$(find "$repo/.claude/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" = "6"
 test -f "$repo/.claude/agents/review.md"
 test -f "$repo/.claude/agents/apply.md"
