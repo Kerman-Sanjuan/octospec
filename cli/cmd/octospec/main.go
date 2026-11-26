@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kerman-sanjuan/octospec/cli/internal/budget"
 	"github.com/kerman-sanjuan/octospec/cli/internal/doctor"
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
 	"github.com/kerman-sanjuan/octospec/cli/internal/lock"
@@ -43,7 +44,7 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newReviewCmd(), newLedgerCmd(), newResultCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newReviewCmd(), newLedgerCmd(), newResultCmd(), newBudgetCmd(), newVersionCmd())
 	return root
 }
 
@@ -172,6 +173,73 @@ func lockExitCode(err error) int {
 // reviewExitCode is what a CI job blocks on. 5 means "the review asks for a human", which is not
 // the same as the command failing (1) and is deliberately distinct from the lock's 3 and 4.
 const reviewExitCode = 5
+
+// newBudgetCmd answers whether a run still has allowance. Exit 6 when it does not, so a wrapper stops
+// the job without parsing English.
+func newBudgetCmd() *cobra.Command {
+	var repo, stage string
+	var plan, asJSON bool
+	var u budget.Usage
+	var minutes float64
+	cmd := &cobra.Command{
+		Use:   "budget",
+		Short: "Report whether a run has budget left, and print the limits",
+		Args:  cobra.NoArgs,
+		RunE: func(c *cobra.Command, args []string) error {
+			root, err := repoRoot(repo)
+			if err != nil {
+				return err
+			}
+			policy, err := budget.Load(root)
+			if err != nil {
+				return err
+			}
+			limits := policy.With(stage)
+			if plan {
+				if asJSON {
+					b, err := json.MarshalIndent(map[string]any{"stage": stage, "limits": limits}, "", "  ")
+					if err != nil {
+						return err
+					}
+					fmt.Println(string(b))
+				} else {
+					fmt.Printf("%s: %d min, %d tokens, %d files, %d diff lines, %d tasks\n",
+						stage, limits.MaxMinutes, limits.MaxTokens, limits.MaxFiles,
+						limits.MaxDiffLines, limits.MaxTasks)
+				}
+				return nil
+			}
+			u.Minutes = minutes
+			v := budget.Check(limits, u)
+			if asJSON {
+				b, err := json.MarshalIndent(v, "", "  ")
+				if err != nil {
+					return err
+				}
+				fmt.Println(string(b))
+			} else {
+				fmt.Println(v.Render())
+			}
+			if !v.OK {
+				os.Exit(budgetExitCode)
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	cmd.Flags().StringVar(&stage, "stage", "apply", "stage whose limits apply")
+	cmd.Flags().BoolVar(&plan, "plan", false, "print the limits instead of checking a run")
+	cmd.Flags().BoolVar(&asJSON, "json", false, "print JSON")
+	cmd.Flags().Float64Var(&minutes, "elapsed-minutes", 0, "minutes elapsed so far")
+	cmd.Flags().IntVar(&u.Tokens, "tokens", -1, "tokens spent; -1 when the agent cannot report them")
+	cmd.Flags().IntVar(&u.Files, "files", 0, "files touched so far")
+	cmd.Flags().IntVar(&u.DiffLines, "diff-lines", 0, "added plus removed lines so far")
+	cmd.Flags().IntVar(&u.Tasks, "tasks", 0, "tasks completed so far")
+	return cmd
+}
+
+// budgetExitCode says "the run has no allowance left". A wrapper stops the job; it does not retry.
+const budgetExitCode = 6
 
 // newResultCmd is the contract between a stage and whatever runs it: one object per execution, with
 // a closed vocabulary, so a scheduler decides retry or park without reading an agent's prose.
