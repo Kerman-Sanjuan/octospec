@@ -26,7 +26,16 @@ Load the `openspec-apply-change` skill and follow it.
 6. Run the project's build and tests before reporting a group done. Report a
    failure as a failure.
 
-7. Leave the record of what happened:
+7. Keep `openspec/changes/<change>/coverage.md` current: one line per requirement of the change,
+   pointing at the thing that proves it.
+
+   ```
+   - <requirement title, exactly as in the spec> -> <test name or script>
+   ```
+
+   A requirement with no line, or a line pointing at a test you renamed an hour ago, is a requirement
+   nobody can prove. G9 warns, and the review will ask.
+8. Leave the record of what happened:
 
    ```
    octospec result write --stage apply --issue <issue> --change <change> --outcome ok
