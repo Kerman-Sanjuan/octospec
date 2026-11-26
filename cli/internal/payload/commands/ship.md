@@ -15,12 +15,22 @@ Open the PR for the current branch once the gates are green.
    - the change name and artifact paths,
    - the `openspec validate` result.
    `gh pr create --title "<type>(#<issue>): <summary>" --body-file <file>`
-4. Run or observe CI (`gh pr checks --watch`). If any gate fails, hand the
+4. Copy the issue's kind and mode onto the pull request, verbatim:
+
+   ```
+   gh issue view <issue> --json labels --jq '[.labels[].name | select(startswith("type:") or . == "mode:autonomous") | "--add-label=" + .] | .[]'
+   ```
+
+   Pass those arguments to `gh pr edit <pr>`. If the issue carries no `type:*` label, stop and name
+   the issue: a pull request with no kind cannot be filtered, and guessing it from the title is how
+   labels stop meaning anything. Do not copy `status:*`: status describes the issue's journey, and
+   the pull request already says it is under review by existing.
+5. Run or observe CI (`gh pr checks --watch`). If any gate fails, hand the
    specific failing check back to `/apply` to fix and iterate - do not report a
    bare failure, and do not continue until it is green.
-5. Once every gate is green, add label `status:in-review`; leave
+6. Once every gate is green, add label `status:in-review` to the **issue**; leave
    `status:in-progress` (the `/archive` step clears it).
-6. Write the result you are handing over:
+7. Write the result you are handing over:
 
    ```
    octospec result write --stage ship --issue <issue> --change <change> --outcome ok \
@@ -31,4 +41,4 @@ Open the PR for the current branch once the gates are green.
    when it returned without working. If CI never goes green, write
    `--outcome stalled --reason timeout`; if the change should not ship after all,
    `--reason no_pr_requested`.
-7. Print the PR URL.
+8. Print the PR URL.
