@@ -140,7 +140,7 @@ octospec/
 ### Gates
 
 Hard gates block CI or merge; advisory gates warn. `scripts/check-gates.sh` runs
-the gates that do not depend on the target stack (G1 to G4, and G6 to G8); a
+the gates that do not depend on the target stack (G1 to G4, and G6 to G9); a
 repository adds its own build/test gate for G5.
 
 | Gate | Checks | Strength |
@@ -153,6 +153,7 @@ repository adds its own build/test gate for G5.
 | G6 | a PR touching `openspec/changes/<name>/` carries a spec delta | hard |
 | G7 | all tasks checked before merge | advisory |
 | G8 | one OpenSpec change per issue | advisory |
+| G9 | every requirement names the check that proves it (`coverage.md`) | advisory |
 
 ## Install
 
