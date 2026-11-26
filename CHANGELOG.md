@@ -5,6 +5,8 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 ## Unreleased
 
 ### Added
+- `octospec result`: every stage can leave a machine-readable record of what happened and why, with a
+  closed vocabulary for reasons and a JSON Schema for consumers.
 - `octospec review`: score a pull request from a list of findings and decide whether it needs a
   human.
 - `/review`: publish that score on the pull request, as one comment updated in place.
