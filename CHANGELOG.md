@@ -5,6 +5,9 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 ## Unreleased
 
 ### Added
+- `octospec review`: score a pull request from a list of findings and decide whether it needs a
+  human.
+- `/review`: publish that score on the pull request, as one comment updated in place.
 - `octospec lock` to inspect and manage the lock that guards `openspec/specs/` during archive.
 - `/archive` now parks instead of racing when another archive holds the lock.
 
