@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -283,6 +284,13 @@ func newReviewCmd() *cobra.Command {
 				Familiar:     familiar,
 			})
 
+			if ledgerDir != "" && head == "" {
+				// The spec says the record carries the commit; asking for it twice is how a field
+				// ends up empty in every row.
+				if out, err := exec.Command("git", "-C", root, "rev-parse", "--short", "HEAD").Output(); err == nil {
+					head = strings.TrimSpace(string(out))
+				}
+			}
 			if ledgerDir != "" {
 				rec := review.Record{
 					PR: pr, Issue: issue, Head: head,

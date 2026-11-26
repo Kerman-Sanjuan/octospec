@@ -154,8 +154,10 @@ func Render(rs []Record, skipped int) string {
 	fmt.Fprintf(&b, "%-6s %-6s %-7s %-6s %-10s %s\n", "PR", "SCORE", "RISK", "VERDICT", "WHEN", "WHY")
 	for _, r := range rs {
 		why := strings.Join(r.RiskWhy, "; ")
-		if len(why) > 60 {
-			why = why[:57] + "..."
+		if runes := []rune(why); len(runes) > 60 {
+			// Truncate by runes: a path with an accent is two bytes in UTF-8, and cutting it in
+			// half prints a replacement character in the one column that explains the row.
+			why = string(runes[:57]) + "..."
 		}
 		fmt.Fprintf(&b, "%-6d %-6.1f %-7s %-6s %-10s %s\n",
 			r.PR, r.Score, r.Risk, r.Verdict, r.At.Format("2006-01-02"), why)
