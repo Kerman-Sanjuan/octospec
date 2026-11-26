@@ -179,4 +179,3 @@ func TestSpecCommandReadsTheGrill(t *testing.T) {
 		t.Error("spec command does not say it must not re-ask a recorded decision")
 	}
 }
-

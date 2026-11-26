@@ -34,7 +34,7 @@
 
 ## 6. Verification
 
-- [ ] 6.1 `cd cli && go test ./...` and `go vet ./...`.
-- [ ] 6.2 `sh scripts/check-gates.sh` and `sh scripts/check-gates-test.sh`.
-- [ ] 6.3 `sh scripts/e2e-test.sh`.
-- [ ] 6.4 Run the new gate against issue #134 itself: it must pass.
+- [x] 6.1 `cd cli && go test ./...` and `go vet ./...`.
+- [x] 6.2 `sh scripts/check-gates.sh` and `sh scripts/check-gates-test.sh`.
+- [x] 6.3 `sh scripts/e2e-test.sh`.
+- [x] 6.4 Run the new gate against issue #134 itself: it must pass.

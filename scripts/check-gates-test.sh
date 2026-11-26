@@ -148,6 +148,41 @@ BODY
     *) echo "FAIL: G1 did not pass a complete issue" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
   esac
 
+  # A subsection inside Requirements belongs to the section: the first version
+  # of this gate stopped at the first "###" and reported a false "no requirement".
+  cat > "$body_file" <<'BODY'
+## User story
+
+A.
+
+## Context
+
+B.
+
+## Requirements
+
+### The grill
+
+- The intake SHALL grill the frontier.
+
+### The gate
+
+- G1 MUST fail on an open question.
+
+## Success criteria
+
+- C.
+
+## Grill
+
+- The boundary is decided.
+BODY
+  out=$(run_g1)
+  case "$out" in
+    *"PASS G1 issue #1"*) ;;
+    *) echo "FAIL: G1 stopped reading Requirements at a subsection" >&2; printf '%s\n' "$out" >&2; exit 1 ;;
+  esac
+
   # A requirement that states no obligation is prose, not a requirement.
   cat > "$body_file" <<'BODY'
 ### User story
