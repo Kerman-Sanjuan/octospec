@@ -4,12 +4,15 @@ package seed
 
 import (
 	"embed"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/kerman-sanjuan/octospec/cli/internal/review"
 )
 
 //go:embed all:schema
@@ -53,6 +56,9 @@ func Run(opts Options) (Result, error) {
 		return r, err
 	}
 	if err := ensureGitignore(opts.Repo); err != nil {
+		return r, err
+	}
+	if err := ensureReviewPolicy(opts.Repo); err != nil {
 		return r, err
 	}
 	if opts.SkipLabels {
@@ -136,4 +142,24 @@ func ensureGitignore(repo string) error {
 	}
 	_, err = f.WriteString(prefix + gitignoreBlock)
 	return err
+}
+
+// ensureReviewPolicy writes the starting point for the review score, and never overwrites it: the
+// numbers belong to the repository from the moment it has them, and re-seeding must not reset a
+// threshold somebody tuned on purpose.
+func ensureReviewPolicy(repo string) error {
+	path := filepath.Join(repo, filepath.FromSlash(review.PolicyPath))
+	if _, err := os.Stat(path); err == nil {
+		return nil
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	b, err := json.MarshalIndent(review.DefaultPolicy(), "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, append(b, '\n'), 0o644)
 }

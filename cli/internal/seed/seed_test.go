@@ -52,3 +52,33 @@ func TestEnsureGitignoreKeepsExistingContent(t *testing.T) {
 		t.Fatalf("the block was not appended: %q", b)
 	}
 }
+
+func TestEnsureReviewPolicyWritesDefaultsOnce(t *testing.T) {
+	repo := t.TempDir()
+	if err := ensureReviewPolicy(repo); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(repo, ".octospec", "review.json")
+	b, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(b), "\"threshold\"") {
+		t.Fatalf("defaults do not carry a threshold: %s", b)
+	}
+	// A tuned policy must survive a re-seed.
+	tuned := []byte(`{"threshold": 8.5}`)
+	if err := os.WriteFile(path, tuned, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := ensureReviewPolicy(repo); err != nil {
+		t.Fatal(err)
+	}
+	after, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(after) != string(tuned) {
+		t.Fatalf("re-seeding overwrote a tuned policy: %s", after)
+	}
+}
