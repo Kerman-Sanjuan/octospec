@@ -246,6 +246,11 @@ func replaceUnchanged(p string, r, before Record) error {
 		return err
 	}
 	name := tmp.Name()
+	if err := tmp.Chmod(0o644); err != nil {
+		tmp.Close()
+		os.Remove(name)
+		return err
+	}
 	if _, err := tmp.Write(append(b, '\n')); err != nil {
 		tmp.Close()
 		os.Remove(name)
