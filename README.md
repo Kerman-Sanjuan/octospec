@@ -35,7 +35,7 @@ curl -fsSL https://raw.githubusercontent.com/Kerman-Sanjuan/octospec/main/instal
 octospec install --tool claude    # or pi, opencode, copilot
 octospec seed
 
-# 3. in your agent, run the loop: /idea -> /spec -> /apply -> /ship -> /archive
+# 3. in your agent, run the loop: /idea -> /spec -> /apply -> /ship -> /review -> /archive
 ```
 
 See [Install](#install) for every tool and every channel.
@@ -69,10 +69,13 @@ There is no dual write. Each artifact has exactly one authoritative home:
 /apply   ──▶ tasks, commits, checklist synced
               │
               ▼
-/ship    ──▶ PR (Closes #n) + CI gates                  ← human reviews and merges
+/ship    ──▶ PR (Closes #n) + CI gates
               │
               ▼
-/archive ──▶ specs updated, issue closed
+/review  ──▶ score 0-10 + risk                         ← human reads only what it flags
+              │
+              ▼
+/archive ──▶ specs updated, issue closed                ← human merges
 ```
 
 1. **`/idea`** interviews you for a feature and files the issue. The issue body
@@ -86,7 +89,11 @@ There is no dual write. Each artifact has exactly one authoritative home:
    insight per task) up to date.
 4. **`/ship`** opens a pull request that closes the issue (the branch was
    pushed by `/spec`).
-5. **`/archive`** archives the change, updates `openspec/specs/` (filling each
+5. **`/review`** reads the pull request against its own change, writes the findings as JSON, and
+   scores them: 0-10, a risk level, and a verdict. It publishes one `## Review` comment and states
+   that a process produced it. The risk decides who has to look; the score decides whether anybody
+   does. It never merges.
+6. **`/archive`** archives the change, updates `openspec/specs/` (filling each
    capability's Purpose), closes the issue, and deletes the merged branch.
 
 ### The issue timeline
@@ -249,6 +256,7 @@ Each stage runs on a scoped agent. The agents live once in
 | plan | `spec` | thinking | read, search, edit, shell |
 | execute | `apply` | implementer | read, search, edit, shell |
 | ship | `ship` | reviewer | read, search, shell |
+| review | `review` | reviewer | read, search, shell |
 | archive | `archive` | reviewer | read, search, edit, shell |
 
 The tool surface maps to each tool's native permission field. Claude, opencode,
@@ -278,6 +286,7 @@ tool default, and `octospec update` re-renders the agents with the new value.
 | `/spec <#\|url>` | plan | Turn an issue into a change, commit it on `feat\|fix/<issue>-<slug>`, publish one `## Plan` comment, validate, and label `status:spec-ready`. |
 | `/apply [change]` | execute | Work the tasks on the branch `/spec` created, group by group, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI; on failure, loop back to `/apply`; open the PR once the gates are green. |
+| `/review <#\|url>` | review | Score the pull request from structured findings: 0-10, risk, verdict. One `## Review` comment, updated in place, marked as agentic. |
 | `/archive [change]` | archive | Archive the change, sync `openspec/specs/` (filling each Purpose), commit and push, close the issue, and delete the merged branch. |
 
 ## Deeper documentation

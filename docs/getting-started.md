@@ -62,7 +62,8 @@ Start in your agent (pi, opencode, GitHub Copilot, or Claude Code):
 2. `/spec <issue>` to turn the issue into a change and publish the plan.
 3. `/apply` to implement it on the change branch.
 4. `/ship` to open the pull request once CI is green.
-5. `/archive` after the PR merges, to sync the specs and close the issue.
+5. `/review` to score the pull request and see whether it needs you.
+6. `/archive` after the PR merges, to sync the specs and close the issue.
 
 ## Next
 
