@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kerman-sanjuan/octospec/cli/internal/budget"
 	"github.com/kerman-sanjuan/octospec/cli/internal/config"
 	"github.com/kerman-sanjuan/octospec/cli/internal/lock"
 	"github.com/kerman-sanjuan/octospec/cli/internal/plan"
@@ -91,7 +92,26 @@ func Run(repo string) ([]Check, error) {
 
 	checks = append(checks, checkLock(repo))
 
+	checks = append(checks, checkBudget(repo))
+
 	return checks, nil
+}
+
+// checkBudget prints the ceilings a run will be held to. A repository cannot pretend it has budgets:
+// the answer is either its file or the defaults it never chose.
+func checkBudget(repo string) Check {
+	policy, err := budget.Load(repo)
+	if err != nil {
+		return Check{"budget", false, err.Error()}
+	}
+	l := policy.With("apply")
+	detail := fmt.Sprintf("%d min, %d tokens, %d files, %d diff lines, %d tasks",
+		l.MaxMinutes, l.MaxTokens, l.MaxFiles, l.MaxDiffLines, l.MaxTasks)
+	source := "defaults"
+	if _, err := os.Stat(filepath.Join(repo, filepath.FromSlash(budget.PolicyPath))); err == nil {
+		source = budget.PolicyPath
+	}
+	return Check{"budget", true, detail + " (" + source + ")"}
 }
 
 // checkLock reports who holds the archive lock. A free lock is healthy; an expired lease is not,

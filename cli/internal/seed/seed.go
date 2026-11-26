@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/kerman-sanjuan/octospec/cli/internal/budget"
 	"github.com/kerman-sanjuan/octospec/cli/internal/review"
 )
 
@@ -56,6 +57,9 @@ func Run(opts Options) (Result, error) {
 		return r, err
 	}
 	if err := ensureGitignore(opts.Repo); err != nil {
+		return r, err
+	}
+	if err := ensureBudgetPolicy(opts.Repo); err != nil {
 		return r, err
 	}
 	if err := ensureReviewPolicy(opts.Repo); err != nil {
@@ -142,6 +146,25 @@ func ensureGitignore(repo string) error {
 	}
 	_, err = f.WriteString(prefix + gitignoreBlock)
 	return err
+}
+
+// ensureBudgetPolicy writes the default limits once. A repository that has tuned them keeps them:
+// re-seeding must not reset a ceiling somebody lowered for a reason.
+func ensureBudgetPolicy(repo string) error {
+	path := filepath.Join(repo, filepath.FromSlash(budget.PolicyPath))
+	if _, err := os.Stat(path); err == nil {
+		return nil
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	b, err := json.MarshalIndent(budget.Policy{Limits: budget.Default()}, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, append(b, '\n'), 0o644)
 }
 
 // ensureReviewPolicy writes the starting point for the review score, and never overwrites it: the

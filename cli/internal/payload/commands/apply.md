@@ -26,7 +26,16 @@ Load the `openspec-apply-change` skill and follow it.
 6. Run the project's build and tests before reporting a group done. Report a
    failure as a failure.
 
-7. Leave the record of what happened:
+7. Check the budget after every task, never in the middle of one:
+
+   ```
+   octospec budget --stage apply --elapsed-minutes <m> --files <n> --diff-lines <n> --tasks <n> [--tokens <n>]
+   ```
+
+   Exit 6 means the allowance is gone. Commit the task you just finished, stop in a state the next run
+   can continue from, and write `--outcome stalled --reason budget_exhausted` in step 8. Never push
+   past the limit to "finish what I started": that is how a 25-file change becomes a 300-file one.
+8. Leave the record of what happened:
 
    ```
    octospec result write --stage apply --issue <issue> --change <change> --outcome ok
