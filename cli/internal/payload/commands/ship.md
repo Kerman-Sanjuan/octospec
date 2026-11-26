@@ -28,8 +28,10 @@ Open the PR for the current branch once the gates are green.
 5. Run or observe CI (`gh pr checks --watch`). If any gate fails, hand the
    specific failing check back to `/apply` to fix and iterate - do not report a
    bare failure, and do not continue until it is green.
-6. Once every gate is green, add label `status:in-review` to the **issue**; leave
-   `status:in-progress` (the `/archive` step clears it).
+6. Once every gate is green, move the issue to `status:in-review`:
+   `gh issue edit <issue> --remove-label status:backlog,status:spec-ready,status:in-progress --add-label status:in-review`
+   The `status:*` labels are one state, not a pile: leaving `status:spec-ready` next to
+   `status:in-review` says the card is in two places at once. `/archive` clears what is left.
 7. Write the result you are handing over:
 
    ```
@@ -42,3 +44,4 @@ Open the PR for the current branch once the gates are green.
    `--outcome stalled --reason timeout`; if the change should not ship after all,
    `--reason no_pr_requested`.
 8. Print the PR URL.
+

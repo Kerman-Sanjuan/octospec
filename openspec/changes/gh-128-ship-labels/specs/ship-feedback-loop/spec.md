@@ -27,8 +27,14 @@ copy `status:*` labels there.
 
 #### Scenario: Status stays on the issue
 
-- **WHEN** the gates pass and `/ship` adds `status:in-review`
+- **WHEN** the gates pass and `/ship` moves the issue to `status:in-review`
 - **THEN** the label lands on the issue, and the pull request's `status:*` labels are unchanged
+
+#### Scenario: One status, not a pile
+
+- **WHEN** the issue carried `status:spec-ready` and the gates pass
+- **THEN** `/ship` removes `status:spec-ready` and adds `status:in-review` in the same command, so
+  the issue ends with exactly one `status:*` label
 
 #### Scenario: Saying it twice changes nothing
 

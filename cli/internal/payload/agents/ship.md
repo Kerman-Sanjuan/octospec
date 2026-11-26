@@ -30,4 +30,5 @@ green.
   label only ever helped the issue.
 - Copy nothing you did not read. A missing `type:*` on the issue stops the stage; a kind inferred
   from the title is a label that lies.
-- `status:*` stays on the issue. Add `status:in-review` there, and only after the gates pass.
+- `status:*` stays on the issue, and it is one state, not a pile: when you add `status:in-review`,
+  remove the previous `status:*` in the same command. A card in two states is a card nobody trusts.

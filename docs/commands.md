@@ -42,7 +42,7 @@ agents. The scope per tool is recorded in `.octospec/octospec.json`.
 | `/bug [summary]` | intake | Interview you, then file the bug issue with those sections as the body. |
 | `/spec <#\|url>` | plan | Turn the issue into a change, commit it on the branch, publish one `## Plan` comment, and validate. |
 | `/apply [change]` | execute | Work the tasks on the branch, keeping one `## Implementation` comment. |
-| `/ship [change]` | ship | Run CI, loop failures back to `/apply`, and open the PR once it is green. The PR carries `Closes #n` and the issue's `type:*` and `mode:autonomous` labels. |
+| `/ship [change]` | ship | Run CI, loop failures back to `/apply`, and open the PR once it is green. The PR carries `Closes #n` and the issue's `type:*` and `mode:autonomous` labels; the issue moves to `status:in-review`, replacing the previous `status:*`. |
 | `/archive [change]` | archive | Archive the change, sync the specs, commit and push, close the issue, and delete the branch. |
 | `/review <#\|url>` | review | Read the pull request against its own change, write the findings as JSON, and publish one `## Review` comment with the score, the costed findings and the risk. |
 
