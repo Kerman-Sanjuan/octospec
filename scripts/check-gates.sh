@@ -18,13 +18,18 @@ report() { printf '%s %s\n' "$1" "$2"; }
 # What a grep cannot check is whether a requirement is testable. That is a
 # reader's judgement, not a gate's.
 section_lines() {
-  # $1 heading, $2 body: the lines under that heading, up to the next heading.
+  # $1 heading, $2 body: the lines under that heading, up to the next heading of
+  # the same level or higher. A subsection (like "### The grill" inside
+  # "## Requirements") belongs to the section, not to the one before it.
   printf '%s\n' "$2" | awk -v want="$1" '
     /^#{2,4}[ \t]/ {
-      if (inside) exit
-      h = $0
-      sub(/^#{2,4}[ \t]+/, "", h)
-      if (h == want || h ~ "^" want "[ \t]*(/|\\(|:|$)") { inside = 1; next }
+      match($0, /^#+/)
+      if (inside && RLENGTH <= level) exit
+      if (!inside) {
+        h = $0
+        sub(/^#{2,4}[ \t]+/, "", h)
+        if (h == want || h ~ "^" want "[ \t]*(/|\\(|:|$)") { inside = 1; level = RLENGTH; next }
+      }
     }
     inside { print }
   '
