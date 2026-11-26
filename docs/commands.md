@@ -15,6 +15,7 @@ octospec has two surfaces: the CLI, and the workflow commands you run inside you
 | `octospec lock status [--repo <path>]` | Report whether the lock that guards `openspec/specs/` is free, held (by which change, on which host, since when) or stale. Read-only. |
 | `octospec lock acquire --change <name> [--wait 2m] [--repo <path>]` | Take the archive lock. Exit 3 when another change holds it and the wait expired, 4 when the holder is gone, 1 on any other error. |
 | `octospec lock release --change <name> [--force] [--repo <path>]` | Release the lock. `--force` clears a stale lock deliberately; nothing clears it automatically. |
+| `octospec review --findings <file> [--json] [--enforce] [--changed-files a,b] [--diff-lines n] [--familiar]` | Score a pull request from a list of findings: 0-10, a risk level and a verdict. Reports by default; `--enforce` exits 5 when the verdict asks for a human. |
 | `octospec version` | Print the version. |
 
 ## Tools
@@ -40,10 +41,31 @@ agents. The scope per tool is recorded in `.octospec/octospec.json`.
 | `/apply [change]` | execute | Work the tasks on the branch, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI, loop failures back to `/apply`, and open the PR once it is green. |
 | `/archive [change]` | archive | Archive the change, sync the specs, commit and push, close the issue, and delete the branch. |
+| `/review <#\|url>` | review | Read the pull request against its own change, write the findings as JSON, and publish one `## Review` comment with the score, the costed findings and the risk. |
 
 Each command runs its stage agent. The agent per stage and its tool surface live
 in `cli/internal/payload/agents/`. Set the model each role uses with
 `octospec models`.
+
+## The review policy
+
+`octospec review` is arithmetic over findings, so the numbers live in the repository and tuning
+them never needs a release. `octospec seed` writes `.octospec/review.json` with the defaults and
+never overwrites an existing one.
+
+| Key | Meaning | Default |
+|---|---|---|
+| `threshold` | Score at or below which the verdict asks for a human | `7` |
+| `weights` | Points each finding type costs (`blocking`, `correctness`, `test`, `duplication`, `naming`, `style`, `docs`) | 4 / 3 / 2 / 1.5 / 0.5 / 0.5 / 0.5 |
+| `sensitive_paths` | Path prefixes where any change asks for a human, whatever the score | empty |
+| `large_diff_lines` | Added plus removed lines that count as a large diff | `400` |
+
+Risk is a table, not a score: a sensitive path is always `high`; large *and* unfamiliar is `high`;
+either one alone is `medium`; neither is `low`. Familiarity is a flag, because only the person
+merging knows it.
+
+Start in report-only mode — no `--enforce` — and read the first twenty scores before setting a
+threshold. A gate configured from a guess is a gate somebody turns off.
 
 ## Labels
 

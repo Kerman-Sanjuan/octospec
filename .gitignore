@@ -10,3 +10,6 @@
 # octospec-generated agents (run `octospec update` to regenerate)
 .github/agents/
 .claude/agents/
+
+# octospec runtime state
+.octospec/locks/

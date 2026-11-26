@@ -20,8 +20,8 @@ func TestCommandsEmbedded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(cmds) != 6 {
-		t.Fatalf("want 6 commands, got %d", len(cmds))
+	if len(cmds) != 7 {
+		t.Fatalf("want 7 commands, got %d", len(cmds))
 	}
 	for _, c := range cmds {
 		if c.Description == "" || c.Body == "" {
@@ -51,7 +51,7 @@ func TestAgentsEmbedded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"idea", "spec", "apply", "ship", "archive"}
+	want := []string{"idea", "spec", "apply", "ship", "review", "archive"}
 	if len(agents) != len(want) {
 		t.Fatalf("want %d agents, got %d", len(want), len(agents))
 	}

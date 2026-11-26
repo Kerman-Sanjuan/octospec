@@ -93,7 +93,7 @@ type Agent struct {
 }
 
 // stageOrder fixes the order of the loop.
-var stageOrder = map[string]int{"idea": 0, "spec": 1, "apply": 2, "ship": 3, "archive": 4}
+var stageOrder = map[string]int{"idea": 0, "spec": 1, "apply": 2, "ship": 3, "review": 4, "archive": 5}
 
 // agentRoles is the set of roles the model configuration understands. It
 // mirrors config.Roles, which cannot be imported here without a cycle.

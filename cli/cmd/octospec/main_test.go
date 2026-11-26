@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -113,5 +115,55 @@ func TestLockReleaseWithoutChangeOrForceFails(t *testing.T) {
 	cmd.SetArgs([]string{"release", "--repo", dir})
 	if err := cmd.Execute(); err == nil {
 		t.Fatal("release without --change or --force must fail")
+	}
+}
+
+func TestReviewPrintsJSONForCleanFindings(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "findings.json")
+	if err := os.WriteFile(path, []byte(`[]`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out := runCapture(t, func() {
+		cmd := newReviewCmd()
+		cmd.SetArgs([]string{"--repo", dir, "--findings", path, "--familiar", "--json"})
+		if err := cmd.Execute(); err != nil {
+			t.Fatal(err)
+		}
+	})
+	var res struct {
+		Score   float64
+		Verdict string
+		Risk    string
+	}
+	if err := json.Unmarshal([]byte(out), &res); err != nil {
+		t.Fatalf("output is not JSON: %v\n%s", err, out)
+	}
+	if res.Score != 10 || res.Verdict != "pass" || res.Risk != "low" {
+		t.Fatalf("result = %+v", res)
+	}
+}
+
+// Without --familiar the risk table assumes the author has not touched the paths, because that is
+// the safe assumption for a change nobody has looked at yet.
+func TestReviewDefaultsToUnknownAuthor(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "findings.json")
+	if err := os.WriteFile(path, []byte(`[]`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out := runCapture(t, func() {
+		cmd := newReviewCmd()
+		cmd.SetArgs([]string{"--repo", dir, "--findings", path, "--json"})
+		if err := cmd.Execute(); err != nil {
+			t.Fatal(err)
+		}
+	})
+	var res struct{ Risk string }
+	if err := json.Unmarshal([]byte(out), &res); err != nil {
+		t.Fatal(err)
+	}
+	if res.Risk != "medium" {
+		t.Fatalf("risk = %q, want medium when familiarity is unknown", res.Risk)
 	}
 }
