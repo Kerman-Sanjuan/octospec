@@ -11,29 +11,33 @@ from the `octospec` schema, not from this file.
 1. Resolve the issue from `$ARGUMENTS`:
    `gh issue view <n> --json number,title,body,updatedAt,url,labels`
    If it does not exist, stop and tell the user to run `/idea`.
-2. If the issue is ambiguous - a requirement, a user story, or a bug is not
-   clear enough to plan - ask clarifying questions one at a time and route the
-   answers to the issue body. Do not invent requirements, and do not finalize
-   the plan until the issue body is clear.
-3. Derive `<slug>` from the title; the change name is `gh-<issue>-<slug>`
+2. Read `## Grill` before asking anything. It holds the decisions already closed
+   in the intake; a question it answers is not asked again.
+3. If the issue is still ambiguous - a requirement, a user story, or a bug is
+   not clear enough to plan - grill the open frontier in rounds: numbered
+   questions, each with your recommended answer. Then append each answer to
+   `## Grill` in the issue body, so the record grows instead of living in this
+   conversation. Do not invent requirements, and do not finalize the plan until
+   nothing on the frontier is open.
+4. Derive `<slug>` from the title; the change name is `gh-<issue>-<slug>`
    (OpenSpec requires a leading letter, so the number cannot come first).
    Derive the branch prefix from the issue's `type:*` label
    (`type:feature` -> `feat`, `type:bug` -> `fix`); the branch is
    `feat|fix/<issue>-<slug>`.
-4. If `openspec/changes/gh-<issue>-<slug>/` already exists, reuse it and its
+5. If `openspec/changes/gh-<issue>-<slug>/` already exists, reuse it and its
    branch (idempotent re-run) - do not scaffold a second change. Otherwise:
    `openspec new change "gh-<issue>-<slug>" --schema octospec`
-5. Create or switch to the change branch:
+6. Create or switch to the change branch:
    `git checkout -b feat|fix/<issue>-<slug>` (or `git checkout` it if it
    already exists).
-6. Let the skill create every artifact required by
+7. Let the skill create every artifact required by
    `openspec status --change "<change>" --json` (`issue`, `proposal`,
    `specs`, `design`, `tasks`).
-7. Commit the artifacts on the branch and push:
+8. Commit the artifacts on the branch and push:
    `git add openspec/changes/<change>`
    `git commit -m "docs(#<issue>): add spec artifacts"`
    `git push -u origin HEAD`
-8. Publish a single **plan comment** to the issue, headed with the commit SHA
+9. Publish a single **plan comment** to the issue, headed with the commit SHA
    the artifacts were committed at (`git rev-parse HEAD`), with fixed
    headings:
    - `## Plan`
@@ -44,9 +48,9 @@ from the `octospec` schema, not from this file.
    Record its id in `.openspec.yaml` as `github.comments.plan`. On re-run,
    update that comment in place instead of adding a new one:
    `gh api --method PATCH /repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`
-9. Run `openspec validate "<change>" --strict`. If it fails, fix, commit,
+10. Run `openspec validate "<change>" --strict`. If it fails, fix, commit,
    and push again, then refresh the plan comment.
-10. Add label `status:spec-ready`; remove `status:backlog`. Do **not** add an
+11. Add label `status:spec-ready`; remove `status:backlog`. Do **not** add an
     approval label: `status:spec-ready` means the approach is drafted. The
     human approves the approach by running `/apply`.
 
