@@ -1,0 +1,16 @@
+{
+  "threshold": 7,
+  "large_diff_lines": 400,
+  "sensitive_paths": [
+    "cli/internal/payload/commands"
+  ],
+  "weights": {
+    "blocking": 4,
+    "correctness": 3,
+    "test": 2,
+    "duplication": 1.5,
+    "naming": 0.5,
+    "style": 0.5,
+    "docs": 0.5
+  }
+}
