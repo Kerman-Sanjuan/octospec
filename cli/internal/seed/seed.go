@@ -4,10 +4,12 @@ package seed
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 //go:embed all:schema
@@ -48,6 +50,9 @@ func Run(opts Options) (Result, error) {
 		return r, err
 	}
 	if r.Repo, err = InstallRepo(opts.Repo); err != nil {
+		return r, err
+	}
+	if err := ensureGitignore(opts.Repo); err != nil {
 		return r, err
 	}
 	if opts.SkipLabels {
@@ -100,4 +105,35 @@ func copyTree(fsys fs.FS, src, dst string, count *int) error {
 		*count++
 		return nil
 	})
+}
+
+// gitignoreBlock keeps the runtime state out of the repository. The archive lock is written by
+// /archive inside the tree, so an un-ignored copy would be committed by the next `git add -A`.
+const gitignoreBlock = "# octospec runtime state\n.octospec/locks/\n"
+
+// ensureGitignore appends the managed block to .gitignore when it is missing. It never rewrites
+// or reorders what the repository already has.
+func ensureGitignore(repo string) error {
+	path := filepath.Join(repo, ".gitignore")
+	b, err := os.ReadFile(path)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	if strings.Contains(string(b), ".octospec/locks/") {
+		return nil
+	}
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	prefix := ""
+	if len(b) > 0 && !strings.HasSuffix(string(b), "\n") {
+		prefix = "\n"
+	}
+	if len(b) > 0 {
+		prefix += "\n"
+	}
+	_, err = f.WriteString(prefix + gitignoreBlock)
+	return err
 }
