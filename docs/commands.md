@@ -40,13 +40,27 @@ agents. The scope per tool is recorded in `.octospec/octospec.json`.
 
 | Command | Phase | Behaviour |
 |---|---|---|
-| `/idea [idea]` | intake | Interview you, then file the issue with those sections as the body. |
-| `/bug [summary]` | intake | Interview you, then file the bug issue with those sections as the body. |
+| `/idea [idea]` | intake | Grill the decision frontier in rounds, then file the issue with those sections as the body and the closed decisions under `## Grill`. |
+| `/bug [summary]` | intake | The same grill, on what happens versus what should happen. |
 | `/spec <#\|url>` | plan | Turn the issue into a change, commit it on the branch, publish one `## Plan` comment, and validate. |
 | `/apply [change]` | execute | Work the tasks on the branch, keeping one `## Implementation` comment. |
 | `/ship [change]` | ship | Run CI, loop failures back to `/apply`, and open the PR once it is green. The PR carries `Closes #n` and the issue's `type:*` and `mode:autonomous` labels; the issue moves to `status:in-review`, replacing the previous `status:*`. |
 | `/archive [change]` | archive | Archive the change, sync the specs, commit and push, close the issue, and delete the branch. |
 | `/review <#\|url>` | review | Read the pull request against its own change, write the findings as JSON, and publish one `## Review` comment with the score, the costed findings and the risk. |
+
+### The grill
+
+`/idea` and `/bug` do not interview you for the form fields. They work the request as a decision tree and
+ask, in rounds, only the decisions whose prerequisites are settled: the **frontier**. Each question is
+numbered and carries a recommended answer, so "yes" is a valid reply.
+
+- Facts are the agent's job: it reads the repository, the files and the tracker instead of asking you.
+- A question that depends on one still open waits for the next round.
+- Nothing is filed while a decision is open. Unattended, the stage stops with `reason: needs_human`.
+- The closed decisions land in the issue under `## Grill`, one line each. `/spec` reads that section and
+  does not re-ask it.
+- G1 rejects an issue whose requirements state no `SHALL`/`MUST`, whose success criteria are empty, or
+  that still carries an open question.
 
 Each command runs its stage agent. The agent per stage and its tool surface live
 in `cli/internal/payload/agents/`. Set the model each role uses with
