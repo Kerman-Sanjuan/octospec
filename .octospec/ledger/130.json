@@ -2,15 +2,14 @@
   "schema": 1,
   "pr": 130,
   "issue": 115,
-  "head": "fe3f181",
+  "head": "2fc76af",
   "score": 10,
   "threshold": 7,
-  "risk": "high",
+  "risk": "medium",
   "risk_why": [
-    "touches sensitive path cli/internal/payload/commands/review.md",
-    "diff of 637 lines"
+    "diff of 660 lines"
   ],
-  "verdict": "human",
+  "verdict": "pass",
   "findings": 0,
-  "at": "2026-11-26T10:08:04.034230522Z"
+  "at": "2026-11-26T10:25:58.267669321Z"
 }
