@@ -176,6 +176,59 @@ else
   report SKIP "G4 PR body not provided"
 fi
 
+# G9 (advisory): every requirement names the check that proves it. A change declares
+# openspec/changes/<name>/coverage.md with one line per requirement,
+#   - <requirement title> -> <symbol>
+# where the symbol is any string that exists in the tree outside openspec/. A requirement with no
+# line, or a line pointing at something that is not there, is a requirement nobody can prove.
+if [ -n "$change_touched" ]; then
+  g9_seen=0
+  g9_nocov=""
+  g9_missing=""
+  g9_unknown=""
+  for d in $(printf '%s\n' "$change_touched" | sed -E 's#^(openspec/changes/[^/]+)/.*#\1#' | sort -u); do
+    [ -d "$d/specs" ] || continue
+    reqs=$(cat "$d"/specs/*/spec.md 2>/dev/null | grep '^### Requirement: ' | sed 's/^### Requirement: //' || true)
+    [ -n "$reqs" ] || continue
+    g9_seen=1
+    cov="$d/coverage.md"
+    if [ ! -f "$cov" ]; then
+      g9_nocov="$g9_nocov $(basename "$d")"
+      continue
+    fi
+    while IFS= read -r req; do
+      [ -n "$req" ] || continue
+      if ! grep -qF -- "$req" "$cov"; then
+        g9_missing="$g9_missing \"$req\";"
+      fi
+    done <<EOF
+$reqs
+EOF
+    while IFS= read -r line; do
+      case "$line" in
+        *' -> '*) ;;
+        *) continue ;;
+      esac
+      sym=$(printf '%s' "$line" | sed 's/^.* -> //' | tr -d '`' | tr -d '\r')
+      [ -n "$sym" ] || continue
+      if ! grep -rqF --exclude-dir=openspec --exclude-dir=.git -- "$sym" . 2>/dev/null; then
+        g9_unknown="$g9_unknown \"$sym\";"
+      fi
+    done <<EOF
+$(grep ' -> ' "$cov" 2>/dev/null || true)
+EOF
+  done
+  if [ "$g9_seen" -eq 0 ]; then
+    report SKIP "G9 requirement coverage: no spec delta"
+  elif [ -n "$g9_nocov$g9_missing$g9_unknown" ]; then
+    report WARN "G9 requirement coverage:${g9_nocov:+ no coverage.md for$g9_nocov}${g9_missing:+ unmapped:$g9_missing}${g9_unknown:+ missing symbol:$g9_unknown}"
+  else
+    report PASS "G9 requirement coverage"
+  fi
+else
+  report SKIP "G9 requirement coverage: no OpenSpec change in this PR"
+fi
+
 if [ "$fail" -ne 0 ]; then
   report FAIL "gates failed"
   exit 1
