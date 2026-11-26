@@ -4,6 +4,10 @@ Grouped by impact. Newest first. Versions follow semantic versioning.
 
 ## Unreleased
 
+### Added
+- `octospec lock` to inspect and manage the lock that guards `openspec/specs/` during archive.
+- `/archive` now parks instead of racing when another archive holds the lock.
+
 ### Fixed
 - Gate G3 skips a tag ref, so the release acceptance check is green on a tag.
 - Release notes now come from the changelog section for the version, not the raw git commit log.
