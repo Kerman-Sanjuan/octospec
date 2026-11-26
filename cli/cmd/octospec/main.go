@@ -3,8 +3,10 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -13,6 +15,7 @@ import (
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
 	"github.com/kerman-sanjuan/octospec/cli/internal/lock"
 	"github.com/kerman-sanjuan/octospec/cli/internal/models"
+	"github.com/kerman-sanjuan/octospec/cli/internal/review"
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/uninstall"
 	"github.com/kerman-sanjuan/octospec/cli/internal/update"
@@ -38,7 +41,7 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newReviewCmd(), newVersionCmd())
 	return root
 }
 
@@ -135,6 +138,111 @@ func lockExitCode(err error) int {
 		return 3
 	default:
 		return 1
+	}
+}
+
+// reviewExitCode is what a CI job blocks on. 5 means "the review asks for a human", which is not
+// the same as the command failing (1) and is deliberately distinct from the lock's 3 and 4.
+const reviewExitCode = 5
+
+// newReviewCmd scores a pull request from a list of findings. The command reports by default and
+// blocks only with --enforce, so a threshold can be set from a real distribution of scores.
+func newReviewCmd() *cobra.Command {
+	var repo, findingsPath string
+	var asJSON, enforce, familiar bool
+	var changedFiles []string
+	var diffLines int
+
+	cmd := &cobra.Command{
+		Use:   "review",
+		Short: "Score a pull request from a list of findings and decide whether it needs a human",
+		Args:  cobra.NoArgs,
+		RunE: func(c *cobra.Command, args []string) error {
+			root, err := repoRoot(repo)
+			if err != nil {
+				return err
+			}
+			var in io.Reader = os.Stdin
+			if findingsPath != "" && findingsPath != "-" {
+				f, err := os.Open(findingsPath)
+				if err != nil {
+					return err
+				}
+				defer f.Close()
+				in = f
+			}
+			findings, err := review.Parse(in)
+			if err != nil {
+				return err
+			}
+			policy, err := review.LoadPolicy(root)
+			if err != nil {
+				return err
+			}
+			res := review.Score(findings, policy, review.RiskInput{
+				ChangedFiles: changedFiles,
+				DiffLines:    diffLines,
+				Familiar:     familiar,
+			})
+
+			if asJSON {
+				b, err := json.MarshalIndent(res, "", "  ")
+				if err != nil {
+					return err
+				}
+				fmt.Println(string(b))
+			} else {
+				printReview(res)
+			}
+
+			if enforce && res.Verdict != review.VerdictPass {
+				os.Exit(reviewExitCode)
+			}
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&findingsPath, "findings", "", "file with the findings; `-` or empty reads stdin")
+	cmd.Flags().BoolVar(&asJSON, "json", false, "print the result as JSON")
+	cmd.Flags().BoolVar(&enforce, "enforce", false, "exit 5 when the verdict asks for a human")
+	cmd.Flags().StringSliceVar(&changedFiles, "changed-files", nil, "paths the pull request touches, for the risk table")
+	cmd.Flags().IntVar(&diffLines, "diff-lines", 0, "added plus removed lines, for the risk table")
+	cmd.Flags().BoolVar(&familiar, "familiar", false, "the author has touched these paths before")
+	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	return cmd
+}
+
+// printReview renders the result for a person: the number, where it was lost, and why the risk
+// is what it is.
+func printReview(r review.Result) {
+	fmt.Printf("score %.1f/10 (threshold %.1f) · risk %s · %s\n", r.Score, r.Threshold, r.Risk, r.Verdict)
+	fmt.Printf("policy %s\n", r.PolicySource)
+	if len(r.Deductions) > 0 {
+		fmt.Println("\ndeductions")
+		for _, d := range r.Deductions {
+			where := d.File
+			if d.Line > 0 {
+				where = fmt.Sprintf("%s:%d", d.File, d.Line)
+			}
+			note := d.Note
+			if note == "" {
+				note = string(d.Type)
+			}
+			fmt.Printf("  -%.1f  %-13s %s  %s\n", d.Weight, d.Axis, where, note)
+		}
+	}
+	if len(r.ByAxis) > 0 {
+		fmt.Println("\nby axis")
+		for _, axis := range review.Axes {
+			if v, ok := r.ByAxis[axis]; ok {
+				fmt.Printf("  %-13s -%.1f\n", axis, v)
+			}
+		}
+	}
+	if len(r.RiskWhy) > 0 {
+		fmt.Println("\nrisk")
+		for _, why := range r.RiskWhy {
+			fmt.Printf("  %s\n", why)
+		}
 	}
 }
 
