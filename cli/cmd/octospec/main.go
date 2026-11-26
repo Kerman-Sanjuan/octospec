@@ -3,12 +3,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/kerman-sanjuan/octospec/cli/internal/doctor"
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
+	"github.com/kerman-sanjuan/octospec/cli/internal/lock"
 	"github.com/kerman-sanjuan/octospec/cli/internal/models"
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/uninstall"
@@ -35,8 +38,111 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newVersionCmd())
 	return root
+}
+
+// newLockCmd exposes the lock that guards openspec/specs during /archive, so that a scheduler can
+// take it and a human can see who holds it or clear a dead one.
+func newLockCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "lock",
+		Short: "Inspect or manage the lock that guards openspec/specs during /archive",
+	}
+	var repo string
+	cmd.PersistentFlags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+
+	var acquireChange string
+	var wait time.Duration
+	acquire := &cobra.Command{
+		Use:   "acquire",
+		Short: "Take the archive lock for a change",
+		RunE: func(c *cobra.Command, args []string) error {
+			root, err := repoRoot(repo)
+			if err != nil {
+				return err
+			}
+			rec, err := lock.Acquire(root, acquireChange, wait)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "error:", err)
+				os.Exit(lockExitCode(err))
+			}
+			fmt.Printf("lock held by %s (pid %d on %s)\n", rec.Change, rec.PID, rec.Host)
+			return nil
+		},
+	}
+	acquire.Flags().StringVar(&acquireChange, "change", "", "change that will hold the lock")
+	acquire.Flags().DurationVar(&wait, "wait", 0, "how long to wait for a free lock, e.g. 2m")
+
+	status := &cobra.Command{
+		Use:   "status",
+		Short: "Report the lock state without modifying it",
+		RunE: func(c *cobra.Command, args []string) error {
+			root, err := repoRoot(repo)
+			if err != nil {
+				return err
+			}
+			st, err := lock.Status(root)
+			if err != nil {
+				return err
+			}
+			switch {
+			case !st.Held:
+				fmt.Println("free")
+			case st.Stale:
+				fmt.Printf("stale: held by %s on %s (%s); clear it with `octospec lock release --force --change %s`\n",
+					st.Record.Change, st.Record.Host, st.Why, st.Record.Change)
+			default:
+				fmt.Printf("held by %s since %s on %s (pid %d)\n",
+					st.Record.Change, st.Record.AcquiredAt.Format(time.RFC3339), st.Record.Host, st.Record.PID)
+			}
+			return nil
+		},
+	}
+
+	var releaseChange string
+	var force bool
+	release := &cobra.Command{
+		Use:   "release",
+		Short: "Release the archive lock, optionally clearing a dead holder",
+		RunE: func(c *cobra.Command, args []string) error {
+			root, err := repoRoot(repo)
+			if err != nil {
+				return err
+			}
+			if err := lock.Release(root, releaseChange, force); err != nil {
+				return err
+			}
+			fmt.Println("lock free")
+			return nil
+		},
+	}
+	release.Flags().StringVar(&releaseChange, "change", "", "change that holds the lock")
+	release.Flags().BoolVar(&force, "force", false, "clear the lock even if another change holds it")
+
+	cmd.AddCommand(acquire, status, release)
+	return cmd
+}
+
+// lockExitCode gives a scheduler a stable code to act on instead of parsing English: 3 means
+// somebody else holds the lock and it may retry later, 4 means the holder is gone and a human
+// has to decide.
+func lockExitCode(err error) int {
+	switch {
+	case errors.Is(err, lock.ErrStale):
+		return 4
+	case errors.Is(err, lock.ErrHeld):
+		return 3
+	default:
+		return 1
+	}
+}
+
+func repoRoot(repo string) (string, error) {
+	if repo != "" {
+		return repo, nil
+	}
+	return os.Getwd()
 }
 
 func newUninstallCmd() *cobra.Command {
