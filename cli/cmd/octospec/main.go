@@ -15,6 +15,7 @@ import (
 	"github.com/kerman-sanjuan/octospec/cli/internal/install"
 	"github.com/kerman-sanjuan/octospec/cli/internal/lock"
 	"github.com/kerman-sanjuan/octospec/cli/internal/models"
+	"github.com/kerman-sanjuan/octospec/cli/internal/result"
 	"github.com/kerman-sanjuan/octospec/cli/internal/review"
 	"github.com/kerman-sanjuan/octospec/cli/internal/seed"
 	"github.com/kerman-sanjuan/octospec/cli/internal/uninstall"
@@ -41,7 +42,7 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newReviewCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newReviewCmd(), newResultCmd(), newVersionCmd())
 	return root
 }
 
@@ -170,6 +171,77 @@ func lockExitCode(err error) int {
 // reviewExitCode is what a CI job blocks on. 5 means "the review asks for a human", which is not
 // the same as the command failing (1) and is deliberately distinct from the lock's 3 and 4.
 const reviewExitCode = 5
+
+// newResultCmd is the contract between a stage and whatever runs it: one object per execution, with
+// a closed vocabulary, so a scheduler decides retry or park without reading an agent's prose.
+func newResultCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "result",
+		Short: "Write or check the record a stage leaves behind",
+	}
+	var dir string
+	var r result.Result
+	var sha string
+	var asJSON bool
+	var artifacts []string
+	write := &cobra.Command{
+		Use:   "write",
+		Short: "Write the result of one stage execution",
+		RunE: func(c *cobra.Command, args []string) error {
+			r.Artifacts = artifacts
+			r.Normalize()
+			if err := r.Validate(); err != nil {
+				fmt.Fprintln(os.Stderr, "error:", err)
+				os.Exit(1)
+			}
+			p, err := result.Write(dir, r, sha)
+			if err != nil {
+				return err
+			}
+			if asJSON {
+				b, err := json.MarshalIndent(r, "", "  ")
+				if err != nil {
+					return err
+				}
+				fmt.Println(string(b))
+				return nil
+			}
+			fmt.Println(p)
+			return nil
+		},
+	}
+	write.Flags().StringVar(&dir, "dir", ".octospec/runs", "directory for the records")
+	write.Flags().StringVar(&r.Stage, "stage", "", "stage that ran: "+strings.Join(result.Stages, ", "))
+	write.Flags().IntVar(&r.Issue, "issue", 0, "issue the stage worked on")
+	write.Flags().StringVar(&r.Change, "change", "", "change the stage worked on")
+	write.Flags().StringVar(&r.Outcome, "outcome", "", "ok or stalled")
+	write.Flags().StringVar(&r.Reason, "reason", "", "why it stalled: "+strings.Join(result.Reasons, ", "))
+	write.Flags().StringArrayVar(&artifacts, "artifact", nil, "URL or path a person can open; repeatable")
+	write.Flags().Int64Var(&r.DurationMS, "duration-ms", 0, "how long the stage took")
+	write.Flags().StringVar(&sha, "sha", "", "commit the stage ran on (default: HEAD)")
+	write.Flags().BoolVar(&asJSON, "json", false, "print the object instead of the path")
+
+	show := &cobra.Command{
+		Use:   "show <file>",
+		Short: "Print one record, and fail when it does not validate",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(c *cobra.Command, args []string) error {
+			rec, err := result.Read(args[0])
+			if err != nil {
+				return err
+			}
+			b, err := json.MarshalIndent(rec, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Println(string(b))
+			return nil
+		},
+	}
+
+	cmd.AddCommand(write, show)
+	return cmd
+}
 
 // newReviewCmd scores a pull request from a list of findings. The command reports by default and
 // blocks only with --enforce, so a threshold can be set from a real distribution of scores.
