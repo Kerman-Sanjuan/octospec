@@ -10,7 +10,54 @@ fail=0
 
 report() { printf '%s %s\n' "$1" "$2"; }
 
-# G1: issue linked to a touched change has the required sections.
+# G1: issue linked to a touched change has the required sections, and those
+# sections are decidable. Two levels, both deterministic:
+#   - shape: every required heading is present;
+#   - substance: each requirement states SHALL or MUST, success criteria are
+#     filled, and no open question remains.
+# What a grep cannot check is whether a requirement is testable. That is a
+# reader's judgement, not a gate's.
+section_lines() {
+  # $1 heading, $2 body: the lines under that heading, up to the next heading.
+  printf '%s\n' "$2" | awk -v want="$1" '
+    /^#{2,4}[ \t]/ {
+      if (inside) exit
+      h = $0
+      sub(/^#{2,4}[ \t]+/, "", h)
+      if (h == want || h ~ "^" want "[ \t]*(/|\\(|:|$)") { inside = 1; next }
+    }
+    inside { print }
+  '
+}
+requirements_report() {
+  # stdin: the Requirements section. Prints "<total> <bad> <first bad line>".
+  awk '
+    function flush() {
+      if (block != "") {
+        total++
+        if (block !~ /(SHALL|MUST)/) { bad++; if (first == "") first = substr(block, 1, 70) }
+      }
+      block = ""
+    }
+    /^[ \t]*([-*+]|[0-9]+[.)])[ \t]+/ { flush(); block = $0; next }
+    /^[ \t]*$/ { next }
+    /^#/ { next }
+    { if (block != "") block = block " " $0 }
+    END { flush(); printf "%d %d %s\n", total, bad, first }
+  '
+}
+open_questions_report() {
+  # stdin: the Open questions section. Prints how many lines still ask something.
+  awk '
+    /^[ \t]*$/ { next }
+    {
+      line = tolower($0)
+      gsub(/[ \t]/, "", line)
+      if (line !~ /^(none|n\/a|ninguna|nothing)\.?$/) n++
+    }
+    END { print n + 0 }
+  '
+}
 # Only runs when an OpenSpec change is in the diff.
 change_touched=$(git diff --name-only "$BASE_REF...HEAD" 2>/dev/null | grep -E '^openspec/changes/[^/]+/' | grep -v '^openspec/changes/archive/' || true)
 if [ -n "$change_touched" ]; then
@@ -30,17 +77,48 @@ if [ -n "$change_touched" ]; then
         report SKIP "G1 issue #$issue body: gh could not read it"
         continue
       fi
+      problems=""
+      add_problem() {
+        if [ -z "$problems" ]; then problems="$1"; else problems="$problems; $1"; fi
+      }
       missing=""
-      for section in "User story" "Context" "Requirements" "Success criteria"; do
+      for section in "User story" "Context" "Requirements" "Success criteria" "Grill"; do
         if ! printf '%s' "$body" | grep -qE "^#{2,4}[[:space:]]+$section"; then
           missing="$missing $section"
         fi
       done
       if [ -n "$missing" ]; then
-        report FAIL "G1 issue #$issue missing section(s):$missing"
+        add_problem "missing section(s):$missing"
+      fi
+      if printf '%s' "$body" | grep -qE "^#{2,4}[[:space:]]+Requirements"; then
+        req_out=$(section_lines "Requirements" "$body" | requirements_report)
+        req_total=${req_out%% *}
+        req_rest=${req_out#* }
+        req_bad=${req_rest%% *}
+        req_first=${req_rest#* }
+        if [ "$req_total" -eq 0 ]; then
+          add_problem "no requirement statement (SHALL or MUST)"
+        elif [ "$req_bad" -gt 0 ]; then
+          add_problem "$req_bad requirement(s) without SHALL or MUST (first: $req_first)"
+        fi
+      fi
+      if printf '%s' "$body" | grep -qE "^#{2,4}[[:space:]]+Success criteria"; then
+        sc_lines=$(section_lines "Success criteria" "$body" | grep -cE '[^[:space:]]' || true)
+        if [ "$sc_lines" -eq 0 ]; then
+          add_problem "empty Success criteria"
+        fi
+      fi
+      if printf '%s' "$body" | grep -qE "^#{2,4}[[:space:]]+Open questions"; then
+        oq_lines=$(section_lines "Open questions" "$body" | open_questions_report)
+        if [ "$oq_lines" -gt 0 ]; then
+          add_problem "$oq_lines open question(s)"
+        fi
+      fi
+      if [ -n "$problems" ]; then
+        report FAIL "G1 issue #$issue: $problems"
         fail=1
       else
-        report PASS "G1 issue #$issue sections complete"
+        report PASS "G1 issue #$issue sections complete and decidable"
       fi
     done
     if [ "$checked" -eq 0 ]; then
