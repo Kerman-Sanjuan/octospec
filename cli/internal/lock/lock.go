@@ -2,9 +2,11 @@
 // change's deltas into openspec/specs/. One repository, one lock file, one holder.
 //
 // The lock is a file created with O_CREATE|O_EXCL, not a daemon and not a system lock, because
-// the person who has to clear a dead lock is not in the session that took it. The file names the
-// pid, the host and the acquisition time, so `octospec lock status` can say who holds it and
-// whether that holder is gone.
+// the person who has to clear a dead lock is not in the session that took it. The file is a
+// lease: it names the change, the host, the time it was taken and when it expires. Liveness is
+// the expiry, never the process, because `octospec lock acquire` is a one-shot call whose pid is
+// gone before the caller does any work. The pid stays in the record as a hint for whoever reads
+// `lock status`.
 package lock
 
 import (
@@ -13,7 +15,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"syscall"
 	"time"
 )
 
@@ -22,9 +23,10 @@ const (
 	Dir = ".octospec/locks"
 	// FileName is the lock that guards openspec/specs/.
 	FileName = "specs.lock"
-	// RemoteTTL is how old a lock taken on another host may be before it is reported stale.
-	// There is no `kill -0` across hosts, so age is the only signal available.
-	RemoteTTL = 15 * time.Minute
+	// DefaultTTL is how long a lease lasts without a heartbeat. An archive is a fold, a changelog
+	// entry, a commit and a push: minutes. Thirty leaves room for a slow run and bounds the damage
+	// of a crash to half an hour of blocked work.
+	DefaultTTL = 30 * time.Minute
 
 	pollEvery = 200 * time.Millisecond
 )
@@ -32,20 +34,33 @@ const (
 var (
 	// ErrHeld means somebody else holds the lock and the wait expired.
 	ErrHeld = errors.New("archive lock is held")
-	// ErrStale means the holder is gone. The lock is never stolen; it is reported.
+	// ErrStale means the lease expired. The lock is never stolen; it is reported.
 	ErrStale = errors.New("archive lock is stale")
+	// ErrFree means no lock was held when one was expected.
+	ErrFree = errors.New("no archive lock is held")
 )
 
 // Record is the lock file's content.
 type Record struct {
 	Change     string    `json:"change"`
-	PID        int       `json:"pid"`
+	PID        int       `json:"pid,omitempty"`
 	Host       string    `json:"host"`
 	AcquiredAt time.Time `json:"acquired_at"`
+	ExpiresAt  time.Time `json:"expires_at"`
 }
 
-// State is what Status reports: whether the lock exists, who holds it, and whether that holder
-// looks gone.
+// Expiry is when the lease ends. A record written before the lease existed carries no
+// ExpiresAt; it is read as acquired_at plus the default TTL, which is what the old code did for
+// holders on another host.
+func (r Record) Expiry() time.Time {
+	if !r.ExpiresAt.IsZero() {
+		return r.ExpiresAt
+	}
+	return r.AcquiredAt.Add(DefaultTTL)
+}
+
+// State is what Status reports: whether the lock exists, who holds it, and whether its lease has
+// run out.
 type State struct {
 	Held   bool
 	Record Record
@@ -71,15 +86,25 @@ func Status(repo string) (State, error) {
 		// pretending the repository is free.
 		return State{Held: true, Stale: true, Why: "lock file is unreadable"}, nil
 	}
-	stale, why := isStale(r, time.Now())
-	return State{Held: true, Record: r, Stale: stale, Why: why}, nil
+	if r.Host == "" {
+		return State{Held: true, Record: r, Stale: true, Why: "the lock names no host"}, nil
+	}
+	now := time.Now()
+	if exp := r.Expiry(); !now.Before(exp) {
+		return State{Held: true, Record: r, Stale: true,
+			Why: fmt.Sprintf("lease expired %s ago", now.Sub(exp).Round(time.Second))}, nil
+	}
+	return State{Held: true, Record: r}, nil
 }
 
-// Acquire takes the lock for change, waiting at most wait for a free one. A stale lock is
-// reported, never stolen: clearing it is a human decision.
-func Acquire(repo, change string, wait time.Duration) (Record, error) {
+// Acquire takes the lock for change, waiting at most wait for a free one, with a lease of ttl. A
+// stale lock is reported, never stolen: clearing it is a human decision.
+func Acquire(repo, change string, wait, ttl time.Duration) (Record, error) {
 	if change == "" {
 		return Record{}, errors.New("a change name is required to take the lock")
+	}
+	if ttl <= 0 {
+		ttl = DefaultTTL
 	}
 	p := Path(repo)
 	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
@@ -87,7 +112,7 @@ func Acquire(repo, change string, wait time.Duration) (Record, error) {
 	}
 	deadline := time.Now().Add(wait)
 	for {
-		rec, created, err := tryCreate(p, change)
+		rec, created, err := tryCreate(p, change, ttl)
 		if err != nil {
 			return Record{}, err
 		}
@@ -99,15 +124,53 @@ func Acquire(repo, change string, wait time.Duration) (Record, error) {
 			return Record{}, err
 		}
 		if st.Stale {
-			return Record{}, fmt.Errorf("%w: held by %q (%s); clear it with `octospec lock release --force --change %s`",
-				ErrStale, st.Record.Change, st.Why, st.Record.Change)
+			return Record{}, fmt.Errorf("%w: %s; held by %q; clear it with `octospec lock release --force --change %s`",
+				ErrStale, st.Why, st.Record.Change, st.Record.Change)
 		}
 		if !time.Now().Before(deadline) {
-			return Record{}, fmt.Errorf("%w: held by %q since %s on %s",
-				ErrHeld, st.Record.Change, st.Record.AcquiredAt.Format(time.RFC3339), st.Record.Host)
+			return Record{}, fmt.Errorf("%w: held by %q since %s on %s, lease expires in %s",
+				ErrHeld, st.Record.Change, st.Record.AcquiredAt.Format(time.RFC3339), st.Record.Host,
+				time.Until(st.Record.Expiry()).Round(time.Second))
 		}
 		time.Sleep(pollEvery)
 	}
+}
+
+// Heartbeat extends the lease of the holder that already owns the lock. It refuses to revive an
+// expired lease: by then somebody else may hold it, and reviving would be the same silent
+// double-holder in a new costume.
+func Heartbeat(repo, change string, ttl time.Duration) (Record, error) {
+	if change == "" {
+		return Record{}, errors.New("a change name is required to extend the lease")
+	}
+	if ttl <= 0 {
+		ttl = DefaultTTL
+	}
+	p := Path(repo)
+	b, err := os.ReadFile(p)
+	if errors.Is(err, os.ErrNotExist) {
+		return Record{}, fmt.Errorf("%w: take it with `octospec lock acquire --change %s`", ErrFree, change)
+	}
+	if err != nil {
+		return Record{}, err
+	}
+	var r Record
+	if err := json.Unmarshal(b, &r); err != nil {
+		return Record{}, fmt.Errorf("%w: the lock file is unreadable", ErrStale)
+	}
+	if r.Change != change {
+		return Record{}, fmt.Errorf("%w: held by %q, not %q", ErrHeld, r.Change, change)
+	}
+	now := time.Now()
+	if exp := r.Expiry(); !now.Before(exp) {
+		return Record{}, fmt.Errorf("%w: lease expired %s ago; take it again", ErrStale,
+			now.Sub(exp).Round(time.Second))
+	}
+	r.ExpiresAt = now.UTC().Add(ttl)
+	if err := replace(p, r); err != nil {
+		return Record{}, err
+	}
+	return r, nil
 }
 
 // Release removes the lock. Without force it only removes a lock taken by change.
@@ -131,7 +194,7 @@ func Release(repo, change string, force bool) error {
 	return os.Remove(p)
 }
 
-func tryCreate(p, change string) (Record, bool, error) {
+func tryCreate(p, change string, ttl time.Duration) (Record, bool, error) {
 	f, err := os.OpenFile(p, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
 	if errors.Is(err, os.ErrExist) {
 		return Record{}, false, nil
@@ -141,7 +204,8 @@ func tryCreate(p, change string) (Record, bool, error) {
 	}
 	defer f.Close()
 	host, _ := os.Hostname()
-	rec := Record{Change: change, PID: os.Getpid(), Host: host, AcquiredAt: time.Now().UTC()}
+	now := time.Now().UTC()
+	rec := Record{Change: change, PID: os.Getpid(), Host: host, AcquiredAt: now, ExpiresAt: now.Add(ttl)}
 	b, err := json.MarshalIndent(rec, "", "  ")
 	if err != nil {
 		os.Remove(p)
@@ -154,32 +218,20 @@ func tryCreate(p, change string) (Record, bool, error) {
 	return rec, true, nil
 }
 
-func isStale(r Record, now time.Time) (bool, string) {
-	host, _ := os.Hostname()
-	if r.Host == "" {
-		return true, "the lock names no host"
-	}
-	if r.Host != host {
-		age := now.Sub(r.AcquiredAt)
-		if age > RemoteTTL {
-			return true, fmt.Sprintf("taken on %s %s ago", r.Host, age.Round(time.Second))
-		}
-		return false, ""
-	}
-	if r.PID <= 0 {
-		return true, "the lock names no process"
-	}
-	if processAlive(r.PID) {
-		return false, ""
-	}
-	return true, fmt.Sprintf("process %d is gone", r.PID)
-}
-
-func processAlive(pid int) bool {
-	p, err := os.FindProcess(pid)
+// replace writes the record through a temporary file and renames it over the lock, so a reader
+// never sees half a lease.
+func replace(p string, r Record) error {
+	b, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
-		return false
+		return err
 	}
-	err = p.Signal(syscall.Signal(0))
-	return err == nil || errors.Is(err, syscall.EPERM)
+	tmp := p + ".tmp"
+	if err := os.WriteFile(tmp, append(b, '\n'), 0o644); err != nil {
+		return err
+	}
+	if err := os.Rename(tmp, p); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	return nil
 }
