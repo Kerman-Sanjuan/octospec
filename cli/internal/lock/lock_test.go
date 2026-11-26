@@ -20,15 +20,39 @@ func TestStatusFreeWhenNoFile(t *testing.T) {
 	}
 }
 
+// The bug this change fixes: the writer is a one-shot process, so its pid is always gone by the
+// time anybody looks. A dead pid inside a valid lease must not make the lock stale.
+func TestADeadWriterDoesNotExpireTheLease(t *testing.T) {
+	repo := t.TempDir()
+	write(t, repo, Record{
+		Change:     "gh-1-demo",
+		PID:        999999,
+		Host:       host(t),
+		AcquiredAt: time.Now().UTC(),
+		ExpiresAt:  time.Now().UTC().Add(10 * time.Minute),
+	})
+	st, err := Status(repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !st.Held || st.Stale {
+		t.Fatalf("a valid lease with a dead pid must be held, got %+v", st)
+	}
+}
+
 func TestAcquireThenStatus(t *testing.T) {
 	repo := t.TempDir()
-	rec, err := Acquire(repo, "gh-1-demo", 0)
+	rec, err := Acquire(repo, "gh-1-demo", 0, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if rec.Change != "gh-1-demo" || rec.PID != os.Getpid() {
 		t.Fatalf("record = %+v", rec)
 	}
+	if got := time.Until(rec.Expiry()); got <= 0 || got > DefaultTTL {
+		t.Fatalf("lease = %s, want (0, %s]", got, DefaultTTL)
+	}
+	// Status re-reads the file, which is what a second process does.
 	st, err := Status(repo)
 	if err != nil {
 		t.Fatal(err)
@@ -40,10 +64,10 @@ func TestAcquireThenStatus(t *testing.T) {
 
 func TestSecondAcquireIsHeldNotStolen(t *testing.T) {
 	repo := t.TempDir()
-	if _, err := Acquire(repo, "gh-1-demo", 0); err != nil {
+	if _, err := Acquire(repo, "gh-1-demo", 0, 0); err != nil {
 		t.Fatal(err)
 	}
-	_, err := Acquire(repo, "gh-2-other", 0)
+	_, err := Acquire(repo, "gh-2-other", 0, 0)
 	if !errors.Is(err, ErrHeld) {
 		t.Fatalf("want ErrHeld, got %v", err)
 	}
@@ -55,14 +79,14 @@ func TestSecondAcquireIsHeldNotStolen(t *testing.T) {
 
 func TestAcquireWaitsForRelease(t *testing.T) {
 	repo := t.TempDir()
-	if _, err := Acquire(repo, "gh-1-demo", 0); err != nil {
+	if _, err := Acquire(repo, "gh-1-demo", 0, 0); err != nil {
 		t.Fatal(err)
 	}
 	go func() {
 		time.Sleep(150 * time.Millisecond)
 		_ = Release(repo, "gh-1-demo", false)
 	}()
-	rec, err := Acquire(repo, "gh-2-other", 3*time.Second)
+	rec, err := Acquire(repo, "gh-2-other", 3*time.Second, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,29 +97,115 @@ func TestAcquireWaitsForRelease(t *testing.T) {
 
 func TestAcquireRefusesAStaleLock(t *testing.T) {
 	repo := t.TempDir()
-	host, _ := os.Hostname()
-	write(t, repo, Record{Change: "gh-1-demo", PID: 999999, Host: host, AcquiredAt: time.Now().UTC()})
-	_, err := Acquire(repo, "gh-2-other", 0)
+	write(t, repo, Record{
+		Change:     "gh-1-demo",
+		Host:       host(t),
+		AcquiredAt: time.Now().UTC().Add(-40 * time.Minute),
+		ExpiresAt:  time.Now().UTC().Add(-10 * time.Minute),
+	})
+	_, err := Acquire(repo, "gh-2-other", 0, 0)
 	if !errors.Is(err, ErrStale) {
 		t.Fatalf("want ErrStale, got %v", err)
 	}
 	st, _ := Status(repo)
-	if !st.Stale {
-		t.Fatalf("want stale, got %+v", st)
+	if !st.Stale || st.Record.Change != "gh-1-demo" {
+		t.Fatalf("the lock must be reported stale and never stolen: %+v", st)
 	}
 }
 
-func TestRemoteLockIsStaleOnlyAfterTTL(t *testing.T) {
+func TestALockWithoutExpiryIsReadByAge(t *testing.T) {
 	repo := t.TempDir()
+	// A record written by #122: no expires_at, taken on another host.
 	write(t, repo, Record{Change: "gh-1-demo", PID: 1, Host: "another-host", AcquiredAt: time.Now().UTC()})
-	st, _ := Status(repo)
-	if st.Stale {
-		t.Fatalf("a fresh remote lock is not stale: %+v", st)
+	if st, _ := Status(repo); st.Stale {
+		t.Fatalf("a fresh record without an expiry is not stale: %+v", st)
 	}
-	write(t, repo, Record{Change: "gh-1-demo", PID: 1, Host: "another-host", AcquiredAt: time.Now().Add(-RemoteTTL - time.Minute).UTC()})
-	st, _ = Status(repo)
-	if !st.Stale {
-		t.Fatalf("an old remote lock is stale: %+v", st)
+	write(t, repo, Record{
+		Change:     "gh-1-demo",
+		PID:        1,
+		Host:       "another-host",
+		AcquiredAt: time.Now().Add(-DefaultTTL - time.Minute).UTC(),
+	})
+	if st, _ := Status(repo); !st.Stale {
+		t.Fatalf("a record older than the default TTL is stale: %+v", st)
+	}
+}
+
+func TestHeartbeatExtendsTheLease(t *testing.T) {
+	repo := t.TempDir()
+	rec, err := Acquire(repo, "gh-1-demo", 0, time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	extended, err := Heartbeat(repo, "gh-1-demo", time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !extended.ExpiresAt.After(rec.ExpiresAt) {
+		t.Fatalf("expiry = %s, want after %s", extended.ExpiresAt, rec.ExpiresAt)
+	}
+	if !extended.AcquiredAt.Equal(rec.AcquiredAt) {
+		t.Fatalf("acquired_at moved: %s -> %s", rec.AcquiredAt, extended.AcquiredAt)
+	}
+	if st, _ := Status(repo); st.Stale {
+		t.Fatalf("heartbeat must leave the lock valid: %+v", st)
+	}
+}
+
+func TestHeartbeatDoesNotReviveAnExpiredLease(t *testing.T) {
+	repo := t.TempDir()
+	write(t, repo, Record{
+		Change:     "gh-1-demo",
+		Host:       host(t),
+		AcquiredAt: time.Now().UTC().Add(-time.Hour),
+		ExpiresAt:  time.Now().UTC().Add(-time.Minute),
+	})
+	if _, err := Heartbeat(repo, "gh-1-demo", time.Hour); !errors.Is(err, ErrStale) {
+		t.Fatalf("want ErrStale, got %v", err)
+	}
+	if st, _ := Status(repo); !st.Stale {
+		t.Fatalf("the lease must stay expired: %+v", st)
+	}
+}
+
+func TestHeartbeatIsGuardedByChange(t *testing.T) {
+	repo := t.TempDir()
+	if _, err := Acquire(repo, "gh-1-demo", 0, 0); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Heartbeat(repo, "gh-2-other", 0); !errors.Is(err, ErrHeld) {
+		t.Fatalf("want ErrHeld, got %v", err)
+	}
+}
+
+func TestHeartbeatWithoutALock(t *testing.T) {
+	repo := t.TempDir()
+	if _, err := Heartbeat(repo, "gh-1-demo", 0); !errors.Is(err, ErrFree) {
+		t.Fatalf("want ErrFree, got %v", err)
+	}
+}
+
+// A heartbeat that lost the race against a force-clear plus a fresh acquire must not overwrite the
+// new holder's record with a lease for work that is no longer happening.
+func TestHeartbeatDoesNotOverwriteANewHolder(t *testing.T) {
+	repo := t.TempDir()
+	before := Record{
+		Change:     "gh-1-demo",
+		Host:       host(t),
+		AcquiredAt: time.Now().UTC(),
+		ExpiresAt:  time.Now().UTC().Add(time.Minute),
+	}
+	next := before
+	next.Change = "gh-2-other"
+	next.AcquiredAt = before.AcquiredAt.Add(time.Second)
+	write(t, repo, next)
+
+	err := replaceUnchanged(Path(repo), before, before)
+	if !errors.Is(err, ErrHeld) {
+		t.Fatalf("want ErrHeld, got %v", err)
+	}
+	if st, _ := Status(repo); st.Record.Change != "gh-2-other" {
+		t.Fatalf("the new holder was overwritten: %+v", st.Record)
 	}
 }
 
@@ -115,7 +225,7 @@ func TestUnreadableLockIsStale(t *testing.T) {
 
 func TestReleaseIsGuardedByChange(t *testing.T) {
 	repo := t.TempDir()
-	if _, err := Acquire(repo, "gh-1-demo", 0); err != nil {
+	if _, err := Acquire(repo, "gh-1-demo", 0, 0); err != nil {
 		t.Fatal(err)
 	}
 	if err := Release(repo, "gh-2-other", false); err == nil {
@@ -154,4 +264,13 @@ func write(t *testing.T, repo string, r Record) {
 	if err := os.WriteFile(Path(repo), b, 0o644); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func host(t *testing.T) string {
+	t.Helper()
+	h, err := os.Hostname()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return h
 }

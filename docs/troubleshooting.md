@@ -11,11 +11,18 @@ Run `octospec install` again. It calls `openspec init --tools`, which writes the
 Another archive is writing `openspec/specs/`. That is the lock doing its job: two changes folding
 deltas into the same capability at once lose requirements silently.
 
-- `octospec lock status` says who holds it, on which host, and since when.
-- If that run is still alive, wait or let it finish. Do not clear the lock.
-- If `status` says **stale** (the process is gone, or the lock was taken on another host more than
-  15 minutes ago), clear it deliberately: `octospec lock release --force --change <name>`.
-- Nothing clears a stale lock automatically, on purpose: a slow archive must never lose to an
+The lock is a **lease**: it carries the time it was taken and the time it expires, and that expiry
+is the only thing that decides whether the holder is still working. The pid in the file is a hint
+for reading, not a liveness test — `octospec lock acquire` is a one-shot call, so its process is
+always gone by the time you look.
+
+- `octospec lock status` says who holds it, on which host, since when, and how long the lease has
+  left.
+- If the lease is valid, wait or let it finish. Do not clear the lock. If your own archive is the
+  slow one, extend it: `octospec lock heartbeat --change <name>`.
+- If `status` says **stale**, the lease expired: the holder died mid-archive. Clear it deliberately
+  with `octospec lock release --force --change <name>`.
+- Nothing clears an expired lease automatically, on purpose: a slow archive must never lose to an
   impatient one.
 
 ## "label not found"

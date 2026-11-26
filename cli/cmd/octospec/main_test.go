@@ -108,7 +108,7 @@ func TestLockStatusReportsFree(t *testing.T) {
 
 func TestLockReleaseWithoutChangeOrForceFails(t *testing.T) {
 	dir := t.TempDir()
-	if _, err := lock.Acquire(dir, "gh-1-demo", 0); err != nil {
+	if _, err := lock.Acquire(dir, "gh-1-demo", 0, 0); err != nil {
 		t.Fatal(err)
 	}
 	cmd := newLockCmd()
