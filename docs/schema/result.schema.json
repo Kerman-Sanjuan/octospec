@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://octospec.dev/schema/result.schema.json",
+  "title": "octospec stage result",
+  "description": "One stage execution, as written by `octospec result write`. Closed vocabularies: a consumer switches on `reason` to decide whether to retry.",
+  "type": "object",
+  "required": ["schema", "stage", "issue", "outcome", "artifacts", "duration_ms", "at"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "type": "integer",
+      "const": 1,
+      "description": "Version of this schema. Bumped when a field changes meaning."
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["apply", "ship", "review", "archive"]
+    },
+    "issue": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "change": {
+      "type": "string",
+      "description": "The OpenSpec change the stage worked on, when it has one."
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["ok", "stalled"],
+      "description": "Did the stage move. The reason says what to do next."
+    },
+    "reason": {
+      "type": "string",
+      "enum": ["timeout", "crashed", "empty_diff", "no_pr_requested", "needs_human", "budget_exhausted"],
+      "description": "Present only when outcome is stalled. Each value implies a different retry."
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "URLs or paths a person can open. Required for an ok result from ship and archive."
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "stalled" } }, "required": ["outcome"] },
+      "then": { "required": ["reason"] },
+      "else": { "not": { "required": ["reason"] } }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": { "const": "ok" },
+          "stage": { "enum": ["ship", "archive"] }
+        },
+        "required": ["outcome", "stage"]
+      },
+      "then": { "properties": { "artifacts": { "minItems": 1 } } }
+    }
+  ]
+}

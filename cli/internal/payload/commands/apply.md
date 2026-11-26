@@ -26,4 +26,16 @@ Load the `openspec-apply-change` skill and follow it.
 6. Run the project's build and tests before reporting a group done. Report a
    failure as a failure.
 
+7. Leave the record of what happened:
+
+   ```
+   octospec result write --stage apply --issue <issue> --change <change> --outcome ok
+   octospec result write --stage apply --issue <issue> --change <change> \
+     --outcome stalled --reason <needs_human|empty_diff|budget_exhausted|crashed|timeout>
+   ```
+
+   The reason is the part that matters: a stage that ran out of budget and a stage that found
+   nothing to do need different retries, and `failed` for both teaches the scheduler to retry a dead
+   end.
+
 Stop on a blocker and ask.
