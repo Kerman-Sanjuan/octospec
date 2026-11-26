@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -42,7 +43,7 @@ func newRootCmd() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newReviewCmd(), newResultCmd(), newVersionCmd())
+	root.AddCommand(newInstallCmd(), newSeedCmd(), newUpdateCmd(), newUninstallCmd(), newDoctorCmd(), newModelsCmd(), newLockCmd(), newReviewCmd(), newLedgerCmd(), newResultCmd(), newVersionCmd())
 	return root
 }
 
@@ -246,10 +247,10 @@ func newResultCmd() *cobra.Command {
 // newReviewCmd scores a pull request from a list of findings. The command reports by default and
 // blocks only with --enforce, so a threshold can be set from a real distribution of scores.
 func newReviewCmd() *cobra.Command {
-	var repo, findingsPath string
+	var repo, findingsPath, ledgerDir, head string
 	var asJSON, enforce, familiar bool
 	var changedFiles []string
-	var diffLines int
+	var diffLines, pr, issue int
 
 	cmd := &cobra.Command{
 		Use:   "review",
@@ -283,6 +284,27 @@ func newReviewCmd() *cobra.Command {
 				Familiar:     familiar,
 			})
 
+			if ledgerDir != "" && head == "" {
+				// The spec says the record carries the commit; asking for it twice is how a field
+				// ends up empty in every row.
+				if out, err := exec.Command("git", "-C", root, "rev-parse", "--short", "HEAD").Output(); err == nil {
+					head = strings.TrimSpace(string(out))
+				}
+			}
+			if ledgerDir != "" {
+				rec := review.Record{
+					PR: pr, Issue: issue, Head: head,
+					Score: res.Score, Threshold: res.Threshold,
+					Risk: res.Risk, RiskWhy: res.RiskWhy, Verdict: res.Verdict,
+					Findings: len(findings),
+				}
+				path, err := review.WriteRecord(ledgerDir, rec)
+				if err != nil {
+					return err
+				}
+				fmt.Fprintf(os.Stderr, "record %s\n", path)
+			}
+
 			if asJSON {
 				b, err := json.MarshalIndent(res, "", "  ")
 				if err != nil {
@@ -306,6 +328,30 @@ func newReviewCmd() *cobra.Command {
 	cmd.Flags().IntVar(&diffLines, "diff-lines", 0, "added plus removed lines, for the risk table")
 	cmd.Flags().BoolVar(&familiar, "familiar", false, "the author has touched these paths before")
 	cmd.Flags().StringVar(&repo, "repo", "", "repository root (default: cwd)")
+	cmd.Flags().StringVar(&ledgerDir, "ledger", "", "directory to keep one record per pull request")
+	cmd.Flags().IntVar(&pr, "pr", 0, "pull request number, the key of the ledger record")
+	cmd.Flags().IntVar(&issue, "issue", 0, "issue the pull request closes")
+	cmd.Flags().StringVar(&head, "head", "", "head commit of the pull request")
+	return cmd
+}
+
+// newLedgerCmd reads the records the review stage wrote and prints the series: what we merged, with
+// what score, risk and verdict. Files only, so it works offline and needs no service.
+func newLedgerCmd() *cobra.Command {
+	var dir string
+	cmd := &cobra.Command{
+		Use:   "ledger",
+		Short: "Summarise the review records kept in a directory",
+		RunE: func(c *cobra.Command, args []string) error {
+			records, skipped, err := review.ReadAll(dir)
+			if err != nil {
+				return err
+			}
+			fmt.Print(review.Render(records, skipped))
+			return nil
+		},
+	}
+	cmd.Flags().StringVar(&dir, "dir", ".octospec/ledger", "directory holding one record per pull request")
 	return cmd
 }
 

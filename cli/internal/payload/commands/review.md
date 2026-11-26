@@ -26,18 +26,29 @@ You find; the command scores. Never write the number yourself: it comes from
    ```
 
    Report what you can defend. An empty list is a legitimate answer and means the change is clean.
-4. Score it:
+4. Score it, and keep the record:
 
    ```
    octospec review --findings <file> \
      --changed-files <comma-separated paths> \
      --diff-lines <additions + deletions> \
      [--familiar] \
+     --ledger .octospec/ledger --pr <pr> --issue <issue> --head <head commit> \
      --json
    ```
 
-   Pass `--familiar` only when the person who will merge has already touched those paths.
-5. Publish exactly one comment, headed `## Review`, containing:
+   Pass `--familiar` only when the person who will merge has already touched those paths. The
+   ledger is the point of the run: the comment dies with the pull request, the record does not.
+5. Move the `risk:high` label so the pull request list says where to look:
+
+   ```
+   gh pr edit <pr> --add-label risk:high      # when risk is high
+   gh pr edit <pr> --remove-label risk:high   # when it is not
+   ```
+
+   The label points at the record; it never replaces it. A label is current state and disappears
+   with the pull request, and what we want here is a series.
+6. Publish exactly one comment, headed `## Review`, containing:
    - the score, the threshold and the verdict, on the first line;
    - the costed findings grouped by axis, each with `file:line` and the sentence;
    - the risk level and the facts that produced it;
@@ -45,9 +56,11 @@ You find; the command scores. Never write the number yourself: it comes from
 
    Update the comment in place on re-run: keep its id in `.openspec.yaml` as
    `github.comments.review`.
-6. If the verdict is `human`, leave the pull request unmerged and say which axis cost the most. If
+7. Commit the record (`git add .octospec/ledger && git commit -m "chore(#<issue>): record the
+   review"`), so it lands with the merge instead of dying on the branch.
+8. If the verdict is `human`, leave the pull request unmerged and say which axis cost the most. If
    it is `pass`, say so and stop. Do not merge: merging is a person's decision.
-7. If the command failed because a finding named an unknown axis or type, fix the finding, not the
+9. If the command failed because a finding named an unknown axis or type, fix the finding, not the
    command.
 
 10. Write the result, so a scheduler can tell a clean review from one that never happened:
@@ -60,4 +73,5 @@ You find; the command scores. Never write the number yourself: it comes from
     With `--outcome stalled --reason needs_human` when the verdict asks for a person.
 
 The repository's numbers live in `.octospec/review.json`. Changing the threshold is an edit there,
-never a release of octospec.
+never a release of octospec. The series lives in `.octospec/ledger/` and is read with
+`octospec ledger`.
