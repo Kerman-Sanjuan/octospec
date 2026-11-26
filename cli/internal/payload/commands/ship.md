@@ -32,7 +32,11 @@ Open the PR for the current branch once the gates are green.
    `gh issue edit <issue> --remove-label status:backlog,status:spec-ready,status:in-progress --add-label status:in-review`
    The `status:*` labels are one state, not a pile: leaving `status:spec-ready` next to
    `status:in-review` says the card is in two places at once. `/archive` clears what is left.
-7. Write the result you are handing over:
+7. Check the budget before you keep iterating on CI:
+   `octospec budget --stage ship --elapsed-minutes <m> --files <n> --diff-lines <n>`. Exit 6 means
+   stop: write `--outcome stalled --reason budget_exhausted` and say which limit was hit, instead of
+   opening a fourth round of fixes nobody can afford.
+8. Write the result you are handing over:
 
    ```
    octospec result write --stage ship --issue <issue> --change <change> --outcome ok \
@@ -43,5 +47,5 @@ Open the PR for the current branch once the gates are green.
    when it returned without working. If CI never goes green, write
    `--outcome stalled --reason timeout`; if the change should not ship after all,
    `--reason no_pr_requested`.
-8. Print the PR URL.
+9. Print the PR URL.
 
